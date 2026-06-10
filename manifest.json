@@ -4,6 +4,8 @@
   "description": "أداة حسابات المبيعات الذكية ومشاركتها مع العملاء",
   "start_url": "./index.html",
   "id": "sales-calculator-pwa",
+  "lang": "ar",
+  "dir": "rtl",
   "display": "standalone",
   "background_color": "#121318",
   "theme_color": "#d4af37",
