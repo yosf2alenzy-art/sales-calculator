@@ -10,7 +10,12 @@
   "background_color": "#121318",
   "theme_color": "#d4af37",
   "orientation": "portrait",
-  "categories": ["business", "utilities", "finance"],
+  "categories": [
+    "business",
+    "utilities",
+    "finance"
+  ],
+  "scope": "./",
   "icons": [
     {
       "src": "icon-192.png",
@@ -44,6 +49,27 @@
       "sizes": "1920x1065",
       "form_factor": "wide",
       "label": "حاسبة الخصومات المتسلسلة"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "type": "image/png",
+      "sizes": "600x1065",
+      "form_factor": "narrow",
+      "label": "حاسبة الخصومات المتسلسلة - موبايل"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "إضافة منتج جديد",
+      "short_name": "منتج جديد",
+      "description": "إضافة منتج جديد للعملية الحسابية الحالية",
+      "url": "./index.html?action=add-product",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
