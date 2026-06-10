@@ -1,0 +1,22 @@
+{
+  "name": "حاسبة الخصومات المتسلسلة",
+  "short_name": "حاسبة الخصومات",
+  "description": "أداة حسابات المبيعات الذكية ومشاركتها مع العملاء",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121318",
+  "theme_color": "#d4af37",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
