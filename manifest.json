@@ -1,6 +1,6 @@
 {
-  "name": "حاسبة الخصومات المتسلسلة",
-  "short_name": "حاسبة الخصومات",
+  "name": "حاسبة الدهمشي الذكية",
+  "short_name": "حاسبة الدهمشي",
   "description": "أداة حسابات المبيعات الذكية ومشاركتها مع العملاء",
   "start_url": "./index.html",
   "id": "sales-calculator-pwa",
@@ -48,14 +48,14 @@
       "type": "image/png",
       "sizes": "1920x1065",
       "form_factor": "wide",
-      "label": "حاسبة الخصومات المتسلسلة"
+      "label": "حاسبة الدهمشي الذكية"
     },
     {
       "src": "screenshot-mobile.png",
       "type": "image/png",
       "sizes": "600x1065",
       "form_factor": "narrow",
-      "label": "حاسبة الخصومات المتسلسلة - موبايل"
+      "label": "حاسبة الدهمشي الذكية - موبايل"
     }
   ],
   "shortcuts": [

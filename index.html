@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة الخصومات المتسلسلة الاحترافية للمبيعات</title>
+    <title>حاسبة الدهمشي الذكية الاحترافية للمبيعات</title>
     <link rel="stylesheet" href="style.css">
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -40,142 +40,120 @@
 
         <!-- Header -->
         <header>
-            <h1 data-i18n="title">حاسبة الخصومات المتسلسلة</h1>
+            <h1 data-i18n="title">حاسبة الدهمشي الذكية</h1>
             <p data-i18n="subtitle">أداة حسابات المبيعات الذكية ومشاركتها مع العملاء</p>
         </header>
 
-        <!-- Products & Prices Card -->
-        <div class="card">
-            <div class="discounts-section-title">
-                <h2><i class="fa-solid fa-cart-shopping"></i> <span data-i18n="productsTitle">المنتجات والأسعار</span></h2>
-                <button type="button" class="btn btn-secondary" id="btnAddProduct" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem;">
-                    <i class="fa-solid fa-plus"></i> <span data-i18n="addProduct">إضافة منتج</span>
-                </button>
-            </div>
-            
-            <!-- Products dynamic list -->
-            <div class="discount-list" id="productsList">
-                <!-- Dynamically generated product rows -->
-            </div>
-
-            <!-- Currency Configuration -->
-            <div class="currency-row-config" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.25rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="currencySelect"><i class="fa-solid fa-money-bill-wave"></i> <span data-i18n="currency">العملة</span></label>
-                    <div class="input-container">
-                        <select id="currencySelect">
-                            <option value="SAR" data-i18n="optSAR">ريال سعودي (ر.س)</option>
-                            <option value="EGP" data-i18n="optEGP">جنيه مصري (ج.م)</option>
-                            <option value="AED" data-i18n="optAED">درهم إماراتي (د.إ)</option>
-                            <option value="KWD" data-i18n="optKWD">دينار كويتي (د.ك)</option>
-                            <option value="USD" data-i18n="optUSD">دولار ($)</option>
-                            <option value="custom" data-i18n="optCustom">أخرى (مخصص)</option>
-                        </select>
-                    </div>
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stats-card">
+                <div class="stats-icon">
+                    <i class="fa-solid fa-users"></i>
                 </div>
-                
-                <div class="form-group" id="customCurrencyGroup" style="display: none; margin-bottom: 0; animation: slideIn 0.3s ease-out forwards;">
-                    <label for="customCurrency" data-i18n="customCurrencyLabel">اكتب العملة المخصصة</label>
-                    <input type="text" id="customCurrency" lang="en" data-i18n-placeholder="customCurrencyPlaceholder" placeholder="مثال: يورو" value="يورو">
+                <div class="stats-info">
+                    <span class="stats-label" data-i18n="visitorCountLabel">عدد زوار الحاسبة</span>
+                    <span class="stats-value" id="visitorCountVal">...</span>
                 </div>
             </div>
-
-            <!-- Segmented Control for Discount Presets -->
-            <div class="preset-row-config" style="display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                <label style="font-size: 1.05rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">
-                    <i class="fa-solid fa-tags"></i> <span data-i18n="presetTitle">نمط الخصم المعتمد</span>
-                </label>
-                
-                <!-- Vertical presets list -->
-                <div id="presetsList" style="display: flex; flex-direction: column; gap: 0.55rem; width: 100%;">
-                    <!-- Presets will be rendered vertically here -->
+            <div class="stats-card">
+                <div class="stats-icon" style="color: var(--success); background: var(--success-glow);">
+                    <i class="fa-solid fa-calculator"></i>
                 </div>
-
-                <!-- Save current discounts form -->
-                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; margin-top: 0.5rem;">
-                    <input type="text" id="newPresetName" data-i18n-placeholder="presetNamePlaceholder" placeholder="اسم النمط الجديد..." style="padding: 0.65rem 1rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-sm);">
-                    <button type="button" class="btn btn-secondary" id="btnSavePreset" style="width: auto; padding: 0.65rem 1.25rem; font-size: 1.05rem; font-weight: 800; border-radius: var(--radius-sm);">
-                        <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="savePreset">حفظ النمط</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- VAT configuration row -->
-            <div class="vat-row-config" style="display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <input type="checkbox" id="applyVat" checked style="width: 1.4rem; height: 1.4rem; cursor: pointer; accent-color: var(--primary);">
-                    <label for="applyVat" style="cursor: pointer; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);" data-i18n="applyVat">تطبيق ضريبة القيمة المضافة</label>
-                </div>
-                <div class="input-container vat-rate-container" style="max-width: 120px; margin-right: auto; margin-left: 0;">
-                    <input type="text" id="vatRate" inputmode="decimal" pattern="[0-9.]*" value="15" style="padding: 0.6rem; font-size: 1.1rem; font-weight: 700;">
-                    <span class="input-icon-left" style="left: 0.6rem; font-size: 1rem; font-weight: 700;">%</span>
+                <div class="stats-info">
+                    <span class="stats-label" data-i18n="usageCountLabel">عدد مستخدمي البرنامج</span>
+                    <span class="stats-value" id="usageCountVal">...</span>
                 </div>
             </div>
         </div>
 
-        <!-- Sequential Discounts Card -->
-        <div class="card">
-            <div class="discounts-section-title">
-                <h2><i class="fa-solid fa-percent"></i> <span data-i18n="discountsTitle">سلسلة الخصومات</span></h2>
-                <div class="discount-btn-group" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                    <button type="button" class="btn btn-secondary" id="btnAddPercentDiscount" style="width: auto; padding: 0.5rem 1rem; font-size: 0.95rem;">
-                        <i class="fa-solid fa-plus"></i> <span data-i18n="addPercentDiscount">خصم نسبة</span>
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="btnAddFixedDiscount" style="width: auto; padding: 0.5rem 1rem; font-size: 0.95rem;">
-                        <i class="fa-solid fa-plus"></i> <span data-i18n="addFixedDiscount">خصم مبلغ</span>
-                    </button>
+        <!-- Compact Settings Bar -->
+        <div class="settings-bar" id="globalSettingsCard">
+            <!-- Currency Section (No icon) -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label for="currencySelect"><span data-i18n="currency">العملة:</span></label>
+                <select id="currencySelect">
+                    <option value="SAR" data-i18n="optSAR">ريال سعودي (SAR)</option>
+                    <option value="EGP" data-i18n="optEGP">جنيه مصري (EGP)</option>
+                    <option value="AED" data-i18n="optAED">درهم إماراتي (AED)</option>
+                    <option value="KWD" data-i18n="optKWD">دينار كويتي (KWD)</option>
+                    <option value="USD" data-i18n="optUSD">دولار أمريكي ($)</option>
+                    <option value="custom" data-i18n="optCustom">أخرى (مخصص)</option>
+                </select>
+                <div id="customCurrencyGroup" style="display: none; align-items: center; gap: 0.35rem; animation: slideIn 0.3s ease-out forwards;">
+                    <input type="text" id="customCurrency" lang="en" data-i18n-placeholder="customCurrencyPlaceholder" placeholder="مثال: يورو" value="يورو">
                 </div>
             </div>
             
-            <!-- Dynamic discount inputs container -->
-            <div class="discount-list" id="discountList">
-                <!-- Dynamically generated items will go here -->
+            <!-- VAT Section (No icon) -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="applyVat" checked style="width: 1.15rem; height: 1.15rem; cursor: pointer; accent-color: var(--primary);">
+                    <span data-i18n="applyVat">الضريبة:</span>
+                </label>
+                <div class="input-container vat-rate-container" style="width: 75px; display: inline-flex; position: relative;">
+                    <input type="text" id="vatRate" inputmode="decimal" pattern="[0-9.]*" value="15">
+                    <span class="input-icon-left" style="left: 0.6rem; font-size: 0.85rem; font-weight: 700;">%</span>
+                </div>
             </div>
+        </div>
+
+        <!-- Groups Header & Small Add Group Button -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; margin-bottom: -0.5rem; padding: 0 0.5rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;" data-i18n="groupsSectionTitle">
+                <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> المجموعات والخصومات
+            </h2>
+            <button type="button" class="btn-add-group-small" id="btnAddGroup">
+                <i class="fa-solid fa-plus"></i> <span data-i18n="addGroup">إضافة مجموعة</span>
+            </button>
+        </div>
+
+        <!-- Groups Dynamic Container -->
+        <div id="groupsContainer" style="display: flex; flex-direction: column; gap: 1.75rem;">
+            <!-- Dynamic group cards go here -->
         </div>
 
         <!-- Professional Results Card -->
         <div class="card results-card" id="resultsSection">
-            <!-- Dynamic items summary list -->
-            <div id="resultsProductsSummary" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-                <!-- Sum of item subtotals shown here -->
+            <!-- Group summaries list -->
+            <div id="groupResultsContainer" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Dynamically generated per-group breakdowns go here -->
             </div>
 
-            <div class="result-row" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 1rem; margin-bottom: 0.5rem;">
-                <span class="result-label" data-i18n="resOriginalTotal">إجمالي السعر الأصلي:</span>
-                <span class="result-value" id="resOriginalPrice">0.00</span>
-            </div>
-            
-            <!-- Sequential breakdown details -->
-            <div class="breakdown-section">
-                <div class="breakdown-title"><i class="fa-solid fa-route"></i> <span data-i18n="discountsTitle">سلسلة الخصومات</span>:</div>
-                <div class="breakdown-flow" id="breakdownFlow">
-                    <!-- Steps will be generated here -->
+            <!-- Grand Total Section -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid rgba(255, 255, 255, 0.12);">
+                <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;" data-i18n="grandTotalHeader">
+                    <i class="fa-solid fa-calculator"></i> الإجمالي العام الكلي
+                </h3>
+                
+                <div class="result-row">
+                    <span class="result-label" data-i18n="grandOriginalTotal">إجمالي السعر الأصلي الكلي:</span>
+                    <span class="result-value" id="grandOriginalPrice">0.00</span>
                 </div>
-            </div>
+                
+                <div class="result-row">
+                    <span class="result-label" data-i18n="grandTotalSaved">إجمالي مبلغ الوفر الكلي:</span>
+                    <span class="result-value" id="grandTotalDiscountValue" style="color: var(--danger);">0.00</span>
+                </div>
 
-            <div class="result-row" style="margin-top: 1rem;">
-                <span class="result-label" data-i18n="resTotalDiscount">إجمالي مبلغ الخصم:</span>
-                <span class="result-value" id="resTotalDiscountValue" style="color: var(--danger);">0.00</span>
-            </div>
+                <div class="result-row">
+                    <span class="result-label" data-i18n="resEffectiveDiscount">النسبة الفعلية الكلية للخصم:</span>
+                    <span class="result-value" id="grandEffectiveDiscountPct" style="color: var(--accent);">0%</span>
+                </div>
 
-            <div class="result-row">
-                <span class="result-label" data-i18n="resEffectiveDiscount">النسبة الفعلية الكلية للخصم:</span>
-                <span class="result-value" id="resEffectiveDiscountPct" style="color: var(--accent);">0%</span>
-            </div>
+                <div class="result-row" id="grandVatRowBefore" style="border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 1rem;">
+                    <span class="result-label" data-i18n="grandPriceBeforeVat">السعر الإجمالي قبل الضريبة:</span>
+                    <span class="result-value" id="grandPriceBeforeVat">0.00</span>
+                </div>
 
-            <div class="result-row" id="vatRowBefore" style="border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 1rem;">
-                <span class="result-label" id="resPriceBeforeVatLabel" data-i18n="resPriceBeforeVat">السعر بعد الخصم (قبل الضريبة):</span>
-                <span class="result-value" id="resPriceBeforeVat">0.00</span>
-            </div>
+                <div class="result-row" id="grandVatRowAmount">
+                    <span class="result-label"><span data-i18n="resVatLabel">ضريبة القيمة المضافة</span> (<span id="grandVatRateLabel">15</span>%):</span>
+                    <span class="result-value" id="grandVatValue" style="color: var(--accent);">0.00</span>
+                </div>
 
-            <div class="result-row" id="vatRowAmount">
-                <span class="result-label"><span data-i18n="resVatLabel">ضريبة القيمة المضافة</span> (<span id="resVatRateLabel">15</span>%):</span>
-                <span class="result-value" id="resVatValue" style="color: var(--accent);">0.00</span>
-            </div>
-
-            <div class="result-row highlight" id="vatRowFinal">
-                <span class="result-label" id="resFinalPriceLabel" data-i18n="resFinalPriceVat">السعر النهائي الصافي (شامل الضريبة):</span>
-                <span class="result-value" id="resFinalPrice">0.00</span>
+                <div class="result-row highlight" id="grandVatRowFinal">
+                    <span class="result-label" id="grandFinalPriceLabel" data-i18n="grandFinalPriceVat">السعر النهائي الكلي (شامل الضريبة):</span>
+                    <span class="result-value" id="grandFinalPrice">0.00</span>
+                </div>
             </div>
         </div>
 
