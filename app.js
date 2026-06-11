@@ -75,7 +75,30 @@ const translations = {
         grandTotalSaved: "إجمالي مبلغ الوفر الكلي:",
         grandPriceBeforeVat: "السعر الإجمالي قبل الضريبة:",
         grandFinalPriceVat: "السعر النهائي الكلي (شامل الضريبة):",
-        grandFinalPriceNoVat: "السعر النهائي الكلي:"
+        grandFinalPriceNoVat: "السعر النهائي الكلي:",
+        navLogin: "دخول الموظف",
+        navLogout: "تسجيل الخروج",
+        navSettings: "إعدادات الإدارة",
+        loginHeader: "تسجيل دخول الموظف",
+        lblUsername: "اسم المستخدم",
+        lblPassword: "كلمة المرور",
+        errLogin: "خطأ في اسم المستخدم أو كلمة المرور",
+        btnLoginSubmit: "دخول",
+        settingsHeader: "إعدادات الإدارة",
+        settingsGeneral: "الإعدادات العامة",
+        settingsShowProducts: "تفعيل مقترحات قائمة مكيفات جري في البحث",
+        settingsLockTheme: "تثبيت مظهر موحد للحاسبة",
+        settingsUserMgmt: "إدارة الموظفين والصلاحيات",
+        permQuotation: "صلاحية تجهيز عرض سعر",
+        btnAddUser: "إضافة موظف",
+        quotationTitle: "عرض سعر رسمي",
+        btnCreateQuotation: "تجهيز عرض سعر",
+        errNoQuotationPermission: "عذراً، تحتاج إلى صلاحية من الإدارة لتجهيز عرض السعر. يرجى تسجيل الدخول بحساب موظف مصرح له.",
+        errNotLoggedIn: "يرجى تسجيل الدخول لتجهيز عرض السعر.",
+        footerCompany: "الشركة الأساسية - فرع حفر الباطن",
+        pdfReportTitle: "تقرير نتائج الحسابات",
+        pdfHeaderTitle: "تقرير حساب المبيعات والخصومات",
+        btnCreateResultsPdf: "تصدير النتيجة PDF"
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -152,7 +175,30 @@ const translations = {
         grandTotalSaved: "Grand Total Saved:",
         grandPriceBeforeVat: "Grand Total before VAT:",
         grandFinalPriceVat: "Grand Final Net (incl. VAT):",
-        grandFinalPriceNoVat: "Grand Final Net Price:"
+        grandFinalPriceNoVat: "Grand Final Net Price:",
+        navLogin: "Employee Login",
+        navLogout: "Logout",
+        navSettings: "Admin Settings",
+        loginHeader: "Employee Login",
+        lblUsername: "Username",
+        lblPassword: "Password",
+        errLogin: "Invalid username or password",
+        btnLoginSubmit: "Login",
+        settingsHeader: "Admin Settings",
+        settingsGeneral: "General Settings",
+        settingsShowProducts: "Enable Gree AC autocomplete suggestions",
+        settingsLockTheme: "Lock global theme for all users",
+        settingsUserMgmt: "Staff & Permissions Management",
+        permQuotation: "Can create quotations",
+        btnAddUser: "Add Employee",
+        quotationTitle: "Official Quotation",
+        btnCreateQuotation: "Create Quotation",
+        errNoQuotationPermission: "Access Denied. You need management permission to generate quotations. Please log in with an authorized employee account.",
+        errNotLoggedIn: "Please log in to generate quotations.",
+        footerCompany: "Al-Asasiya Company - Hafar Al-Batin Branch",
+        pdfReportTitle: "Calculation Results Report",
+        pdfHeaderTitle: "Sales & Discount Calculation Report",
+        btnCreateResultsPdf: "Export Results PDF"
     }
 };
 
@@ -182,6 +228,13 @@ let state = {
     theme: 'luxury-gold',
     applyVat: true,
     vatRate: 15,
+    showProductList: true,
+    lockTheme: false,
+    lockedTheme: 'luxury-gold',
+    users: [
+        { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
+    ],
+    currentUser: null,
     groups: [
         {
             id: 'group_1',
@@ -348,8 +401,13 @@ function applyTheme(theme) {
 
 // Load state from localStorage on init
 function init() {
-    let savedState = safeGetLocalStorage('sales_calculator_state_v10');
+    let savedState = safeGetLocalStorage('sales_calculator_state_v11');
     let migrated = false;
+    if (!savedState) {
+        // Try to migrate from v10
+        savedState = safeGetLocalStorage('sales_calculator_state_v10');
+        if (savedState) migrated = true;
+    }
     if (!savedState) {
         // Try to migrate from v9
         savedState = safeGetLocalStorage('sales_calculator_state_v9');
@@ -360,7 +418,7 @@ function init() {
         try {
             state = JSON.parse(savedState);
             // Migrate single products & discounts to groups array if coming from v9
-            if (migrated || (!state.groups && state.products)) {
+            if (!state.groups && state.products) {
                 state.groups = [
                     {
                         id: 'group_1',
@@ -377,7 +435,6 @@ function init() {
                 delete state.products;
                 delete state.discounts;
                 delete state.activePresetId;
-                saveState(); // save migrated state as v10
             }
 
             // Verify structure of groups
@@ -426,10 +483,35 @@ function init() {
                     }
                 ];
             }
+            
+            // Migrate to v11 fields
+            if (state.showProductList === undefined) state.showProductList = true;
+            if (state.lockTheme === undefined) state.lockTheme = false;
+            if (state.lockedTheme === undefined) state.lockedTheme = 'luxury-gold';
+            if (!Array.isArray(state.users)) {
+                state.users = [
+                    { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
+                ];
+            } else {
+                // Ensure default user is updated or present
+                const hasMeYousef = state.users.some(u => u.username === 'meyousef');
+                if (!hasMeYousef) {
+                    state.users.push({ username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } });
+                } else {
+                    // Force the password from requests to ensure sync
+                    const mainAdmin = state.users.find(u => u.username === 'meyousef');
+                    if (mainAdmin) mainAdmin.password = '85197Qq';
+                }
+            }
+            state.currentUser = null; // reset session at startup
             if (!state.language) state.language = 'ar';
+            
+            saveState(); // save migrated state
         } catch (e) {
             console.error('Failed to parse saved state, using defaults', e);
         }
+    } else {
+        saveState();
     }
 
     // Load initial values to currency list based on currency option
@@ -445,24 +527,455 @@ function init() {
     applyVatCheckbox.checked = state.applyVat;
     vatRateInput.value = state.vatRate;
 
-    // Set theme values based on device type
-    if (isMobileDevice()) {
-        state.theme = 'luxury-gold';
+    // Apply theme values based on theme lock
+    if (state.lockTheme) {
+        themeSelect.value = state.lockedTheme;
+        themeSelect.disabled = true;
+        applyTheme(state.lockedTheme);
     } else {
-        // If computer: if no saved theme in localStorage, default to royal-dark
-        const hasSavedTheme = safeGetLocalStorage('sales_calculator_state_v9') !== null;
-        if (!hasSavedTheme) {
-            state.theme = 'royal-dark';
+        themeSelect.disabled = false;
+        // Set theme values based on device type
+        if (isMobileDevice()) {
+            state.theme = 'luxury-gold';
+        } else {
+            // If computer: if no saved theme in localStorage, default to royal-dark
+            const hasSavedTheme = safeGetLocalStorage('sales_calculator_state_v9') !== null;
+            if (!hasSavedTheme) {
+                state.theme = 'royal-dark';
+            }
         }
+        themeSelect.value = state.theme;
+        applyTheme(state.theme);
     }
-    themeSelect.value = state.theme;
-    applyTheme(state.theme);
 
     // Switch Language Setup
     setLanguage(state.language);
 
     setupEventListeners();
+    updateUIForSession();
     handleStats();
+    checkAdminHash();
+}
+
+function checkAdminHash() {
+    const hash = window.location.hash.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    if (hash === '#settings' || hash === '#admin' || search.includes('settings') || search.includes('admin')) {
+        const loginModal = document.getElementById('loginModal');
+        const settingsModal = document.getElementById('settingsModal');
+        if (state.currentUser) {
+            settingsModal.style.display = 'flex';
+            document.getElementById('settingsToggleProductList').checked = state.showProductList;
+            document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
+            document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+            renderSettingsUsersList();
+        } else {
+            loginModal.style.display = 'flex';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginErrorMsg').style.display = 'none';
+            document.getElementById('loginUsername').focus();
+        }
+    }
+}
+
+// User / Session UI Updates
+function updateUIForSession() {
+    const lang = state.language;
+    const btnUserLogin = document.getElementById('btnUserLogin');
+    const loginBtnText = document.getElementById('loginBtnText');
+    const btnAdminSettings = document.getElementById('btnAdminSettings');
+    
+    if (state.currentUser) {
+        loginBtnText.textContent = translations[lang].navLogout + " (" + state.currentUser.username + ")";
+        btnUserLogin.classList.add('active');
+        btnAdminSettings.style.display = 'flex';
+    } else {
+        loginBtnText.textContent = translations[lang].navLogin;
+        btnUserLogin.classList.remove('active');
+        btnAdminSettings.style.display = 'none';
+    }
+}
+
+// Login / Logout operations
+function handleLogin(username, password) {
+    username = username.trim();
+    const user = state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+    if (user) {
+        state.currentUser = { username: user.username, permissions: { ...user.permissions } };
+        saveState();
+        updateUIForSession();
+        return true;
+    }
+    return false;
+}
+
+function handleLogout() {
+    state.currentUser = null;
+    saveState();
+    updateUIForSession();
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+// User Management
+function addUser(username, password, permQuotation) {
+    username = username.trim();
+    if (!username || !password) return false;
+    const exists = state.users.some(u => u.username.toLowerCase() === username.toLowerCase());
+    if (exists) return false;
+    
+    state.users.push({
+        username: username,
+        password: password,
+        permissions: { createQuotation: permQuotation }
+    });
+    saveState();
+    renderSettingsUsersList();
+    return true;
+}
+
+function deleteUser(username) {
+    if (username.toLowerCase() === 'meyousef') return false;
+    state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
+    if (state.currentUser && state.currentUser.username.toLowerCase() === username.toLowerCase()) {
+        handleLogout();
+    }
+    saveState();
+    renderSettingsUsersList();
+    return true;
+}
+
+function renderSettingsUsersList() {
+    const container = document.getElementById('adminUsersListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const lang = state.language;
+    
+    state.users.forEach(user => {
+        const row = document.createElement('div');
+        row.className = 'settings-user-row';
+        
+        const canQuote = user.permissions && user.permissions.createQuotation;
+        const permText = canQuote ? translations[lang].permQuotation : (lang === 'ar' ? 'بدون صلاحيات' : 'No permissions');
+        
+        row.innerHTML = `
+            <div class="settings-user-info">
+                <span class="settings-user-name">${user.username}</span>
+                <span class="settings-user-perm">${permText}</span>
+            </div>
+            ${user.username !== 'meyousef' ? `
+                <button type="button" class="btn-delete delete-user-btn" data-username="${user.username}" title="${lang === 'ar' ? 'حذف المستخدم' : 'Delete User'}" style="width: 2rem; height: 2rem;">
+                    <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
+                </button>
+            ` : `<span style="font-size: 0.85rem; color: var(--primary); font-weight: bold;">مدير النظام</span>`}
+        `;
+        
+        const deleteBtn = row.querySelector('.delete-user-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                deleteUser(user.username);
+            });
+        }
+        container.appendChild(row);
+    });
+}
+
+// Quotation Formatter
+function renderQuotation() {
+    const lang = state.language;
+    const currency = getActiveCurrency();
+    
+    // Set date
+    const dateEl = document.getElementById('quoteDate');
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+    dateEl.textContent = formattedDate;
+    
+    // Set quote number
+    const quoteNumEl = document.getElementById('quoteNumber');
+    const quoteNumber = "QD-" + Math.floor(1000 + Math.random() * 9000);
+    quoteNumEl.textContent = quoteNumber;
+    
+    // Set prepared by
+    const preparedByInput = document.getElementById('quotePreparedByInput');
+    preparedByInput.value = state.currentUser ? state.currentUser.username : (lang === 'ar' ? 'الموظف' : 'Staff');
+    
+    // Fill items table
+    const tbody = document.querySelector('#quoteItemsTable tbody');
+    tbody.innerHTML = '';
+    
+    let itemIndex = 1;
+    let grandOriginalSum = 0;
+    let grandNetSum = 0;
+    
+    state.groups.forEach((group, gIndex) => {
+        let groupOriginalTotal = 0;
+        group.products.forEach(p => groupOriginalTotal += p.price * p.quantity);
+        
+        let currentPrice = groupOriginalTotal;
+        const totalQuantity = group.products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+        
+        // Calculate group net price after discounts
+        let groupNetPrice = groupOriginalTotal;
+        if (group.discounts.length > 0 && groupOriginalTotal > 0) {
+            group.discounts.forEach(discount => {
+                let discountAmount = 0;
+                if (discount.type === 'percent') {
+                    discountAmount = preciseRound(currentPrice * (discount.value / 100));
+                } else {
+                    discountAmount = preciseRound(discount.value * totalQuantity);
+                }
+                currentPrice = Math.max(0, preciseRound(currentPrice - discountAmount));
+            });
+            groupNetPrice = currentPrice;
+        }
+        
+        const groupDiscountRatio = groupOriginalTotal > 0 ? (groupOriginalTotal - groupNetPrice) / groupOriginalTotal : 0;
+        
+        group.products.forEach((product, pIndex) => {
+            const prodName = product.name.trim() || (lang === 'ar' ? `منتج المجموعة ${gIndex+1} - رقم ${pIndex+1}` : `Product G${gIndex+1} - #${pIndex+1}`);
+            const originalLineVal = product.price * product.quantity;
+            const discountLineVal = originalLineVal * groupDiscountRatio;
+            const netLineVal = originalLineVal - discountLineVal;
+            
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #cbd5e1';
+            
+            const discountPctText = (groupDiscountRatio * 100).toFixed(1) + "%";
+            
+            tr.innerHTML = `
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1;">${itemIndex++}</td>
+                <td style="padding: 0.75rem 0.5rem; border: 1px solid #cbd5e1;">${prodName}</td>
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1;">${product.quantity}</td>
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1; font-family: monospace;">${formatNumber(product.price)} ${currency}</td>
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1; font-family: monospace;">${formatNumber(originalLineVal)} ${currency}</td>
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1; color: var(--danger); font-weight: bold;">${discountPctText}</td>
+                <td style="padding: 0.75rem 0.5rem; text-align: center; border: 1px solid #cbd5e1; font-weight: bold; font-family: monospace;">${formatNumber(netLineVal)} ${currency}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        grandOriginalSum += groupOriginalTotal;
+        grandNetSum += groupNetPrice;
+    });
+    
+    // Fill Totals Block
+    const quoteOriginalSumEl = document.getElementById('quoteOriginalSum');
+    const quoteDiscountSumEl = document.getElementById('quoteDiscountSum');
+    const quoteBeforeVatSumEl = document.getElementById('quoteBeforeVatSum');
+    const quoteVatRowEl = document.getElementById('quoteVatRow');
+    const quoteVatSumEl = document.getElementById('quoteVatSum');
+    const quoteVatRateLabelEl = document.getElementById('quoteVatRateLabel');
+    const quoteFinalSumEl = document.getElementById('quoteFinalSum');
+    
+    const grandTotalSavedValue = Math.max(0, preciseRound(grandOriginalSum - grandNetSum));
+    
+    quoteOriginalSumEl.textContent = `${formatNumber(grandOriginalSum)} ${currency}`;
+    quoteDiscountSumEl.textContent = `-${formatNumber(grandTotalSavedValue)} ${currency}`;
+    quoteBeforeVatSumEl.textContent = `${formatNumber(grandNetSum)} ${currency}`;
+    
+    let vatAmount = 0;
+    if (state.applyVat) {
+        vatAmount = preciseRound(grandNetSum * (state.vatRate / 100));
+        quoteVatRowEl.style.display = 'flex';
+        quoteVatRateLabelEl.textContent = formatNumberForVatLabel(state.vatRate);
+        quoteVatSumEl.textContent = `${formatNumber(vatAmount)} ${currency}`;
+    } else {
+        quoteVatRowEl.style.display = 'none';
+    }
+    
+    const grandFinalNet = preciseRound(grandNetSum + vatAmount);
+    quoteFinalSumEl.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
+}
+
+// Results PDF Formatter
+function renderResultsPdf() {
+    const lang = state.language;
+    const currency = getActiveCurrency();
+    
+    // Set date
+    const dateEl = document.getElementById('pdfReportDate');
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
+    dateEl.textContent = formattedDate;
+    
+    // Fill groups results container
+    const pdfGroupsContainer = document.getElementById('pdfGroupsContainer');
+    pdfGroupsContainer.innerHTML = '';
+    
+    let grandOriginalSum = 0;
+    let grandNetSum = 0;
+    
+    state.groups.forEach((group, gIndex) => {
+        let groupOriginalTotal = 0;
+        group.products.forEach(p => groupOriginalTotal += p.price * p.quantity);
+        grandOriginalSum += groupOriginalTotal;
+        
+        const totalQuantity = group.products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+        
+        // Products rows html
+        let productsRowsHtml = '';
+        group.products.forEach((product, pIndex) => {
+            const prodName = product.name.trim() || (lang === 'ar' ? `منتج المجموعة ${gIndex+1} - رقم ${pIndex+1}` : `Product G${gIndex+1} - #${pIndex+1}`);
+            const lineTotal = product.price * product.quantity;
+            productsRowsHtml += `
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0;">${pIndex + 1}</td>
+                    <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${prodName}</td>
+                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0;">${product.quantity}</td>
+                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; font-family: monospace;">${formatNumber(product.price)} ${currency}</td>
+                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; font-family: monospace;">${formatNumber(lineTotal)} ${currency}</td>
+                </tr>
+            `;
+        });
+        
+        // Trace steps and build discount steps html
+        let discountStepsHtml = '';
+        let currentPrice = groupOriginalTotal;
+        let groupNetPrice = groupOriginalTotal;
+        
+        if (group.discounts.length === 0 || groupOriginalTotal <= 0) {
+            discountStepsHtml = `<div style="color: #64748b; font-style: italic;">${translations[lang].noDiscounts}</div>`;
+        } else {
+            group.discounts.forEach((discount, dIndex) => {
+                const startValue = currentPrice;
+                let discountAmount = 0;
+                let detailsText = '';
+                
+                if (discount.type === 'percent') {
+                    const pct = discount.value || 0;
+                    discountAmount = startValue * (pct / 100);
+                    discountAmount = preciseRound(discountAmount);
+                    detailsText = `${pct}%`;
+                } else {
+                    const val = discount.value || 0;
+                    discountAmount = preciseRound(val * totalQuantity);
+                    if (totalQuantity > 1) {
+                        detailsText = `${formatNumber(val)} ${currency} × ${totalQuantity}`;
+                    } else {
+                        detailsText = `${formatNumber(val)} ${currency}`;
+                    }
+                }
+                
+                const endValue = Math.max(0, preciseRound(startValue - discountAmount));
+                currentPrice = endValue;
+                
+                discountStepsHtml += `
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.25rem;">
+                        <span style="color: #64748b;">${translations[lang].stepLabel} ${dIndex + 1}:</span>
+                        <span>
+                            ${formatNumber(startValue)} 
+                            <span style="color: #e11d48; font-weight: bold;"> - ${detailsText} (${formatNumber(discountAmount)})</span>
+                            ➔ <span style="font-weight: bold; color: #0f172a;">${formatNumber(endValue)} ${currency}</span>
+                        </span>
+                    </div>
+                `;
+            });
+            groupNetPrice = currentPrice;
+        }
+        grandNetSum += groupNetPrice;
+        
+        // VAT & Final sums per group
+        let groupVatAmount = 0;
+        let groupFinalPrice = groupNetPrice;
+        if (state.applyVat) {
+            groupVatAmount = preciseRound(groupNetPrice * (state.vatRate / 100));
+            groupFinalPrice = preciseRound(groupNetPrice + groupVatAmount);
+        }
+        
+        const groupTitle = group.name.trim() || `${translations[lang].groupTitle} ${gIndex + 1}`;
+        
+        const groupSection = document.createElement('div');
+        groupSection.className = 'pdf-group-card';
+        groupSection.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; background: #fff; margin-bottom: 1rem; page-break-inside: avoid;';
+        groupSection.innerHTML = `
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #1e293b; border-bottom: 2px solid #cbd5e1; padding-bottom: 0.5rem; margin: 0 0 0.75rem 0; display: flex; justify-content: space-between;">
+                <span>${groupTitle}</span>
+            </h3>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.9rem; text-align: right;">
+                <thead>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+                        <th style="padding: 0.5rem; border: 1px solid #e2e8f0; width: 40px; text-align: center;">م</th>
+                        <th style="padding: 0.5rem; border: 1px solid #e2e8f0;">اسم الصنف</th>
+                        <th style="padding: 0.5rem; border: 1px solid #e2e8f0; text-align: center; width: 60px;">الكمية</th>
+                        <th style="padding: 0.5rem; border: 1px solid #e2e8f0; text-align: center; width: 100px;">سعر الوحدة</th>
+                        <th style="padding: 0.5rem; border: 1px solid #e2e8f0; text-align: center; width: 100px;">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${productsRowsHtml}
+                </tbody>
+            </table>
+            
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem; font-size: 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem;">
+                <div>
+                    <h4 style="font-weight: 700; color: #475569; margin: 0 0 0.35rem 0;">خطوات الخصم المتسلسل:</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                        ${discountStepsHtml}
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.3rem; justify-content: center; border-right: 1px solid #cbd5e1; padding-right: 1rem;">
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                        <span style="color: #64748b;">إجمالي السعر الأصلي:</span>
+                        <span style="font-weight: 700;">${formatNumber(groupOriginalTotal)} ${currency}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                        <span style="color: #64748b;">مبلغ الخصم الكلي:</span>
+                        <span style="font-weight: 700; color: #e11d48;">-${formatNumber(groupOriginalTotal - groupNetPrice)} ${currency}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                        <span style="color: #64748b;">الصافي قبل الضريبة:</span>
+                        <span style="font-weight: 700; color: #0f766e;">${formatNumber(groupNetPrice)} ${currency}</span>
+                    </div>
+                    ${state.applyVat ? `
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem;">
+                        <span style="color: #64748b;">الضريبة (${formatNumberForVatLabel(state.vatRate)}%):</span>
+                        <span style="font-weight: 700;">${formatNumber(groupVatAmount)} ${currency}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 0.5rem; border-top: 1px dashed #cbd5e1; padding-top: 0.25rem; margin-top: 0.25rem; font-weight: 800; font-size: 0.9rem;">
+                        <span style="color: #1e293b;">الصافي النهائي:</span>
+                        <span style="color: #059669;">${formatNumber(groupFinalPrice)} ${currency}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        pdfGroupsContainer.appendChild(groupSection);
+    });
+    
+    // Fill overall totals
+    const pdfGrandOriginalSum = document.getElementById('pdfGrandOriginalSum');
+    const pdfGrandDiscountSum = document.getElementById('pdfGrandDiscountSum');
+    const pdfGrandBeforeVatSum = document.getElementById('pdfGrandBeforeVatSum');
+    const pdfGrandVatRow = document.getElementById('pdfGrandVatRow');
+    const pdfGrandVatSum = document.getElementById('pdfGrandVatSum');
+    const pdfGrandVatRateLabel = document.getElementById('pdfGrandVatRateLabel');
+    const pdfGrandFinalSum = document.getElementById('pdfGrandFinalSum');
+    
+    const grandTotalSavedValue = Math.max(0, preciseRound(grandOriginalSum - grandNetSum));
+    
+    pdfGrandOriginalSum.textContent = `${formatNumber(grandOriginalSum)} ${currency}`;
+    pdfGrandDiscountSum.textContent = `-${formatNumber(grandTotalSavedValue)} ${currency}`;
+    pdfGrandBeforeVatSum.textContent = `${formatNumber(grandNetSum)} ${currency}`;
+    
+    let vatAmount = 0;
+    if (state.applyVat) {
+        vatAmount = preciseRound(grandNetSum * (state.vatRate / 100));
+        pdfGrandVatRow.style.display = 'flex';
+        pdfGrandVatRateLabel.textContent = formatNumberForVatLabel(state.vatRate);
+        pdfGrandVatSum.textContent = `${formatNumber(vatAmount)} ${currency}`;
+    } else {
+        pdfGrandVatRow.style.display = 'none';
+    }
+    
+    const grandFinalNet = preciseRound(grandNetSum + vatAmount);
+    pdfGrandFinalSum.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
 }
 
 // Setup all event listeners
@@ -471,6 +984,10 @@ function setupEventListeners() {
     btnLangEn.addEventListener('click', () => setLanguage('en'));
 
     themeSelect.addEventListener('change', () => {
+        if (state.lockTheme) {
+            themeSelect.value = state.lockedTheme;
+            return;
+        }
         state.theme = themeSelect.value;
         applyTheme(state.theme);
         saveState();
@@ -530,6 +1047,309 @@ function setupEventListeners() {
 
     btnCopyReport.addEventListener('click', copyReportToClipboard);
     btnShareWhatsApp.addEventListener('click', shareOnWhatsApp);
+
+    // Modal toggle buttons & elements
+    const btnUserLogin = document.getElementById('btnUserLogin');
+    const btnAdminSettings = document.getElementById('btnAdminSettings');
+    const btnCreateQuotation = document.getElementById('btnCreateQuotation');
+    
+    const loginModal = document.getElementById('loginModal');
+    const settingsModal = document.getElementById('settingsModal');
+    const quotationModal = document.getElementById('quotationModal');
+    
+    const btnCloseLogin = document.getElementById('btnCloseLogin');
+    const btnCloseSettings = document.getElementById('btnCloseSettings');
+    const btnCloseQuotation = document.getElementById('btnCloseQuotation');
+    const btnCloseQuotationFooter = document.getElementById('btnCloseQuotationFooter');
+    
+    // Login Modal events
+    btnUserLogin.addEventListener('click', () => {
+        if (state.currentUser) {
+            handleLogout();
+        } else {
+            loginModal.style.display = 'flex';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginErrorMsg').style.display = 'none';
+            document.getElementById('loginUsername').focus();
+        }
+    });
+    
+    btnCloseLogin.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+    
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const usernameInput = document.getElementById('loginUsername').value;
+        const passwordInput = document.getElementById('loginPassword').value;
+        const success = handleLogin(usernameInput, passwordInput);
+        if (success) {
+            loginModal.style.display = 'none';
+            document.getElementById('settingsModal').style.display = 'flex';
+            document.getElementById('settingsToggleProductList').checked = state.showProductList;
+            document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
+            document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+            renderSettingsUsersList();
+        } else {
+            document.getElementById('loginErrorMsg').style.display = 'block';
+        }
+    });
+
+    // Hash change event listener for settings
+    window.addEventListener('hashchange', checkAdminHash);
+
+    // Logout from admin settings
+    const btnAdminLogout = document.getElementById('btnAdminLogout');
+    if (btnAdminLogout) {
+        btnAdminLogout.addEventListener('click', () => {
+            handleLogout();
+            window.location.hash = '';
+        });
+    }
+    
+    // Settings Modal events
+    btnAdminSettings.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+        document.getElementById('settingsToggleProductList').checked = state.showProductList;
+        document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
+        document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+        renderSettingsUsersList();
+    });
+    
+    btnCloseSettings.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+    
+    document.getElementById('settingsToggleProductList').addEventListener('change', () => {
+        state.showProductList = document.getElementById('settingsToggleProductList').checked;
+        saveState();
+        renderGroups();
+    });
+    
+    document.getElementById('settingsToggleThemeLock').addEventListener('change', () => {
+        state.lockTheme = document.getElementById('settingsToggleThemeLock').checked;
+        if (state.lockTheme) {
+            themeSelect.disabled = true;
+            themeSelect.value = state.lockedTheme;
+            applyTheme(state.lockedTheme);
+        } else {
+            themeSelect.disabled = false;
+            themeSelect.value = state.theme;
+            applyTheme(state.theme);
+        }
+        saveState();
+    });
+    
+    document.getElementById('settingsLockedThemeSelect').addEventListener('change', () => {
+        state.lockedTheme = document.getElementById('settingsLockedThemeSelect').value;
+        if (state.lockTheme) {
+            themeSelect.value = state.lockedTheme;
+            applyTheme(state.lockedTheme);
+        }
+        saveState();
+    });
+    
+    document.getElementById('addUserForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newUsernameInput = document.getElementById('newUsername');
+        const newUserPasswordInput = document.getElementById('newUserPassword');
+        const newUserPermQuotationInput = document.getElementById('newUserPermQuotation');
+        
+        const success = addUser(newUsernameInput.value, newUserPasswordInput.value, newUserPermQuotationInput.checked);
+        if (success) {
+            newUsernameInput.value = '';
+            newUserPasswordInput.value = '';
+            newUserPermQuotationInput.checked = true;
+        } else {
+            alert(state.language === 'ar' ? 'عذراً، هذا الموظف مسجل مسبقاً.' : 'Employee username already exists.');
+        }
+    });
+    
+    const resultsPdfModal = document.getElementById('resultsPdfModal');
+    // Close modal when clicking outside card
+    window.addEventListener('click', (e) => {
+        if (e.target === loginModal) loginModal.style.display = 'none';
+        if (e.target === settingsModal) settingsModal.style.display = 'none';
+        if (e.target === quotationModal) quotationModal.style.display = 'none';
+        if (e.target === resultsPdfModal) resultsPdfModal.style.display = 'none';
+    });
+    
+    // Quotation events
+    btnCreateQuotation.addEventListener('click', () => {
+        renderQuotation();
+        document.getElementById('quoteCustomerName').value = '';
+        document.getElementById('quoteCustomerPhone').value = '';
+        document.getElementById('quoteCompanyName').value = 'الشركة الأساسية';
+        document.getElementById('quoteBranchName').value = 'فرع حفر الباطن';
+        document.getElementById('quotePreparedByInput').value = state.currentUser ? state.currentUser.username : 'الموظف';
+        document.getElementById('printCustomerName').style.display = 'none';
+        document.getElementById('printCustomerPhone').style.display = 'none';
+        document.getElementById('quoteCustomerName').style.display = 'inline-block';
+        document.getElementById('quoteCustomerPhone').style.display = 'inline-block';
+        
+        quotationModal.style.display = 'flex';
+    });
+    
+    btnCloseQuotation.addEventListener('click', () => {
+        quotationModal.style.display = 'none';
+    });
+    
+    btnCloseQuotationFooter.addEventListener('click', () => {
+        quotationModal.style.display = 'none';
+    });
+    
+    document.getElementById('btnQuotePrintPDF').addEventListener('click', () => {
+        const nameVal = document.getElementById('quoteCustomerName').value.trim();
+        const phoneVal = document.getElementById('quoteCustomerPhone').value.trim();
+        
+        const printName = document.getElementById('printCustomerName');
+        const printPhone = document.getElementById('printCustomerPhone');
+        
+        printName.textContent = nameVal || '--';
+        printPhone.textContent = phoneVal || '--';
+        
+        const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
+        const branchVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
+        const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
+        
+        const printCompName = document.getElementById('printQuoteCompanyName');
+        const printBranchName = document.getElementById('printQuoteBranchName');
+        const printPrep = document.getElementById('printQuotePreparedBy');
+        
+        printCompName.textContent = compVal;
+        printBranchName.textContent = branchVal;
+        printPrep.textContent = prepVal;
+        
+        printName.style.setProperty('display', 'inline', 'important');
+        printPhone.style.setProperty('display', 'inline', 'important');
+        printCompName.style.setProperty('display', 'block', 'important');
+        printBranchName.style.setProperty('display', 'block', 'important');
+        printPrep.style.setProperty('display', 'inline', 'important');
+        
+        document.getElementById('quoteCustomerName').style.display = 'none';
+        document.getElementById('quoteCustomerPhone').style.display = 'none';
+        document.getElementById('quoteCompanyName').style.display = 'none';
+        document.getElementById('quoteBranchName').style.display = 'none';
+        document.getElementById('quotePreparedByInput').style.display = 'none';
+        
+        document.body.classList.add('printing-quote');
+        
+        if (navigator.webdriver) {
+            console.log("Mock print execution for automation");
+        } else {
+            window.print();
+        }
+        
+        document.body.classList.remove('printing-quote');
+        
+        printName.style.display = 'none';
+        printPhone.style.display = 'none';
+        printCompName.style.display = 'none';
+        printBranchName.style.display = 'none';
+        printPrep.style.display = 'none';
+        
+        document.getElementById('quoteCustomerName').style.display = 'inline-block';
+        document.getElementById('quoteCustomerPhone').style.display = 'inline-block';
+        document.getElementById('quoteCompanyName').style.display = 'inline-block';
+        document.getElementById('quoteBranchName').style.display = 'inline-block';
+        document.getElementById('quotePreparedByInput').style.display = 'inline-block';
+    });
+    
+    document.getElementById('btnQuoteShareWhatsApp').addEventListener('click', () => {
+        triggerUsageStats();
+        const lang = state.language;
+        
+        const custName = document.getElementById('quoteCustomerName').value.trim() || '--';
+        const custPhone = document.getElementById('quoteCustomerPhone').value.trim() || '--';
+        const quoteNo = document.getElementById('quoteNumber').textContent;
+        const dateText = document.getElementById('quoteDate').textContent;
+        
+        const compNameVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
+        const branchNameVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
+        const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
+        
+        let msg = `📄 *${translations[lang].quotationTitle} - ${compNameVal}*\n`;
+        if (branchNameVal) msg += `${branchNameVal}\n`;
+        msg += `رقم العرض: ${quoteNo}\n`;
+        msg += `التاريخ: ${dateText}\n`;
+        msg += `العميل: ${custName}\n`;
+        if (custPhone !== '--') msg += `جوال: ${custPhone}\n`;
+        msg += `بواسطة: ${prepVal}\n`;
+        msg += `----\n`;
+        
+        state.groups.forEach((group, index) => {
+            const groupTitle = group.name.trim() || `${translations[lang].groupTitle} ${index + 1}`;
+            msg += `*${groupTitle}*:\n`;
+            
+            group.products.forEach((product, pIndex) => {
+                const prodName = product.name.trim() || `${translations[lang].productPlaceholder} ${pIndex + 1}`;
+                msg += `  - ${prodName} (العدد: ${product.quantity})\n`;
+            });
+        });
+        
+        const finalPriceText = document.getElementById('quoteFinalSum').textContent;
+        msg += `----\n`;
+        msg += `💵 *السعر الصافي النهائي: ${finalPriceText}*\n`;
+        msg += `📱 تم الإنشاء عبر حاسبة الدهمشي الذكية`;
+        
+        const urlEncodedText = encodeURIComponent(msg);
+        window.open(`https://api.whatsapp.com/send?text=${urlEncodedText}`, '_blank');
+    });
+
+    // Results PDF Events
+    document.getElementById('btnCreateResultsPdf').addEventListener('click', () => {
+        renderResultsPdf();
+        document.getElementById('pdfCustomerName').value = '';
+        document.getElementById('pdfCustomerPhone').value = '';
+        document.getElementById('printPdfCustomerName').style.display = 'none';
+        document.getElementById('printPdfCustomerPhone').style.display = 'none';
+        document.getElementById('pdfCustomerName').style.display = 'inline-block';
+        document.getElementById('pdfCustomerPhone').style.display = 'inline-block';
+        
+        document.getElementById('resultsPdfModal').style.display = 'flex';
+    });
+
+    document.getElementById('btnPdfPrintPDF').addEventListener('click', () => {
+        const nameVal = document.getElementById('pdfCustomerName').value.trim();
+        const phoneVal = document.getElementById('pdfCustomerPhone').value.trim();
+        
+        const printName = document.getElementById('printPdfCustomerName');
+        const printPhone = document.getElementById('printPdfCustomerPhone');
+        
+        printName.textContent = nameVal || '--';
+        printPhone.textContent = phoneVal || '--';
+        
+        printName.style.setProperty('display', 'inline', 'important');
+        printPhone.style.setProperty('display', 'inline', 'important');
+        
+        document.getElementById('pdfCustomerName').style.display = 'none';
+        document.getElementById('pdfCustomerPhone').style.display = 'none';
+        
+        document.body.classList.add('printing-results');
+        
+        if (navigator.webdriver) {
+            console.log("Mock print execution for automation");
+        } else {
+            window.print();
+        }
+        
+        document.body.classList.remove('printing-results');
+        
+        printName.style.display = 'none';
+        printPhone.style.display = 'none';
+        
+        document.getElementById('pdfCustomerName').style.display = 'inline-block';
+        document.getElementById('pdfCustomerPhone').style.display = 'inline-block';
+    });
+
+    document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
+        document.getElementById('resultsPdfModal').style.display = 'none';
+    });
+
+    document.getElementById('btnCloseResultsPdfFooter').addEventListener('click', () => {
+        document.getElementById('resultsPdfModal').style.display = 'none';
+    });
 }
 
 // Set active language and translate UI elements
@@ -775,8 +1595,9 @@ function renderGroups() {
             row.className = 'product-item';
             row.dataset.id = product.id;
 
+            const listAttr = state.showProductList ? 'list="defaultProductNames"' : '';
             row.innerHTML = `
-                <input type="text" class="product-name-input" value="${product.name}" 
+                <input type="text" class="product-name-input" ${listAttr} value="${product.name}" 
                     placeholder="${translations[lang].productPlaceholder} ${pIndex + 1}">
                 
                 <div class="input-container">
@@ -1173,7 +1994,7 @@ function calculate() {
 
 // Save state to localStorage
 function saveState() {
-    safeSetLocalStorage('sales_calculator_state_v10', JSON.stringify(state));
+    safeSetLocalStorage('sales_calculator_state_v11', JSON.stringify(state));
 }
 
 // Force formatting with English (Latin) numbers always
