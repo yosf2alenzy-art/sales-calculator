@@ -3026,6 +3026,8 @@ async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
     const lang = state.language;
     showLoading(lang === 'ar' ? 'جاري تهيئة محرك الـ PDF...' : 'Initializing PDF engine...');
     
+    let modalRestorer = null;
+    
     try {
         // 1. Ensure html2pdf is loaded
         if (!window.html2pdf) {
@@ -3048,12 +3050,48 @@ async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
             document.getElementById('printQuoteCompanyName').textContent = compVal;
             document.getElementById('printQuoteBranchName').textContent = branchVal;
             document.getElementById('printQuotePreparedBy').textContent = prepVal;
+            
+            // If the quote modal is currently hidden, temporarily display with layout (opacity 0)
+            const modal = document.getElementById('quotationModal');
+            if (modal && modal.style.display === 'none') {
+                const prevDisplay = modal.style.display;
+                const prevOpacity = modal.style.opacity;
+                const prevPointerEvents = modal.style.pointerEvents;
+                
+                modal.style.display = 'flex';
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+                
+                modalRestorer = () => {
+                    modal.style.display = prevDisplay;
+                    modal.style.opacity = prevOpacity;
+                    modal.style.pointerEvents = prevPointerEvents;
+                };
+            }
         } else {
             // It's results PDF, sync the modal fields
             const nameVal = document.getElementById('pdfCustomerName').value.trim();
             const phoneVal = document.getElementById('pdfCustomerPhone').value.trim();
             document.getElementById('printPdfCustomerName').textContent = nameVal || '--';
             document.getElementById('printPdfCustomerPhone').textContent = phoneVal || '--';
+            
+            // If the results modal is currently hidden, temporarily display with layout (opacity 0)
+            const modal = document.getElementById('resultsPdfModal');
+            if (modal && modal.style.display === 'none') {
+                const prevDisplay = modal.style.display;
+                const prevOpacity = modal.style.opacity;
+                const prevPointerEvents = modal.style.pointerEvents;
+                
+                modal.style.display = 'flex';
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+                
+                modalRestorer = () => {
+                    modal.style.display = prevDisplay;
+                    modal.style.opacity = prevOpacity;
+                    modal.style.pointerEvents = prevPointerEvents;
+                };
+            }
         }
         
         // 3. Temporarily hide input controls via class
@@ -3077,13 +3115,21 @@ async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
         
         // Generate PDF blob
         const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-        document.body.classList.remove('html2pdf-active');
         
-        // Create file object
+        // Restore styles and hidden modals immediately
+        document.body.classList.remove('html2pdf-active');
+        if (modalRestorer) {
+            modalRestorer();
+            modalRestorer = null;
+        }
+        
+        // Create file object (safe ASCII filename)
         const file = new File([pdfBlob], defaultFileName, { type: "application/pdf" });
         
-        // Try Web Share API first
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Detect mobile vs desktop
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             hideLoading();
             await navigator.share({
                 files: [file],
@@ -3091,7 +3137,7 @@ async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
                 text: lang === 'ar' ? 'مرفق لكم التقرير بصيغة PDF.' : 'Attached is the PDF report.'
             });
         } else {
-            // Fallback: download file locally and redirect to WhatsApp
+            // Force download PDF locally
             const downloadUrl = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a');
             a.href = downloadUrl;
@@ -3106,11 +3152,20 @@ async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
                 : 'The report PDF has been downloaded. Please attach it in the chat.';
             
             hideLoading();
-            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+            
+            // Route to WhatsApp Web on Desktop, and native WhatsApp app on Mobile
+            if (isMobile) {
+                window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+            } else {
+                window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+            }
         }
     } catch (e) {
         console.error("Error generating/sharing PDF", e);
         document.body.classList.remove('html2pdf-active');
+        if (modalRestorer) {
+            modalRestorer();
+        }
         hideLoading();
         alert(lang === 'ar' 
             ? 'حدث خطأ أثناء توليد ملف الـ PDF. يرجى التأكد من اتصال الإنترنت أو استخدام ميزة الطباعة العادية.' 
