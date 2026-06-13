@@ -98,7 +98,27 @@ const translations = {
         footerCompany: "الشركة الأساسية - فرع حفر الباطن",
         pdfReportTitle: "تقرير نتائج الحسابات",
         pdfHeaderTitle: "تقرير حساب المبيعات والخصومات",
-        btnCreateResultsPdf: "تصدير النتيجة PDF"
+        btnCreateResultsPdf: "تصدير النتيجة PDF",
+        btnAbout: "حول البرنامج",
+        aboutHeader: "حول حاسبة الدهمشي الذكية",
+        addTerm: "إضافة شرط",
+        expandAll: "إلغاء الطي",
+        collapseAllExceptFirst: "طي الكل",
+        deleteExtraGroups: "إغلاق المجموعات الإضافية",
+        settingsProgramTitle: "اسم البرنامج:",
+        settingsProgramTitlePlaceholder: "مثال: حاسبة الدهمشي الذكية",
+        tutorialCardLabel: "شرح البرنامج",
+        tutorialSelectPlaceholder: "القائمة",
+        tutProduct: "إضافة منتج وحذفه",
+        tutDiscount: "إضافة نسبة وحذفها",
+        tutGroup: "إضافة مجموعة وحذفها",
+        tutPdf: "تصدير النتيجة إلى ملف PDF",
+        tutQuote: "عرض سعر",
+        tutWhatsapp: "إرسال عبر واتساب",
+        tutCopy: "نسخ التقرير المنسق",
+        settingsSuggestions: "إدارة مقترحات المنتجات",
+        btnAddSuggestion: "إضافة",
+        settingsTutorialLinks: "إدارة روابط شروحات البرنامج"
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -198,7 +218,27 @@ const translations = {
         footerCompany: "Al-Asasiya Company - Hafar Al-Batin Branch",
         pdfReportTitle: "Calculation Results Report",
         pdfHeaderTitle: "Sales & Discount Calculation Report",
-        btnCreateResultsPdf: "Export Results PDF"
+        btnCreateResultsPdf: "Export Results PDF",
+        btnAbout: "About App",
+        aboutHeader: "About Al-Dahmashy Smart Calculator",
+        addTerm: "Add Term",
+        expandAll: "Expand All",
+        collapseAllExceptFirst: "Collapse All",
+        deleteExtraGroups: "Close Extra Groups",
+        settingsProgramTitle: "Program Name:",
+        settingsProgramTitlePlaceholder: "e.g. Al-Dahmashy Smart Calculator",
+        tutorialCardLabel: "App Tutorials",
+        tutorialSelectPlaceholder: "Menu",
+        tutProduct: "Add & delete product",
+        tutDiscount: "Add & delete percentage",
+        tutGroup: "Add & delete group",
+        tutPdf: "Export results to PDF",
+        tutQuote: "Price quotation",
+        tutWhatsapp: "Send via WhatsApp",
+        tutCopy: "Copy formatted report",
+        settingsSuggestions: "Manage Product Suggestions",
+        btnAddSuggestion: "Add",
+        settingsTutorialLinks: "Manage Tutorial Links"
     }
 };
 
@@ -220,9 +260,101 @@ const currencyDisplaySymbols = {
     }
 };
 
+// Default Products list
+const defaultProducts = [
+    "مكيف جرى جدارى PULAR طن بارد",
+    "مكيف جرى جدارى PULAR طن ونصف بارد",
+    "مكيف جرى جدارى PULAR طنين بارد",
+    "مكيف جرى جدارى PULAR طنين ونصف بارد",
+    "مكيف جرى جدارى PULAR ثلاثة طن بارد",
+    "مكيف جرى جدارى PULAR طن حار بارد",
+    "مكيف جرى جدارى PULAR طن ونصف حار بارد",
+    "مكيف جرى جدارى PULAR طنين حار بارد",
+    "مكيف جرى جدارى PULAR طنين ونصف حار بارد",
+    "مكيف جرى جدارى PULAR ثلاثة طن حار بارد",
+    "مكيف جرى جداري PULAR PRO طن بارد",
+    "مكيف جرى جدارى PULAR PRO طن ونصف بارد",
+    "مكيف جرى جدارى PULAR PRO طنين بارد",
+    "مكيف جرى جدارى PULAR PRO طنين ونصف بارد",
+    "مكيف جرى جدارى PULAR PRO ثلاثة طن بارد",
+    "مكيف جرى جدارى PULAR PRO طن حار بارد",
+    "مكيف جرى جدارى PULAR PRO طن ونصف حار بارد",
+    "مكيف جرى جدارى PULAR PRO طنين حار بارد",
+    "مكيف جرى جدارى PULAR PRO طنين ونصف حار بارد",
+    "مكيف جرى جدارى PULAR PRO ثلاثة طن حار بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طن بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طن ونصف بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طنين بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طنين ونصف بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX ثلاثة طن بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طن حار بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طن ونصف حار بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طنين حار بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX طنين ونصف حار بارد",
+    "مكيف جرى جدارى ( R410 ) AIMAX ثلاثة طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طن ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طنين بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طنين ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX ثلاثة طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طن ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طنين حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX طنين ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIMAX ثلاثة طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طن ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طنين بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طنين ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS ثلاثة طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طن ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طنين حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS طنين ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPLUS ثلاثة طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طن ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طنين بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طنين ونصف بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO ثلاثة طن بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طن حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طن ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طنين حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO طنين ونصف حار بارد",
+    "مكيف جرى جدارى ( R32 ) AIPRO ثلاثة طن حار بارد",
+    "مكيف جرى دولابى 4 طن بارد",
+    "مكيف جرى دولابى 4 طن حار بارد",
+    "مكيف جرى دولابى 5 طن بارد",
+    "مكيف جرى دولابى 5 طن حار بارد",
+    "مكيف جرى دولابى 66000 ألف وحدة تبريد RF28 حار بارد",
+    "مكيف جرى مخفي طن ونصف حار بارد ( R410 )",
+    "مكيف جرى مخفي طنين حار بارد ( R410 )",
+    "مكيف جرى مخفي 3 طن حار بارد ( R410 )",
+    "مكيف جرى مخفي 4 طن حار بارد ( R410 )",
+    "مكيف جرى مخفي 5 طن حار بارد ( R410 )",
+    "مكيف جرى كاسيت طن ونصف حار بارد ( R410 )",
+    "مكيف جرى كاسيت طنين حار بارد ( R410 )",
+    "مكيف جرى كاسيت 3 طن حار بارد ( R410 )",
+    "مكيف جرى كاسيت 4 طن حار بارد ( R410 )",
+    "مكيف جرى مخفي طن ونصف حار بارد ( R32 )",
+    "مكيف جرى مخفي طنين حار بارد ( R32 )",
+    "مكيف جرى مخفي 3 طن حار بارد ( R32 )",
+    "مكيف جرى مخفي 4 طن حار بارد ( R32 )",
+    "مكيف جرى مخفي 5 طن حار بارد ( R32 )",
+    "مكيف جرى كاسيت طن ونصف حار بارد ( R32 )",
+    "مكيف جرى كاسيت طنين حار بارد ( R32 )",
+    "مكيف جرى كاسيت 3 طن حار بارد ( R32 )",
+    "مكيف جرى كاسيت 4 طن حار بارد ( R32 )",
+    "مكيف جرى كاسيت دائري طن ونصف حار بارد ( R32 )",
+    "مكيف جرى كاسيت دائري طنين حار بارد ( R32 )",
+    "مكيف جرى كاسيت دائري 3 طن حار بارد ( R32 )",
+    "مكيف جرى كاسيت دائري 4 طن حار بارد ( R32 )"
+];
+
 // Application State
 let state = {
     language: 'ar',
+    programTitle: '',
     currency: 'SAR',
     customCurrency: 'يورو',
     theme: 'luxury-gold',
@@ -240,14 +372,15 @@ let state = {
             id: 'group_1',
             name: 'المجموعة الأولى',
             products: [
-                { id: generateId(), name: '', price: 1000, quantity: 1 }
+                { id: generateId(), name: '', price: '', quantity: '' }
             ],
             discounts: [
                 { id: generateId(), type: 'percent', value: 35 },
                 { id: generateId(), type: 'percent', value: 5 },
                 { id: generateId(), type: 'percent', value: 5 }
             ],
-            activePresetId: 'preset_1'
+            activePresetId: 'preset_1',
+            collapsed: false
         }
     ],
     presets: [
@@ -269,7 +402,22 @@ let state = {
                 { type: 'percent', value: 6 }
             ]
         }
-    ]
+    ],
+    terms: [
+        "هذا العرض ساري المفعول لمدة 15 يوماً من تاريخ صدوره.",
+        "الأسعار المذكورة أعلاه تشمل التركيب الأساسي (إن كان متفقاً عليه).",
+        "لاعتراض أو تعديل العرض يرجى مراجعة إدارة الفرع بحفر الباطن."
+    ],
+    customProducts: [...defaultProducts],
+    tutorialLinks: {
+        product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
+        discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
+        group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
+        pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
+        quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
+        whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
+        copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
+    }
 };
 
 // Unique ID Generator
@@ -401,8 +549,16 @@ function applyTheme(theme) {
 
 // Load state from localStorage on init
 function init() {
-    let savedState = safeGetLocalStorage('sales_calculator_state_v11');
+    let savedState = safeGetLocalStorage('sales_calculator_state_v13');
     let migrated = false;
+    if (!savedState) {
+        savedState = safeGetLocalStorage('sales_calculator_state_v12');
+        if (savedState) migrated = true;
+    }
+    if (!savedState) {
+        savedState = safeGetLocalStorage('sales_calculator_state_v11');
+        if (savedState) migrated = true;
+    }
     if (!savedState) {
         // Try to migrate from v10
         savedState = safeGetLocalStorage('sales_calculator_state_v10');
@@ -423,7 +579,7 @@ function init() {
                     {
                         id: 'group_1',
                         name: state.language === 'ar' ? 'المجموعة الأولى' : 'Group One',
-                        products: state.products || [{ id: generateId(), name: '', price: 1000, quantity: 1 }],
+                        products: state.products || [{ id: generateId(), name: '', price: '', quantity: '' }],
                         discounts: state.discounts || [
                             { id: generateId(), type: 'percent', value: 35 },
                             { id: generateId(), type: 'percent', value: 5 },
@@ -443,7 +599,7 @@ function init() {
                     {
                         id: 'group_1',
                         name: state.language === 'ar' ? 'المجموعة الأولى' : 'Group One',
-                        products: [{ id: generateId(), name: '', price: 1000, quantity: 1 }],
+                        products: [{ id: generateId(), name: '', price: '', quantity: '' }],
                         discounts: [
                             { id: generateId(), type: 'percent', value: 35 },
                             { id: generateId(), type: 'percent', value: 5 },
@@ -456,9 +612,10 @@ function init() {
 
             state.groups.forEach(g => {
                 if (!Array.isArray(g.products)) {
-                    g.products = [{ id: generateId(), name: '', price: 1000, quantity: 1 }];
+                    g.products = [{ id: generateId(), name: '', price: '', quantity: '' }];
                 }
                 if (!Array.isArray(g.discounts)) g.discounts = [];
+                if (g.collapsed === undefined) g.collapsed = false;
             });
 
             if (!Array.isArray(state.presets)) {
@@ -488,6 +645,7 @@ function init() {
             if (state.showProductList === undefined) state.showProductList = true;
             if (state.lockTheme === undefined) state.lockTheme = false;
             if (state.lockedTheme === undefined) state.lockedTheme = 'luxury-gold';
+            if (state.programTitle === undefined) state.programTitle = '';
             if (!Array.isArray(state.users)) {
                 state.users = [
                     { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
@@ -505,6 +663,27 @@ function init() {
             }
             state.currentUser = null; // reset session at startup
             if (!state.language) state.language = 'ar';
+            if (!Array.isArray(state.terms)) {
+                state.terms = [
+                    "هذا العرض ساري المفعول لمدة 15 يوماً من تاريخ صدوره.",
+                    "الأسعار المذكورة أعلاه تشمل التركيب الأساسي (إن كان متفقاً عليه).",
+                    "لاعتراض أو تعديل العرض يرجى مراجعة إدارة الفرع بحفر الباطن."
+                ];
+            }
+            if (!Array.isArray(state.customProducts) || state.customProducts.length === 0) {
+                state.customProducts = [...defaultProducts];
+            }
+            if (!state.tutorialLinks) {
+                state.tutorialLinks = {
+                    product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
+                    discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
+                    group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
+                    pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
+                    quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
+                    whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
+                    copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
+                };
+            }
             
             saveState(); // save migrated state
         } catch (e) {
@@ -513,6 +692,8 @@ function init() {
     } else {
         saveState();
     }
+
+    renderDatalist();
 
     // Load initial values to currency list based on currency option
     currencySelect.value = state.currency;
@@ -568,7 +749,10 @@ function checkAdminHash() {
             document.getElementById('settingsToggleProductList').checked = state.showProductList;
             document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
             document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+            document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
             renderSettingsUsersList();
+            renderAdminSuggestionsList();
+            renderAdminTutorialLinksList();
         } else {
             loginModal.style.display = 'flex';
             document.getElementById('loginUsername').value = '';
@@ -676,6 +860,122 @@ function renderSettingsUsersList() {
                 deleteUser(user.username);
             });
         }
+        container.appendChild(row);
+    });
+}
+
+// Render autocomplete datalist in index.html dynamically
+function renderDatalist() {
+    const datalist = document.getElementById('defaultProductNames');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    if (state.customProducts) {
+        state.customProducts.forEach(name => {
+            if (name && name.trim()) {
+                const opt = document.createElement('option');
+                opt.value = name.trim();
+                datalist.appendChild(opt);
+            }
+        });
+    }
+}
+
+// Render product autocomplete suggestions list in Admin Settings
+function renderAdminSuggestionsList() {
+    const container = document.getElementById('adminSuggestionsListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const lang = state.language;
+
+    if (!state.customProducts) {
+        state.customProducts = [];
+    }
+
+    state.customProducts.forEach((productName, index) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.02); padding: 0.4rem 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04);';
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn-delete';
+        deleteBtn.style.cssText = 'width: 1.8rem; height: 1.8rem; display: flex; justify-content: center; align-items: center; min-height: unset;';
+        deleteBtn.title = lang === 'ar' ? 'حذف المقترح' : 'Delete Suggestion';
+        deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can" style="font-size: 0.75rem;"></i>';
+        
+        deleteBtn.addEventListener('click', () => {
+            state.customProducts.splice(index, 1);
+            saveState();
+            renderAdminSuggestionsList();
+            renderDatalist();
+        });
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = productName;
+        input.style.cssText = 'flex-grow: 1; font-size: 0.85rem; padding: 0.35rem 0.6rem; text-align: right; border: 1px dashed rgba(255,255,255,0.15); border-radius: 4px; background: transparent; color: var(--text-primary); font-family: var(--font-family) !important;';
+        
+        input.addEventListener('input', () => {
+            state.customProducts[index] = input.value;
+            saveState();
+            renderDatalist();
+        });
+        
+        row.appendChild(deleteBtn);
+        row.appendChild(input);
+        container.appendChild(row);
+    });
+}
+
+// Render tutorial links manager in Admin Settings
+function renderAdminTutorialLinksList() {
+    const container = document.getElementById('adminTutorialLinksContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const lang = state.language;
+    
+    if (!state.tutorialLinks) {
+        state.tutorialLinks = {
+            product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
+            discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
+            group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
+            pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
+            quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
+            whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
+            copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
+        };
+    }
+    
+    const topics = [
+        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
+        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
+        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
+        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
+        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
+        { key: 'whatsapp', label: translations[lang].tutWhatsapp || 'إرسال عبر واتساب' },
+        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
+    ];
+    
+    topics.forEach(topic => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.5rem;';
+        
+        const label = document.createElement('label');
+        label.style.cssText = 'font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);';
+        label.textContent = topic.label;
+        
+        const input = document.createElement('input');
+        input.type = 'url';
+        input.value = state.tutorialLinks[topic.key] || '';
+        input.placeholder = 'https://...';
+        input.style.cssText = 'font-size: 0.85rem; padding: 0.35rem 0.6rem; text-align: left; direction: ltr; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: rgba(0, 0, 0, 0.2); color: var(--text-primary);';
+        
+        input.addEventListener('input', () => {
+            state.tutorialLinks[topic.key] = input.value.trim();
+            saveState();
+        });
+        
+        row.appendChild(label);
+        row.appendChild(input);
         container.appendChild(row);
     });
 }
@@ -788,7 +1088,72 @@ function renderQuotation() {
     
     const grandFinalNet = preciseRound(grandNetSum + vatAmount);
     quoteFinalSumEl.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
+    
+    renderTerms();
 }
+
+// Render dynamic terms and conditions
+function renderTerms() {
+    const editContainer = document.getElementById('quoteTermsEditContainer');
+    const printList = document.getElementById('quoteTermsPrintList');
+    if (!editContainer || !printList) return;
+    
+    editContainer.innerHTML = '';
+    printList.innerHTML = '';
+    
+    state.terms.forEach((term, index) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '0.5rem';
+        row.style.marginBottom = '0.25rem';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = term;
+        input.style.flexGrow = '1';
+        input.style.fontSize = '0.85rem';
+        input.style.padding = '0.3rem 0.5rem';
+        input.style.border = '1px dashed #cbd5e1';
+        input.style.background = '#fff';
+        input.style.color = '#333';
+        input.style.borderRadius = '4px';
+        input.style.textAlign = 'right';
+        
+        input.addEventListener('input', () => {
+            state.terms[index] = input.value;
+            li.textContent = input.value;
+            saveState();
+        });
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.style.color = '#ef4444';
+        removeBtn.style.fontSize = '1.3rem';
+        removeBtn.style.cursor = 'pointer';
+        removeBtn.style.padding = '0 0.25rem';
+        removeBtn.style.border = 'none';
+        removeBtn.style.background = 'transparent';
+        removeBtn.style.lineHeight = '1';
+        removeBtn.title = state.language === 'ar' ? 'حذف الشرط' : 'Delete Term';
+        
+        removeBtn.addEventListener('click', () => {
+            state.terms.splice(index, 1);
+            saveState();
+            renderTerms();
+        });
+        
+        row.appendChild(removeBtn);
+        row.appendChild(input);
+        editContainer.appendChild(row);
+        
+        const li = document.createElement('li');
+        li.textContent = term;
+        printList.appendChild(li);
+    });
+}
+
 
 // Results PDF Formatter
 function renderResultsPdf() {
@@ -828,7 +1193,7 @@ function renderResultsPdf() {
                     <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${prodName}</td>
                     <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0;">${product.quantity}</td>
                     <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; font-family: monospace;">${formatNumber(product.price)} ${currency}</td>
-                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; font-family: monospace;">${formatNumber(lineTotal)} ${currency}</td>
+                    <td style="padding: 0.5rem; text-align: center; border: 1px solid #e2e8f0; font-family: monospace;">${lineTotal ? formatNumber(lineTotal) : '0.00'} ${currency}</td>
                 </tr>
             `;
         });
@@ -978,6 +1343,133 @@ function renderResultsPdf() {
     pdfGrandFinalSum.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
 }
 
+// Helper function to print clean HTML in a new, unconstrained window
+function openPrintWindow(htmlContent, title) {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        alert(state.language === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة للطباعة!' : 'Please allow popups to print!');
+        return;
+    }
+    
+    let stylesHtml = '';
+    try {
+        for (let styleSheet of document.styleSheets) {
+            try {
+                let rules = [];
+                for (let rule of styleSheet.cssRules) {
+                    rules.push(rule.cssText);
+                }
+                stylesHtml += `<style>${rules.join('\n')}</style>`;
+            } catch (e) {
+                // Ignore cross-origin security rules
+            }
+        }
+    } catch (err) {
+        console.warn("Could not read stylesheets, falling back", err);
+    }
+    
+    if (!stylesHtml) {
+        stylesHtml = `<link rel="stylesheet" href="style.css">`;
+    }
+    
+    const direction = document.documentElement.dir || 'rtl';
+    const lang = document.documentElement.lang || 'ar';
+    
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="${lang}" dir="${direction}">
+        <head>
+            <meta charset="UTF-8">
+            <title>${title}</title>
+            ${stylesHtml}
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <style>
+                body {
+                    background: #fff !important;
+                    color: #333 !important;
+                    padding: 2rem !important;
+                    margin: 0 !important;
+                    direction: ${direction} !important;
+                    text-align: right !important;
+                }
+                .printable-quotation-content, .printable-results-pdf-content {
+                    display: block !important;
+                }
+                .no-print {
+                    display: none !important;
+                }
+                .pdf-group-card {
+                    page-break-inside: avoid !important;
+                }
+                table {
+                    width: 100% !important;
+                    border-collapse: collapse !important;
+                }
+                th, td {
+                    border: 1px solid #cbd5e1 !important;
+                    padding: 0.75rem 0.5rem !important;
+                }
+                th {
+                    background: #f1f5f9 !important;
+                    color: #1e293b !important;
+                }
+                .customer-info-section {
+                    background: #f8fafc !important;
+                    border: 1px solid #cbd5e1 !important;
+                }
+                #quoteTermsPrintList {
+                    display: block !important;
+                }
+                .print-box-field {
+                    display: inline-block !important;
+                    border: 1px solid #cbd5e1 !important;
+                    background: #fff !important;
+                    color: #333 !important;
+                    padding: 0.35rem 0.6rem !important;
+                    border-radius: 4px !important;
+                    min-width: 180px !important;
+                    text-align: right !important;
+                    font-size: 0.95rem !important;
+                    font-weight: 500 !important;
+                    font-family: 'Tajawal', sans-serif !important;
+                    margin-top: 0.2rem !important;
+                }
+                @media print {
+                    body {
+                        padding: 0 !important;
+                    }
+                    @page {
+                        size: A4 portrait;
+                        margin: 1.5cm;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="quotation-print-container" style="max-width: 800px; margin: 0 auto;">
+                ${htmlContent}
+            </div>
+            <script>
+                window.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(() => {
+                        if (navigator.webdriver) {
+                            console.log("Mock print execution for automation");
+                        } else {
+                            window.print();
+                        }
+                    }, 500);
+                });
+                window.addEventListener('afterprint', () => {
+                    window.close();
+                });
+            </script>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+}
+
 // Setup all event listeners
 function setupEventListeners() {
     btnLangAr.addEventListener('click', () => setLanguage('ar'));
@@ -997,7 +1489,7 @@ function setupEventListeners() {
         state.groups.push({
             id: generateId(),
             name: getGroupName(state.groups.length, state.language),
-            products: [{ id: generateId(), name: '', price: 1000, quantity: 1 }],
+            products: [{ id: generateId(), name: '', price: '', quantity: '' }],
             discounts: [],
             activePresetId: null
         });
@@ -1090,7 +1582,10 @@ function setupEventListeners() {
             document.getElementById('settingsToggleProductList').checked = state.showProductList;
             document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
             document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+            document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
             renderSettingsUsersList();
+            renderAdminSuggestionsList();
+            renderAdminTutorialLinksList();
         } else {
             document.getElementById('loginErrorMsg').style.display = 'block';
         }
@@ -1114,6 +1609,7 @@ function setupEventListeners() {
         document.getElementById('settingsToggleProductList').checked = state.showProductList;
         document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
         document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+        document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
         renderSettingsUsersList();
     });
     
@@ -1150,6 +1646,12 @@ function setupEventListeners() {
         saveState();
     });
     
+    document.getElementById('settingsProgramTitleInput').addEventListener('input', () => {
+        state.programTitle = document.getElementById('settingsProgramTitleInput').value;
+        saveState();
+        applyProgramTitle();
+    });
+    
     document.getElementById('addUserForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const newUsernameInput = document.getElementById('newUsername');
@@ -1165,14 +1667,160 @@ function setupEventListeners() {
             alert(state.language === 'ar' ? 'عذراً، هذا الموظف مسجل مسبقاً.' : 'Employee username already exists.');
         }
     });
-    
+
+    // Expand all groups globally (Uncollapse all)
+    document.getElementById('btnExpandAll').addEventListener('click', () => {
+        state.groups.forEach(g => g.collapsed = false);
+        saveState();
+        renderGroups();
+    });
+
+    // Collapse all except first group globally
+    document.getElementById('btnCollapseAllExceptFirst').addEventListener('click', () => {
+        state.groups.forEach((g, index) => {
+            g.collapsed = (index !== 0);
+        });
+        saveState();
+        renderGroups();
+    });
+
+    // Delete/Close extra groups (Collective Group Deletion)
+    const btnDeleteExtraGroups = document.getElementById('btnDeleteExtraGroups');
+    if (btnDeleteExtraGroups) {
+        btnDeleteExtraGroups.addEventListener('click', () => {
+            if (state.groups.length > 1) {
+                const confirmMsg = state.language === 'ar' 
+                    ? 'هل أنت متأكد من إغلاق وحذف جميع المجموعات المفتوحة والإبقاء على المجموعة الأولى فقط؟' 
+                    : 'Are you sure you want to close and delete all extra groups and keep only the first group?';
+                if (confirm(confirmMsg)) {
+                    state.groups = [state.groups[0]];
+                    saveState();
+                    renderGroups();
+                    calculate();
+                }
+            }
+        });
+    }
+
+    // Tutorial dropdown navigation
+    document.getElementById('tutorialSelect').addEventListener('change', (e) => {
+        const val = e.target.value;
+        const links = state.tutorialLinks || {
+            product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
+            discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
+            group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
+            pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
+            quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
+            whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
+            copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
+        };
+        if (val && links[val]) {
+            window.open(links[val], '_blank');
+            e.target.value = ''; // Reset select placeholder
+        }
+    });
+
+    // Form to add autocomplete product suggestions
+    const addSuggestionForm = document.getElementById('addSuggestionForm');
+    if (addSuggestionForm) {
+        addSuggestionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('newSuggestionName');
+            const val = input.value.trim();
+            if (val) {
+                if (!state.customProducts) {
+                    state.customProducts = [];
+                }
+                if (!state.customProducts.includes(val)) {
+                    state.customProducts.unshift(val);
+                    saveState();
+                    renderAdminSuggestionsList();
+                    renderDatalist();
+                    input.value = '';
+                } else {
+                    alert(state.language === 'ar' ? 'هذا المقترح مضاف بالفعل.' : 'This suggestion already exists.');
+                }
+            }
+        });
+    }
+
+    // Form to bulk add autocomplete product suggestions
+    const bulkAddSuggestionsForm = document.getElementById('bulkAddSuggestionsForm');
+    if (bulkAddSuggestionsForm) {
+        bulkAddSuggestionsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const textarea = document.getElementById('bulkSuggestionsTextarea');
+            const lines = textarea.value.split('\n');
+            let addedCount = 0;
+            if (!state.customProducts) {
+                state.customProducts = [];
+            }
+            lines.forEach(line => {
+                const val = line.trim();
+                if (val && !state.customProducts.includes(val)) {
+                    state.customProducts.unshift(val);
+                    addedCount++;
+                }
+            });
+            if (addedCount > 0) {
+                saveState();
+                renderAdminSuggestionsList();
+                renderDatalist();
+                textarea.value = '';
+                alert(state.language === 'ar' ? `تم إضافة ${addedCount} مقترح بنجاح.` : `Successfully added ${addedCount} suggestions.`);
+            } else {
+                alert(state.language === 'ar' ? 'لم يتم إضافة أي مقترحات جديدة (قد تكون مضافة مسبقاً أو الحقل فارغ).' : 'No new suggestions were added (they might already exist).');
+            }
+        });
+    }
+
+    // Bulk Search and Replace Suggestions
+    const btnBulkReplace = document.getElementById('btnBulkReplace');
+    if (btnBulkReplace) {
+        btnBulkReplace.addEventListener('click', () => {
+            const searchVal = document.getElementById('replaceSearchTerm').value.trim();
+            const replaceVal = document.getElementById('replaceValue').value.trim();
+            if (!searchVal) {
+                alert(state.language === 'ar' ? 'يرجى كتابة الكلمة المراد البحث عنها.' : 'Please enter the term to search for.');
+                return;
+            }
+            if (!state.customProducts || state.customProducts.length === 0) {
+                alert(state.language === 'ar' ? 'لا توجد مقترحات منتجات لتعديلها.' : 'No product suggestions found to update.');
+                return;
+            }
+
+            let count = 0;
+            state.customProducts = state.customProducts.map(name => {
+                if (name.includes(searchVal)) {
+                    const updated = name.split(searchVal).join(replaceVal);
+                    count++;
+                    return updated;
+                }
+                return name;
+            });
+
+            if (count > 0) {
+                saveState();
+                renderAdminSuggestionsList();
+                renderDatalist();
+                alert(state.language === 'ar' ? `تم استبدال الكلمة بنجاح في ${count} مقترح.` : `Successfully replaced term in ${count} suggestions.`);
+                document.getElementById('replaceSearchTerm').value = '';
+                document.getElementById('replaceValue').value = '';
+            } else {
+                alert(state.language === 'ar' ? 'لم يتم العثور على الكلمة في أي من المقترحات.' : 'Term not found in any suggestions.');
+            }
+        });
+    }
+
     const resultsPdfModal = document.getElementById('resultsPdfModal');
+    const aboutModal = document.getElementById('aboutModal');
     // Close modal when clicking outside card
     window.addEventListener('click', (e) => {
         if (e.target === loginModal) loginModal.style.display = 'none';
         if (e.target === settingsModal) settingsModal.style.display = 'none';
         if (e.target === quotationModal) quotationModal.style.display = 'none';
         if (e.target === resultsPdfModal) resultsPdfModal.style.display = 'none';
+        if (e.target === aboutModal) aboutModal.style.display = 'none';
     });
     
     // Quotation events
@@ -1199,6 +1847,12 @@ function setupEventListeners() {
         quotationModal.style.display = 'none';
     });
     
+    document.getElementById('btnQuoteAddTerm').addEventListener('click', () => {
+        state.terms.push(state.language === 'ar' ? 'شرط جديد...' : 'New term...');
+        saveState();
+        renderTerms();
+    });
+    
     document.getElementById('btnQuotePrintPDF').addEventListener('click', () => {
         const nameVal = document.getElementById('quoteCustomerName').value.trim();
         const phoneVal = document.getElementById('quoteCustomerPhone').value.trim();
@@ -1221,80 +1875,27 @@ function setupEventListeners() {
         printBranchName.textContent = branchVal;
         printPrep.textContent = prepVal;
         
-        printName.style.setProperty('display', 'inline', 'important');
-        printPhone.style.setProperty('display', 'inline', 'important');
-        printCompName.style.setProperty('display', 'block', 'important');
-        printBranchName.style.setProperty('display', 'block', 'important');
-        printPrep.style.setProperty('display', 'inline', 'important');
+        // Sync attributes so they are exported in copied innerHTML
+        document.getElementById('quoteCustomerName').setAttribute('value', nameVal);
+        document.getElementById('quoteCustomerPhone').setAttribute('value', phoneVal);
+        document.getElementById('quoteCompanyName').setAttribute('value', compVal);
+        document.getElementById('quoteBranchName').setAttribute('value', branchVal);
+        document.getElementById('quotePreparedByInput').setAttribute('value', prepVal);
         
-        document.getElementById('quoteCustomerName').style.display = 'none';
-        document.getElementById('quoteCustomerPhone').style.display = 'none';
-        document.getElementById('quoteCompanyName').style.display = 'none';
-        document.getElementById('quoteBranchName').style.display = 'none';
-        document.getElementById('quotePreparedByInput').style.display = 'none';
+        const htmlContent = document.querySelector('.printable-quotation-content').innerHTML;
+        const title = state.language === 'ar' ? 'عرض سعر رسمي' : 'Official Quotation';
         
-        document.body.classList.add('printing-quote');
-        
-        if (navigator.webdriver) {
-            console.log("Mock print execution for automation");
-        } else {
-            window.print();
-        }
-        
-        document.body.classList.remove('printing-quote');
-        
-        printName.style.display = 'none';
-        printPhone.style.display = 'none';
-        printCompName.style.display = 'none';
-        printBranchName.style.display = 'none';
-        printPrep.style.display = 'none';
-        
-        document.getElementById('quoteCustomerName').style.display = 'inline-block';
-        document.getElementById('quoteCustomerPhone').style.display = 'inline-block';
-        document.getElementById('quoteCompanyName').style.display = 'inline-block';
-        document.getElementById('quoteBranchName').style.display = 'inline-block';
-        document.getElementById('quotePreparedByInput').style.display = 'inline-block';
+        openPrintWindow(htmlContent, title);
     });
     
     document.getElementById('btnQuoteShareWhatsApp').addEventListener('click', () => {
         triggerUsageStats();
-        const lang = state.language;
         
-        const custName = document.getElementById('quoteCustomerName').value.trim() || '--';
-        const custPhone = document.getElementById('quoteCustomerPhone').value.trim() || '--';
+        const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة_الأساسية';
         const quoteNo = document.getElementById('quoteNumber').textContent;
-        const dateText = document.getElementById('quoteDate').textContent;
+        const fileName = `${compVal.replace(/\s+/g, '_')}_${quoteNo}.pdf`;
         
-        const compNameVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
-        const branchNameVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
-        const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
-        
-        let msg = `📄 *${translations[lang].quotationTitle} - ${compNameVal}*\n`;
-        if (branchNameVal) msg += `${branchNameVal}\n`;
-        msg += `رقم العرض: ${quoteNo}\n`;
-        msg += `التاريخ: ${dateText}\n`;
-        msg += `العميل: ${custName}\n`;
-        if (custPhone !== '--') msg += `جوال: ${custPhone}\n`;
-        msg += `بواسطة: ${prepVal}\n`;
-        msg += `----\n`;
-        
-        state.groups.forEach((group, index) => {
-            const groupTitle = group.name.trim() || `${translations[lang].groupTitle} ${index + 1}`;
-            msg += `*${groupTitle}*:\n`;
-            
-            group.products.forEach((product, pIndex) => {
-                const prodName = product.name.trim() || `${translations[lang].productPlaceholder} ${pIndex + 1}`;
-                msg += `  - ${prodName} (العدد: ${product.quantity})\n`;
-            });
-        });
-        
-        const finalPriceText = document.getElementById('quoteFinalSum').textContent;
-        msg += `----\n`;
-        msg += `💵 *السعر الصافي النهائي: ${finalPriceText}*\n`;
-        msg += `📱 تم الإنشاء عبر حاسبة الدهمشي الذكية`;
-        
-        const urlEncodedText = encodeURIComponent(msg);
-        window.open(`https://api.whatsapp.com/send?text=${urlEncodedText}`, '_blank');
+        sharePdfViaWhatsApp('.printable-quotation-content', fileName, true);
     });
 
     // Results PDF Events
@@ -1320,27 +1921,14 @@ function setupEventListeners() {
         printName.textContent = nameVal || '--';
         printPhone.textContent = phoneVal || '--';
         
-        printName.style.setProperty('display', 'inline', 'important');
-        printPhone.style.setProperty('display', 'inline', 'important');
+        // Sync attributes so they are exported in copied innerHTML
+        document.getElementById('pdfCustomerName').setAttribute('value', nameVal);
+        document.getElementById('pdfCustomerPhone').setAttribute('value', phoneVal);
         
-        document.getElementById('pdfCustomerName').style.display = 'none';
-        document.getElementById('pdfCustomerPhone').style.display = 'none';
+        const htmlContent = document.querySelector('.printable-results-pdf-content').innerHTML;
+        const title = state.language === 'ar' ? 'تقرير نتائج الحسابات' : 'Calculation Results Report';
         
-        document.body.classList.add('printing-results');
-        
-        if (navigator.webdriver) {
-            console.log("Mock print execution for automation");
-        } else {
-            window.print();
-        }
-        
-        document.body.classList.remove('printing-results');
-        
-        printName.style.display = 'none';
-        printPhone.style.display = 'none';
-        
-        document.getElementById('pdfCustomerName').style.display = 'inline-block';
-        document.getElementById('pdfCustomerPhone').style.display = 'inline-block';
+        openPrintWindow(htmlContent, title);
     });
 
     document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
@@ -1350,6 +1938,73 @@ function setupEventListeners() {
     document.getElementById('btnCloseResultsPdfFooter').addEventListener('click', () => {
         document.getElementById('resultsPdfModal').style.display = 'none';
     });
+
+    // About Modal Events
+    document.getElementById('btnAboutApp').addEventListener('click', () => {
+        document.getElementById('aboutModal').style.display = 'flex';
+    });
+
+    document.getElementById('btnCloseAbout').addEventListener('click', () => {
+        document.getElementById('aboutModal').style.display = 'none';
+    });
+}
+
+// Apply dynamic program title updates
+function applyProgramTitle() {
+    const defaultAr = "حاسبة الدهمشي الذكية";
+    const defaultEn = "Al-Dahmashy Smart Calculator";
+    const customTitle = state.programTitle ? state.programTitle.trim() : "";
+    const lang = state.language || 'ar';
+    const displayTitle = customTitle || (lang === 'ar' ? defaultAr : defaultEn);
+
+    // Update translations dictionary dynamically
+    translations.ar.title = customTitle || defaultAr;
+    translations.en.title = customTitle || defaultEn;
+
+    translations.ar.aboutHeader = "حول " + (customTitle || defaultAr);
+    translations.en.aboutHeader = "About " + (customTitle || defaultEn);
+
+    translations.ar.calcAppLabel = `تم الحساب عبر ${customTitle || defaultAr} ✨`;
+    translations.en.calcAppLabel = `Calculated via ${customTitle || defaultEn} ✨`;
+
+    // Update document title
+    if (customTitle) {
+        document.title = customTitle + (lang === 'ar' ? ' الاحترافية للمبيعات' : ' - Professional Sales');
+    } else {
+        document.title = lang === 'ar' ? 'حاسبة الدهمشي الذكية الاحترافية للمبيعات' : 'Al-Dahmashy Smart Calculator - Professional Sales';
+    }
+
+    // Update main header h1
+    const mainTitleEl = document.getElementById('mainProgramTitle');
+    if (mainTitleEl) {
+        mainTitleEl.textContent = displayTitle;
+    }
+
+    // Update about modal header
+    const aboutHeaderEl = document.querySelector('#aboutModal .modal-header h3 span[data-i18n="aboutHeader"]');
+    if (aboutHeaderEl) {
+        aboutHeaderEl.textContent = translations[lang].aboutHeader;
+    }
+
+    // Update about modal body h2
+    const aboutBodyTitleEl = document.getElementById('aboutBodyTitle');
+    if (aboutBodyTitleEl) {
+        if (customTitle) {
+            aboutBodyTitleEl.textContent = customTitle + (lang === 'ar' ? ' الاحترافية للمبيعات' : ' - Professional Sales');
+        } else {
+            aboutBodyTitleEl.textContent = lang === 'ar' ? 'حاسبة الدهمشي الذكية الاحترافية للمبيعات' : 'Al-Dahmashy Smart Calculator - Professional Sales';
+        }
+    }
+
+    // Update about modal footer copyright
+    const aboutFooterCopyrightEl = document.getElementById('aboutFooterCopyright');
+    if (aboutFooterCopyrightEl) {
+        if (lang === 'ar') {
+            aboutFooterCopyrightEl.textContent = `${customTitle || defaultAr} فكرة وتصميم وإنشاء يوسف عيد الدهمشي العنزي © 2026`;
+        } else {
+            aboutFooterCopyrightEl.textContent = `${customTitle || defaultEn} - Idea, Design & Creation by Yousef Eid Al-Dahmashy Al-Anazi © 2026`;
+        }
+    }
 }
 
 // Set active language and translate UI elements
@@ -1369,6 +2024,8 @@ function setLanguage(lang) {
 
     state.language = lang;
     saveState();
+
+    applyProgramTitle();
 
     // Set language direction and lang attributes
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -1443,69 +2100,82 @@ function renderGroups() {
         groupCard.className = 'card group-card';
         groupCard.dataset.id = group.id;
 
+        if (group.collapsed) {
+            groupCard.classList.add('collapsed');
+        }
+
         // Render Group Card Header
         groupCard.innerHTML = `
-            <div class="group-card-header">
-                <div style="display: flex; align-items: center; gap: 0.75rem; flex-grow: 1;">
+            <div class="group-card-header" style="cursor: pointer; user-select: none;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-grow: 1;" class="group-title-container">
+                    <button type="button" class="btn-toggle-collapse" style="background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; transition: var(--transition);">
+                        <i class="fa-solid ${group.collapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
+                    </button>
                     <i class="fa-solid fa-boxes-stacked" style="color: var(--primary); font-size: 1.4rem;"></i>
                     <input type="text" class="group-name-input" value="${group.name}" 
-                        placeholder="${translations[lang].groupPlaceholder}" aria-label="${translations[lang].groupTitle}">
+                        placeholder="${translations[lang].groupPlaceholder}" aria-label="${translations[lang].groupTitle}"
+                        style="cursor: text;">
                 </div>
-                ${state.groups.length > 1 ? `
-                    <button type="button" class="btn-delete delete-group-btn" title="${lang === 'ar' ? 'حذف المجموعة' : 'Delete Group'}" style="width: 2.2rem; height: 2.2rem; display: flex; justify-content: center; align-items: center;">
-                        <i class="fa-solid fa-trash-can" style="font-size: 1rem;"></i>
-                    </button>
-                ` : ''}
-            </div>
-            
-            <!-- Products Section -->
-            <div style="margin-bottom: 1.5rem;">
-                <div class="discounts-section-title" style="margin-bottom: 1rem;">
-                    <h2><i class="fa-solid fa-cart-shopping"></i> <span>${translations[lang].productsTitle}</span></h2>
-                    <button type="button" class="btn btn-secondary add-product-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;">
-                        <i class="fa-solid fa-plus"></i> <span>${translations[lang].addProduct}</span>
-                    </button>
-                </div>
-                <div class="products-list-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    <!-- Dynamic products rows go here -->
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    ${state.groups.length > 1 ? `
+                        <button type="button" class="btn-delete delete-group-btn" title="${lang === 'ar' ? 'حذف المجموعة' : 'Delete Group'}" style="width: 2.2rem; height: 2.2rem; display: flex; justify-content: center; align-items: center;">
+                            <i class="fa-solid fa-trash-can" style="font-size: 1rem;"></i>
+                        </button>
+                    ` : ''}
                 </div>
             </div>
             
-            <!-- Discounts Section -->
-            <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.5rem;">
-                <div class="discounts-section-title" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
-                    <h2><i class="fa-solid fa-percent"></i> <span>${translations[lang].discountsTitle}</span></h2>
-                    <div style="display: flex; gap: 0.4rem;">
-                        <button type="button" class="btn btn-secondary add-pct-discount-btn" style="width: auto; padding: 0.4rem 0.85rem; font-size: 0.85rem;">
-                            <i class="fa-solid fa-plus"></i> <span>${translations[lang].addPercentDiscount}</span>
+            <!-- Group Body Container -->
+            <div class="group-card-body" style="${group.collapsed ? 'display: none;' : ''}">
+                <!-- Products Section -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div class="discounts-section-title" style="margin-bottom: 1rem;">
+                        <h2><i class="fa-solid fa-cart-shopping"></i> <span>${translations[lang].productsTitle}</span></h2>
+                        <button type="button" class="btn btn-secondary add-product-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;">
+                            <i class="fa-solid fa-plus"></i> <span>${translations[lang].addProduct}</span>
                         </button>
-                        <button type="button" class="btn btn-secondary add-fixed-discount-btn" style="width: auto; padding: 0.4rem 0.85rem; font-size: 0.85rem;">
-                            <i class="fa-solid fa-plus"></i> <span>${translations[lang].addFixedDiscount}</span>
-                        </button>
+                    </div>
+                    <div class="products-list-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        <!-- Dynamic products rows go here -->
                     </div>
                 </div>
                 
-                <div class="discounts-list-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    <!-- Dynamic discounts rows go here -->
-                </div>
-                
-                <!-- Presets Row -->
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.05);">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
-                        <label style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0;">
-                            <i class="fa-solid fa-tags"></i> <span>${translations[lang].presetTitle}</span>
-                        </label>
-                        <div class="presets-badges-container" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                            <!-- Dynamic preset items go here -->
+                <!-- Discounts Section -->
+                <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.5rem;">
+                    <div class="discounts-section-title" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                        <h2><i class="fa-solid fa-percent"></i> <span>${translations[lang].discountsTitle}</span></h2>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button type="button" class="btn btn-secondary add-pct-discount-btn" style="width: auto; padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+                                <i class="fa-solid fa-plus"></i> <span>${translations[lang].addPercentDiscount}</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary add-fixed-discount-btn" style="width: auto; padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+                                <i class="fa-solid fa-plus"></i> <span>${translations[lang].addFixedDiscount}</span>
+                            </button>
                         </div>
                     </div>
                     
-                    <!-- Save Preset Form -->
-                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
-                        <input type="text" class="new-preset-name-input" placeholder="${translations[lang].presetNamePlaceholder}" style="padding: 0.5rem 0.75rem; font-size: 0.95rem; border-radius: var(--radius-sm);">
-                        <button type="button" class="btn btn-secondary save-preset-btn" style="width: auto; padding: 0.5rem 1rem; font-size: 0.95rem;">
-                            <i class="fa-solid fa-floppy-disk"></i> <span>${translations[lang].savePreset}</span>
-                        </button>
+                    <div class="discounts-list-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        <!-- Dynamic discounts rows go here -->
+                    </div>
+                    
+                    <!-- Presets Row -->
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed rgba(255, 255, 255, 0.05);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                            <label style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0;">
+                                <i class="fa-solid fa-tags"></i> <span>${translations[lang].presetTitle}</span>
+                            </label>
+                            <div class="presets-badges-container" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                                <!-- Dynamic preset items go here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Save Preset Form -->
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.5rem;">
+                            <input type="text" class="new-preset-name-input" placeholder="${translations[lang].presetNamePlaceholder}" style="padding: 0.5rem 0.75rem; font-size: 0.95rem; border-radius: var(--radius-sm);">
+                            <button type="button" class="btn btn-secondary save-preset-btn" style="width: auto; padding: 0.5rem 1rem; font-size: 0.95rem;">
+                                <i class="fa-solid fa-floppy-disk"></i> <span>${translations[lang].savePreset}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1532,7 +2202,8 @@ function renderGroups() {
 
         // Group Delete button listener
         if (deleteGroupBtn) {
-            deleteGroupBtn.addEventListener('click', () => {
+            deleteGroupBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 state.groups = state.groups.filter(g => g.id !== group.id);
                 saveState();
                 renderGroups();
@@ -1540,9 +2211,20 @@ function renderGroups() {
             });
         }
 
+        // Toggle collapse header click listener
+        const headerEl = groupCard.querySelector('.group-card-header');
+        headerEl.addEventListener('click', (e) => {
+            if (e.target.closest('.group-name-input') || e.target.closest('.btn-delete')) {
+                return;
+            }
+            group.collapsed = !group.collapsed;
+            saveState();
+            renderGroups();
+        });
+
         // Add Product button listener
         addProductBtn.addEventListener('click', () => {
-            group.products.push({ id: generateId(), name: '', price: 1000, quantity: 1 });
+            group.products.push({ id: generateId(), name: '', price: '', quantity: '' });
             saveState();
             renderGroups();
             calculate();
@@ -1634,7 +2316,7 @@ function renderGroups() {
                 const parts = val.split('.');
                 if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
                 priceInput.value = val;
-                product.price = parseFloat(val) || 0;
+                product.price = val === '' ? '' : (parseFloat(val) || 0);
                 saveState();
                 calculate();
             });
@@ -1647,7 +2329,7 @@ function renderGroups() {
                 let val = qtyInput.value;
                 val = toEnglishDigits(val).replace(/[^0-9]/g, '');
                 qtyInput.value = val;
-                product.quantity = Math.max(1, parseInt(val, 10) || 1);
+                product.quantity = val === '' ? '' : (parseInt(val, 10) || 0);
                 saveState();
                 calculate();
             });
@@ -1994,7 +2676,7 @@ function calculate() {
 
 // Save state to localStorage
 function saveState() {
-    safeSetLocalStorage('sales_calculator_state_v11', JSON.stringify(state));
+    safeSetLocalStorage('sales_calculator_state_v13', JSON.stringify(state));
 }
 
 // Force formatting with English (Latin) numbers always
@@ -2163,10 +2845,18 @@ function showToast(lang) {
 // Share the report directly to WhatsApp
 function shareOnWhatsApp() {
     triggerUsageStats();
-    const text = generateTextReport();
-    const urlEncodedText = encodeURIComponent(text);
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${urlEncodedText}`;
-    window.open(whatsappUrl, '_blank');
+    
+    // 1. Populate the results PDF content
+    renderResultsPdf();
+    
+    // 2. Set the default file name
+    const lang = state.language;
+    const defaultName = lang === 'ar' ? 'تقرير_الحسابات.pdf' : 'sales_report.pdf';
+    const customTitle = state.programTitle ? state.programTitle.trim().replace(/\s+/g, '_') : '';
+    const fileName = customTitle ? `${customTitle}_${lang === 'ar' ? 'تقرير' : 'report'}.pdf` : defaultName;
+    
+    // 3. Share it!
+    sharePdfViaWhatsApp('.printable-results-pdf-content', fileName, false);
 }
 
 // Helper to call CounterAPI
@@ -2253,6 +2943,179 @@ async function triggerUsageStats() {
 
 function formatStatNumber(num) {
     return num.toLocaleString('en-US');
+}
+
+// Dynamic script loader helper
+function loadScript(url) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Show blurred backdrop loading overlay with spinner
+function showLoading(message) {
+    let overlay = document.getElementById('dynamicLoadingOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'dynamicLoadingOverlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.background = 'rgba(0, 0, 0, 0.75)';
+        overlay.style.backdropFilter = 'blur(5px)';
+        overlay.style.display = 'flex';
+        overlay.style.flexDirection = 'column';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '99999';
+        overlay.style.color = '#fff';
+        overlay.style.fontFamily = "'Tajawal', sans-serif";
+        
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        spinner.style.width = '50px';
+        spinner.style.height = '50px';
+        spinner.style.border = '5px solid rgba(255, 255, 255, 0.1)';
+        spinner.style.borderTop = '5px solid var(--primary)';
+        spinner.style.borderRadius = '50%';
+        spinner.style.animation = 'spin 1s linear infinite';
+        spinner.style.marginBottom = '1rem';
+        
+        if (!document.getElementById('spinStyle')) {
+            const style = document.createElement('style');
+            style.id = 'spinStyle';
+            style.innerHTML = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        overlay.appendChild(spinner);
+        
+        const text = document.createElement('div');
+        text.id = 'dynamicLoadingText';
+        text.style.fontSize = '1.2rem';
+        text.style.fontWeight = 'bold';
+        overlay.appendChild(text);
+        
+        document.body.appendChild(overlay);
+    }
+    document.getElementById('dynamicLoadingText').textContent = message;
+    overlay.style.display = 'flex';
+}
+
+// Hide loading overlay
+function hideLoading() {
+    const overlay = document.getElementById('dynamicLoadingOverlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
+// Generate PDF blob and share to WhatsApp
+async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
+    const lang = state.language;
+    showLoading(lang === 'ar' ? 'جاري تهيئة محرك الـ PDF...' : 'Initializing PDF engine...');
+    
+    try {
+        // 1. Ensure html2pdf is loaded
+        if (!window.html2pdf) {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+        }
+        
+        showLoading(lang === 'ar' ? 'جاري تجهيز وتوليد ملف الـ PDF...' : 'Preparing and generating PDF...');
+        
+        // 2. Sync fields before printing
+        if (isQuote) {
+            const nameVal = document.getElementById('quoteCustomerName').value.trim();
+            const phoneVal = document.getElementById('quoteCustomerPhone').value.trim();
+            document.getElementById('printCustomerName').textContent = nameVal || '--';
+            document.getElementById('printCustomerPhone').textContent = phoneVal || '--';
+            
+            const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
+            const branchVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
+            const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
+            
+            document.getElementById('printQuoteCompanyName').textContent = compVal;
+            document.getElementById('printQuoteBranchName').textContent = branchVal;
+            document.getElementById('printQuotePreparedBy').textContent = prepVal;
+        } else {
+            // It's results PDF, sync the modal fields
+            const nameVal = document.getElementById('pdfCustomerName').value.trim();
+            const phoneVal = document.getElementById('pdfCustomerPhone').value.trim();
+            document.getElementById('printPdfCustomerName').textContent = nameVal || '--';
+            document.getElementById('printPdfCustomerPhone').textContent = phoneVal || '--';
+        }
+        
+        // 3. Temporarily hide input controls via class
+        document.body.classList.add('html2pdf-active');
+        
+        const element = document.querySelector(elementSelector);
+        
+        // Adjust style options for A4 format
+        const opt = {
+            margin: [8, 8, 8, 8],
+            filename: defaultFileName,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2.5, 
+                useCORS: true, 
+                letterRendering: true,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        // Generate PDF blob
+        const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+        document.body.classList.remove('html2pdf-active');
+        
+        // Create file object
+        const file = new File([pdfBlob], defaultFileName, { type: "application/pdf" });
+        
+        // Try Web Share API first
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            hideLoading();
+            await navigator.share({
+                files: [file],
+                title: defaultFileName,
+                text: lang === 'ar' ? 'مرفق لكم التقرير بصيغة PDF.' : 'Attached is the PDF report.'
+            });
+        } else {
+            // Fallback: download file locally and redirect to WhatsApp
+            const downloadUrl = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = defaultFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+            
+            const msg = lang === 'ar' 
+                ? 'لقد تم حفظ التقرير كملف PDF بنجاح في جهازك. يرجى إرفاق الملف وإرساله للعميل.' 
+                : 'The report PDF has been downloaded. Please attach it in the chat.';
+            
+            hideLoading();
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+        }
+    } catch (e) {
+        console.error("Error generating/sharing PDF", e);
+        document.body.classList.remove('html2pdf-active');
+        hideLoading();
+        alert(lang === 'ar' 
+            ? 'حدث خطأ أثناء توليد ملف الـ PDF. يرجى التأكد من اتصال الإنترنت أو استخدام ميزة الطباعة العادية.' 
+            : 'An error occurred while generating the PDF. Please check your connection or use the normal print option.');
+    }
 }
 
 // Initialize on page load

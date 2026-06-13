@@ -685,6 +685,28 @@ body.theme-elegant-light select {
     animation: slideIn 0.3s ease-out forwards;
 }
 
+.product-item .input-icon-left {
+    font-size: 0.85rem !important;
+    left: 0.5rem !important;
+}
+
+[dir="rtl"] .product-price-input {
+    padding-left: 2.4rem !important;
+    padding-right: 0.5rem !important;
+    text-align: right !important;
+}
+
+[dir="ltr"] .product-price-input {
+    padding-right: 2.4rem !important;
+    padding-left: 0.5rem !important;
+    text-align: left !important;
+}
+
+[dir="ltr"] .product-item .input-icon-left {
+    right: 0.5rem !important;
+    left: auto !important;
+}
+
 #productsList {
     display: flex;
     flex-direction: column;
@@ -746,21 +768,21 @@ body.theme-elegant-light select {
         font-size: 0.95rem !important;
     }
     .product-item .input-icon-left {
-        left: 0.35rem !important;
+        left: 0.5rem !important;
         font-size: 0.85rem !important;
     }
     [dir="ltr"] .product-item .input-icon-left {
-        right: 0.35rem !important;
+        right: 0.5rem !important;
         left: auto !important;
     }
     [dir="rtl"] .product-price-input {
-        padding-left: 1.8rem !important;
-        padding-right: 0.3rem !important;
+        padding-left: 2.4rem !important;
+        padding-right: 0.4rem !important;
         text-align: right !important;
     }
     [dir="ltr"] .product-price-input {
-        padding-right: 1.8rem !important;
-        padding-left: 0.3rem !important;
+        padding-right: 2.4rem !important;
+        padding-left: 0.4rem !important;
         text-align: left !important;
     }
     [dir="rtl"] .product-qty-input {
@@ -814,6 +836,9 @@ body.theme-elegant-light select {
     /* Touch Target Sizing */
     .btn, input, select {
         min-height: 44px;
+    }
+    .stats-container {
+        grid-template-columns: 1fr !important;
     }
 }
 
@@ -885,7 +910,7 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
 /* Stats Section Styles */
 .stats-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.25rem;
     margin-bottom: 0.5rem;
 }
@@ -1126,6 +1151,9 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
     border-radius: var(--radius-md);
     width: 100%;
     max-width: 450px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     overflow: hidden;
     animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -1165,6 +1193,8 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
 
 .modal-body {
     padding: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
 /* User Management Row in Settings */
@@ -1245,6 +1275,8 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         border: none !important;
         border-radius: 0 !important;
         max-width: 100% !important;
+        max-height: none !important;
+        display: block !important;
         box-shadow: none !important;
         overflow: visible !important;
         margin: 0 !important;
@@ -1257,6 +1289,8 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         margin: 0 !important;
         background: #fff !important;
         color: #000 !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 
     .printable-quotation-content input, .printable-quotation-content select,
@@ -1308,3 +1342,182 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
     to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
+/* Pulsing Red Play Button for Tutorial Video */
+.video-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid #ef4444;
+    border-radius: 50%;
+    color: #ef4444;
+    font-size: 1.25rem;
+    transition: var(--transition);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+    animation: pulseRed 2s infinite;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.video-btn:hover {
+    background: #ef4444;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+    transform: scale(1.1);
+}
+
+@keyframes pulseRed {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+    }
+    70% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.print-box-field {
+    display: none;
+}
+@media print {
+    .print-box-field {
+        display: inline-block !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #fff !important;
+        color: #333 !important;
+        padding: 0.35rem 0.6rem !important;
+        border-radius: 4px !important;
+        min-width: 180px !important;
+        text-align: right !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        font-family: 'Tajawal', sans-serif !important;
+        margin-top: 0.2rem !important;
+    }
+}/* Group Accordion Styling */
+.group-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+}
+
+.group-card.collapsed .group-card-header {
+    border-bottom-color: transparent;
+    margin-bottom: 0;
+    padding-bottom: 0.25rem;
+}
+
+.group-card-body {
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+}
+
+.btn-toggle-collapse:hover {
+    color: var(--primary) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 50%;
+}
+
+/* User management and suggestion rows spacing */
+.settings-user-row, #adminSuggestionsListContainer div {
+    margin-bottom: 0.4rem;
+}
+
+/* Unified Group Action Buttons Row */
+.group-actions-container {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.group-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+}
+
+.group-action-btn i {
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+}
+
+.group-action-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1.5px);
+}
+
+.group-action-btn:hover i {
+    transform: scale(1.15);
+}
+
+.group-action-btn:active {
+    transform: translateY(0.5px);
+}
+
+/* Specific theme-based styling overrides */
+#btnExpandAll:hover,
+#btnCollapseAllExceptFirst:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+    color: var(--primary);
+}
+
+#btnDeleteExtraGroups {
+    background: rgba(220, 53, 69, 0.04);
+    border-color: rgba(220, 53, 69, 0.15);
+    color: #f8d7da;
+}
+
+#btnDeleteExtraGroups:hover {
+    background: rgba(220, 53, 69, 0.18);
+    border-color: rgba(220, 53, 69, 0.35);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+}
+
+#btnAddGroup {
+    background: linear-gradient(135deg, var(--primary) 0%, #b8860b 100%);
+    border-color: var(--primary);
+    color: #000;
+    font-weight: 800;
+}
+
+#btnAddGroup:hover {
+    background: linear-gradient(135deg, #ffdf7a 0%, var(--primary) 100%);
+    box-shadow: 0 0 12px var(--primary-glow);
+    color: #000;
+}
+
+/* Hide no-print elements during html2pdf conversion */
+.html2pdf-container .no-print,
+body.html2pdf-active .no-print {
+    display: none !important;
+}
+
+/* Ensure print-only text boxes show up during html2pdf conversion */
+body.html2pdf-active .print-box-field {
+    display: inline-block !important;
+}
