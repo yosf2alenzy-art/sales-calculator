@@ -1491,8 +1491,9 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
     display: flex;
     gap: 0.6rem;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex-wrap: wrap;
+    flex: 1;
 }
 
 .group-action-btn {
@@ -1510,9 +1511,8 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);
-    flex: 1;
-    min-width: 140px;
-    max-width: 195px;
+    flex: 1 1 auto;
+    min-width: max-content;
     height: 38px;
     box-sizing: border-box;
     white-space: nowrap;
@@ -1538,12 +1538,19 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
 }
 
 /* Specific theme-based styling overrides */
-#btnExpandAll:hover,
-#btnCollapseAllExceptFirst:hover {
-    border-color: var(--primary);
-    background: var(--primary-glow);
+#btnCollapseAllExceptFirst,
+#btnExpandAll {
+    background: var(--option-bg);
+    border: 1px solid var(--primary);
     color: var(--primary);
-    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+#btnCollapseAllExceptFirst:hover,
+#btnExpandAll:hover {
+    border-color: var(--primary) !important;
+    background: var(--primary) !important;
+    color: var(--option-bg) !important;
+    box-shadow: 0 0 10px var(--primary-glow) !important;
 }
 
 #btnDeleteExtraGroups {
