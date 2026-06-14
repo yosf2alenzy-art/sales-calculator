@@ -79,7 +79,6 @@
                         <option value="group" data-i18n="tutGroup">إضافة مجموعة وحذفها</option>
                         <option value="pdf" data-i18n="tutPdf">تصدير النتيجة إلى ملف PDF</option>
                         <option value="quote" data-i18n="tutQuote">عرض سعر</option>
-                        <option value="whatsapp" data-i18n="tutWhatsapp">إرسال عبر واتساب</option>
                         <option value="copy" data-i18n="tutCopy">نسخ التقرير المنسق</option>
                     </select>
                 </div>
@@ -118,22 +117,22 @@
         </div>
 
         <!-- Groups Header & Actions Row -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; margin-bottom: -0.5rem; padding: 0 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div class="groups-header-bar">
             <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;" data-i18n="groupsSectionTitle">
                 <i class="fa-solid fa-layer-group" style="color: var(--primary);"></i> المجموعات والخصومات
             </h2>
             <div class="group-actions-container">
-                <button type="button" class="group-action-btn" id="btnExpandAll">
-                    <i class="fa-solid fa-folder-open"></i> <span data-i18n="expandAll">إلغاء الطي</span>
-                </button>
                 <button type="button" class="group-action-btn" id="btnCollapseAllExceptFirst">
                     <i class="fa-solid fa-folder-minus"></i> <span data-i18n="collapseAllExceptFirst">طي الكل</span>
                 </button>
-                <button type="button" class="group-action-btn" id="btnDeleteExtraGroups">
-                    <i class="fa-solid fa-trash-can"></i> <span data-i18n="deleteExtraGroups">إغلاق المجموعات الإضافية</span>
+                <button type="button" class="group-action-btn" id="btnExpandAll">
+                    <i class="fa-solid fa-folder-open"></i> <span data-i18n="expandAll">إلغاء الطي</span>
                 </button>
                 <button type="button" class="group-action-btn" id="btnAddGroup">
                     <i class="fa-solid fa-plus"></i> <span data-i18n="addGroup">إضافة مجموعة</span>
+                </button>
+                <button type="button" class="group-action-btn" id="btnDeleteExtraGroups">
+                    <i class="fa-solid fa-trash-can"></i> <span data-i18n="deleteExtraGroups">إغلاق المجموعات الإضافية</span>
                 </button>
             </div>
         </div>
@@ -145,13 +144,8 @@
 
         <!-- Professional Results Card -->
         <div class="card results-card" id="resultsSection">
-            <!-- Group summaries list -->
-            <div id="groupResultsContainer" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <!-- Dynamically generated per-group breakdowns go here -->
-            </div>
-
-            <!-- Grand Total Section -->
-            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid rgba(255, 255, 255, 0.12);">
+            <!-- Grand Total Section (Always Visible) -->
+            <div id="grandTotalSection">
                 <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;" data-i18n="grandTotalHeader">
                     <i class="fa-solid fa-calculator"></i> الإجمالي العام الكلي
                 </h3>
@@ -186,21 +180,98 @@
                     <span class="result-value" id="grandFinalPrice">0.00</span>
                 </div>
             </div>
+
+            <!-- Toggle Button for Detailed Report & Analysis -->
+            <div style="display: flex; justify-content: center; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                <button type="button" class="btn btn-secondary" id="btnToggleDetailedReport" data-i18n="btnShowDetailedReport" style="width: auto; padding: 0.55rem 1.5rem; font-size: 1rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <i class="fa-solid fa-chevron-down" id="toggleReportIcon"></i> عرض التقرير والتحليل التفصيلي
+                </button>
+            </div>
+
+            <!-- Collapsible Wrapper for Detailed Report & Analysis (Hidden by default) -->
+            <div id="detailedReportWrapper" style="display: none; flex-direction: column; gap: 1.5rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed rgba(255, 255, 255, 0.08);">
+                <!-- Group summaries list -->
+                <div id="groupResultsContainer" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Dynamically generated per-group breakdowns go here -->
+                </div>
+
+                <!-- Deal Analysis Dashboard Section -->
+                <div id="dealDashboardSection" style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1.5rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 0.5rem;" data-i18n="dashboardTitle">
+                        <i class="fa-solid fa-chart-pie"></i> تحليل وهيكل الصفقة المالية
+                    </h3>
+                    
+                    <!-- Stacked Progress Bar -->
+                    <div class="deal-chart-container" style="background: rgba(0, 0, 0, 0.25); height: 28px; border-radius: 50px; display: flex; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); position: relative;">
+                        <!-- Net price segment -->
+                        <div id="chartSegmentNet" style="width: 0%; height: 100%; background: var(--success); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; white-space: nowrap;"></div>
+                        <!-- VAT segment -->
+                        <div id="chartSegmentVat" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; white-space: nowrap;"></div>
+                        <!-- Discount segment -->
+                        <div id="chartSegmentSaved" style="width: 0%; height: 100%; background: var(--danger); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden; white-space: nowrap;"></div>
+                    </div>
+                    
+                    <!-- Chart Legend / Details Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 0.25rem;">
+                        <!-- Net Price Legend -->
+                        <div class="legend-box" style="display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04); transition: var(--transition);">
+                            <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--success);"></span>
+                                <span data-i18n="legendNetPrice">الصافي الفعلي:</span>
+                            </div>
+                            <span id="legendNetValue" style="font-size: 1.1rem; font-weight: 800; margin-top: 0.25rem;">0.00</span>
+                            <span id="legendNetPercent" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">(0%)</span>
+                        </div>
+                        <!-- VAT Legend -->
+                        <div id="legendVatBox" class="legend-box" style="display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04); transition: var(--transition);">
+                            <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent);"></span>
+                                <span data-i18n="legendVat">الضريبة المضافة:</span>
+                            </div>
+                            <span id="legendVatValue" style="font-size: 1.1rem; font-weight: 800; margin-top: 0.25rem;">0.00</span>
+                            <span id="legendVatPercent" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">(0%)</span>
+                        </div>
+                        <!-- Saved Legend -->
+                        <div class="legend-box" style="display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04); transition: var(--transition);">
+                            <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);">
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--danger);"></span>
+                                <span data-i18n="legendSaved">مبلغ التوفير:</span>
+                            </div>
+                            <span id="legendSavedValue" style="font-size: 1.1rem; font-weight: 800; margin-top: 0.25rem;">0.00</span>
+                            <span id="legendSavedPercent" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">(0%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="action-grid">
-            <button type="button" class="btn btn-whatsapp" id="btnShareWhatsApp">
-                <i class="fa-brands fa-whatsapp"></i> <span data-i18n="btnShareWhatsApp">إرسال عبر واتساب</span>
-            </button>
             <button type="button" class="btn btn-copy" id="btnCopyReport">
                 <i class="fa-solid fa-copy"></i> <span data-i18n="btnCopyReport">نسخ التقرير المنسق</span>
             </button>
             <button type="button" class="btn btn-primary" id="btnCreateResultsPdf" style="background: var(--primary); color: #000; border-color: var(--primary);">
                 <i class="fa-solid fa-file-pdf"></i> <span data-i18n="btnCreateResultsPdf">تصدير النتيجة PDF</span>
             </button>
+            <button type="button" class="btn btn-primary btn-excel" id="btnExportCSV">
+                <i class="fa-solid fa-file-excel"></i> <span data-i18n="btnExportCSV">تصدير إكسل CSV</span>
+            </button>
+            <button type="button" class="btn btn-whatsapp" id="btnWhatsAppSendPdf">
+                <i class="fa-brands fa-whatsapp"></i> <span data-i18n="btnWhatsAppSendPdf">إرسال عبر واتساب</span>
+            </button>
             <button type="button" class="btn btn-primary" id="btnCreateQuotation" style="background: var(--success); border-color: var(--success);">
                 <i class="fa-solid fa-file-invoice-dollar"></i> <span data-i18n="btnCreateQuotation">تجهيز عرض سعر</span>
             </button>
+        </div>
+
+        <!-- Utility Actions Bar -->
+        <div class="utility-actions-bar" style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            <button type="button" class="lang-btn" id="btnSaveProject" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.6rem 1.25rem;">
+                <i class="fa-solid fa-file-export" style="color: var(--primary);"></i> <span data-i18n="btnSaveProject">حفظ المشروع (JSON)</span>
+            </button>
+            <button type="button" class="lang-btn" id="btnLoadProject" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.6rem 1.25rem;">
+                <i class="fa-solid fa-file-import" style="color: var(--accent);"></i> <span data-i18n="btnLoadProject">استيراد مشروع (JSON)</span>
+            </button>
+            <input type="file" id="importProjectFile" accept=".json" style="display: none;">
         </div>
 
         <!-- Footer Credit -->
@@ -300,6 +371,42 @@
                     </div>
                 </div>
 
+                <!-- Configure action buttons visibility -->
+                <div style="background: var(--item-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="color: var(--primary); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem;" data-i18n="settingsButtonsVisibility">إعدادات ظهور أزرار العمليات الكبرى</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnCopyReport" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnCopyReport">نسخ التقرير المنسق</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnCreateResultsPdf" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnCreateResultsPdf">تصدير النتيجة PDF</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnExportCSV" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnExportCSV">تصدير إكسل CSV</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnWhatsAppSendPdf" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnWhatsAppSendPdf">إرسال عبر واتساب</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnCreateQuotation" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnCreateQuotation">تجهيز عرض سعر</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnSaveProject" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnSaveProject">حفظ المشروع (JSON)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; font-size: 0.95rem; margin-bottom: 0; color: var(--text-secondary);">
+                            <input type="checkbox" id="visibilityBtnLoadProject" checked style="width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--primary);">
+                            <span data-i18n="btnLoadProject">استيراد مشروع (JSON)</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- User Management Section -->
                 <div style="background: var(--item-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
                     <h4 style="color: var(--primary); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem;" data-i18n="settingsUserMgmt">إدارة الموظفين والصلاحيات</h4>
@@ -363,6 +470,25 @@
                     <h4 style="color: var(--primary); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem;" data-i18n="settingsTutorialLinks">إدارة روابط شروحات البرنامج</h4>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="adminTutorialLinksContainer">
                         <!-- Dynamic link inputs render here -->
+                    </div>
+                </div>
+
+                <!-- Additional Custom Video Tutorials Section -->
+                <div style="background: var(--item-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
+                    <h4 style="color: var(--primary); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem;" data-i18n="settingsCustomVideos">شروحات الفيديو الإضافية</h4>
+                    
+                    <!-- Form to add custom video -->
+                    <form id="addCustomVideoForm" style="display: flex; flex-direction: column; gap: 0.75rem; background: rgba(0, 0, 0, 0.2); padding: 0.75rem; border-radius: var(--radius-sm);">
+                        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 0.5rem;">
+                            <input type="text" id="newVideoTitle" placeholder="عنوان الفيديو الجديد" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                            <input type="url" id="newVideoUrl" placeholder="رابط الفيديو (مثال: يوتيوب)" required style="font-size: 0.95rem; padding: 0.5rem; text-align: left; direction: ltr; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: auto; align-self: flex-end; padding: 0.4rem 1rem; font-size: 0.9rem;" data-i18n="btnAddCustomVideo">إضافة فيديو شرح</button>
+                    </form>
+                    
+                    <!-- Custom Videos List -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding-left: 0.25rem;" id="adminCustomVideosListContainer">
+                        <!-- Custom video rows render here dynamically -->
                     </div>
                 </div>
             </div>
@@ -483,8 +609,8 @@
 
             <!-- Footer Action Panel -->
             <div class="modal-footer no-print" style="padding: 1rem; border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 0.5rem; background: #f8fafc;">
-                <button type="button" class="btn btn-whatsapp" id="btnQuoteShareWhatsApp" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem;">
-                    <i class="fa-brands fa-whatsapp"></i> <span>مشاركة واتساب</span>
+                <button type="button" class="btn btn-whatsapp" id="btnQuoteWhatsAppSend" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem;">
+                    <i class="fa-brands fa-whatsapp"></i> <span data-i18n="btnWhatsAppSendPdf">إرسال عبر واتساب</span>
                 </button>
                 <button type="button" class="btn btn-primary" id="btnQuotePrintPDF" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem; background: var(--success); border-color: var(--success);">
                     <i class="fa-solid fa-print"></i> <span>طباعة وتصدير PDF</span>
@@ -565,6 +691,9 @@
 
             <!-- Footer Action Panel -->
             <div class="modal-footer no-print" style="padding: 1rem; border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 0.5rem; background: #f8fafc;">
+                <button type="button" class="btn btn-whatsapp" id="btnPdfWhatsAppSend" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem;">
+                    <i class="fa-brands fa-whatsapp"></i> <span data-i18n="btnWhatsAppSendPdf">إرسال عبر واتساب</span>
+                </button>
                 <button type="button" class="btn btn-primary" id="btnPdfPrintPDF" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.95rem; background: var(--primary); border-color: var(--primary); color: #000;">
                     <i class="fa-solid fa-print"></i> <span>طباعة وتصدير PDF</span>
                 </button>
@@ -578,6 +707,53 @@
     <!-- Default Products Autocomplete List -->
     <datalist id="defaultProductNames">
     </datalist>
+
+    <!-- Video Gallery Modal -->
+    <div id="videoGalleryModal" class="modal-overlay" style="display: none; z-index: 2000;">
+        <div class="modal-card" style="max-width: 800px; background: rgba(15, 23, 42, 0.95); border: 1px solid var(--primary-glow); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.75rem;">
+                <h3 style="color: var(--primary); font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-circle-play"></i> <span id="galleryActiveTitle">اسم الفيديو</span>
+                </h3>
+                <button type="button" class="close-modal-btn" id="btnCloseVideoGallery" style="color: var(--text-primary); font-size: 2rem; border: none; background: transparent; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.25rem 0.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-height: 80vh; overflow-y: auto;">
+                <!-- Player Container (16:9 Aspect Ratio) -->
+                <div class="video-player-container" style="position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <!-- Embed Player -->
+                    <iframe id="galleryIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none;"></iframe>
+                    
+                    <!-- External Link Fallback UI -->
+                    <div id="galleryFallbackUI" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; gap: 1rem; color: var(--text-primary);">
+                        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 3rem; color: var(--primary); animation: pulseRed 2s infinite;"></i>
+                        <p style="font-size: 1.15rem; font-weight: 700;" id="galleryFallbackText">هذا الرابط مخصص للمشاهدة الخارجية أو البحث.</p>
+                        <a id="galleryFallbackLink" href="#" target="_blank" class="btn btn-primary" style="width: auto; padding: 0.6rem 1.75rem; font-size: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary); color: #000; border-radius: 50px;">
+                            <i class="fa-brands fa-youtube"></i> <span>فتح الشرح في صفحة خارجية</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0 0.5rem;">
+                    <button type="button" class="group-action-btn" id="btnGalleryPrev" style="padding: 0.5rem 1.25rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-arrow-right"></i> <span>الفيديو السابق</span>
+                    </button>
+                    <span id="galleryProgressText" style="font-size: 0.95rem; font-weight: 700; color: var(--text-secondary);">1 / 5</span>
+                    <button type="button" class="group-action-btn" id="btnGalleryNext" style="padding: 0.5rem 1.25rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>الفيديو التالي</span> <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+
+                <!-- Horizontal scrolling list of other videos -->
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0 0.5rem;">
+                    <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted); display: block;" data-i18n="otherVideosTitle">جميع شروحات الفيديو:</span>
+                    <div class="playlist-track" id="galleryPlaylistTrack" style="display: flex; gap: 0.75rem; overflow-x: auto; padding: 0.5rem 0.25rem; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
+                        <!-- Playlist items render here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- About Modal -->
     <div id="aboutModal" class="modal-overlay" style="display: none;">
@@ -614,6 +790,30 @@
                 
                 <div id="aboutFooterCopyright" style="border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 1.25rem; text-align: center; font-size: 1.15rem; color: var(--text-muted); font-weight: 700;">
                     حاسبة الدهمشي الذكية فكرة وتصميم وإنشاء يوسف عيد الدهمشي العنزي © 2026
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Sender Instruction Modal -->
+    <div id="whatsappAlertModal" class="modal-overlay" style="display: none; z-index: 2200;">
+        <div class="modal-card" style="max-width: 500px; border: 1px solid var(--primary-glow); box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                <h3 style="color: var(--primary);"><i class="fa-solid fa-circle-info"></i> <span data-i18n="waAlertTitle">تنبيه لمستخدم الحاسبة</span></h3>
+                <button type="button" class="close-modal-btn" id="btnCloseWhatsAppAlert" style="color: var(--text-secondary);">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: right; line-height: 1.8; color: var(--text-secondary); display: flex; flex-direction: column; gap: 1.25rem;">
+                <p id="waAlertBodyText" style="font-size: 1.05rem; color: var(--text-secondary);">
+                    سيتم الآن فتح نافذة طباعة التقرير لحفظه كملف <strong>PDF</strong> على جهازك أولاً.<br>
+                    بعد حفظ الملف، يرجى إرفاقه وإرساله يدوياً للعميل في محادثة الواتساب التي ستفتح تلقائياً.
+                </p>
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-primary" id="btnConfirmWhatsAppAlert" style="width: auto; padding: 0.55rem 1.5rem; background: var(--success); border-color: var(--success); color: #fff;">
+                        <span>موافق، البدء</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btnCancelWhatsAppAlert" style="width: auto; padding: 0.55rem 1.5rem;">
+                        <span>إلغاء</span>
+                    </button>
                 </div>
             </div>
         </div>

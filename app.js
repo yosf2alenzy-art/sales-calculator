@@ -26,7 +26,6 @@ const translations = {
         resVatLabel: "ضريبة القيمة المضافة",
         resFinalPriceVat: "السعر النهائي الصافي (شامل الضريبة):",
         resFinalPriceNoVat: "السعر النهائي الصافي:",
-        btnShareWhatsApp: "إرسال عبر واتساب",
         btnCopyReport: "نسخ التقرير المنسق",
         toastSuccess: "تم نسخ التقرير بنجاح! 🎉",
         noDiscounts: "لا توجد خطوات حسابية حالياً.",
@@ -104,7 +103,7 @@ const translations = {
         addTerm: "إضافة شرط",
         expandAll: "إلغاء الطي",
         collapseAllExceptFirst: "طي الكل",
-        deleteExtraGroups: "إغلاق المجموعات الإضافية",
+        deleteExtraGroups: "إلغاء المجموعات المفتوحة",
         settingsProgramTitle: "اسم البرنامج:",
         settingsProgramTitlePlaceholder: "مثال: حاسبة الدهمشي الذكية",
         tutorialCardLabel: "شرح البرنامج",
@@ -114,11 +113,29 @@ const translations = {
         tutGroup: "إضافة مجموعة وحذفها",
         tutPdf: "تصدير النتيجة إلى ملف PDF",
         tutQuote: "عرض سعر",
-        tutWhatsapp: "إرسال عبر واتساب",
         tutCopy: "نسخ التقرير المنسق",
         settingsSuggestions: "إدارة مقترحات المنتجات",
         btnAddSuggestion: "إضافة",
-        settingsTutorialLinks: "إدارة روابط شروحات البرنامج"
+        settingsTutorialLinks: "إدارة روابط شروحات البرنامج",
+        settingsCustomVideos: "شروحات الفيديو الإضافية",
+        btnAddCustomVideo: "إضافة فيديو شرح",
+        otherVideosTitle: "جميع شروحات الفيديو:",
+        dashboardTitle: "تحليل وهيكل الصفقة المالية",
+        legendNetPrice: "الصافي الفعلي:",
+        legendVat: "الضريبة المضافة:",
+        legendSaved: "مبلغ التوفير:",
+        btnExportCSV: "تصدير إكسل (CSV)",
+        btnSaveProject: "حفظ المشروع (JSON)",
+        btnLoadProject: "استيراد مشروع (JSON)",
+        importSuccess: "تم استيراد المشروع بنجاح! 🎉",
+        importError: "فشل في استيراد المشروع. تأكد من صحة الملف.",
+        noGroupData: "لا توجد بيانات صالحة للتصدير.",
+        btnShowDetailedReport: "عرض التقرير والتحليل التفصيلي 📊",
+        btnHideDetailedReport: "إخفاء التقرير والتحليل التفصيلي 📊",
+        settingsButtonsVisibility: "إعدادات ظهور أزرار العمليات الكبرى",
+        btnWhatsAppSendPdf: "إرسال عبر واتساب",
+        waAlertTitle: "تنبيه لمستخدم الحاسبة",
+        waAlertBody: "سيتم الآن فتح نافذة طباعة التقرير لحفظه كملف PDF على جهازك أولاً. بعد حفظ الملف، يرجى إرفاقه وإرساله يدوياً للعميل في محادثة الواتساب التي ستفتح تلقائياً."
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -148,7 +165,6 @@ const translations = {
         resVatLabel: "Value Added Tax",
         resFinalPriceVat: "Final Net Price (incl. VAT):",
         resFinalPriceNoVat: "Final Net Price:",
-        btnShareWhatsApp: "Share on WhatsApp",
         btnCopyReport: "Copy Formatted Report",
         toastSuccess: "Report copied successfully! 🎉",
         noDiscounts: "No calculation steps currently.",
@@ -234,11 +250,29 @@ const translations = {
         tutGroup: "Add & delete group",
         tutPdf: "Export results to PDF",
         tutQuote: "Price quotation",
-        tutWhatsapp: "Send via WhatsApp",
         tutCopy: "Copy formatted report",
         settingsSuggestions: "Manage Product Suggestions",
         btnAddSuggestion: "Add",
-        settingsTutorialLinks: "Manage Tutorial Links"
+        settingsTutorialLinks: "Manage Tutorial Links",
+        settingsCustomVideos: "Additional Video Tutorials",
+        btnAddCustomVideo: "Add Video Tutorial",
+        otherVideosTitle: "All Video Tutorials:",
+        dashboardTitle: "Financial Deal Structure Analysis",
+        legendNetPrice: "Actual Net Price:",
+        legendVat: "Added Tax (VAT):",
+        legendSaved: "Total Saved (Discounts):",
+        btnExportCSV: "Export Excel (CSV)",
+        btnSaveProject: "Save Project (JSON)",
+        btnLoadProject: "Import Project (JSON)",
+        importSuccess: "Project imported successfully! 🎉",
+        importError: "Failed to import project. Please check the file.",
+        noGroupData: "No valid group data to export.",
+        btnShowDetailedReport: "Show Detailed Report & Analysis 📊",
+        btnHideDetailedReport: "Hide Detailed Report & Analysis 📊",
+        settingsButtonsVisibility: "Action Buttons Visibility Settings",
+        btnWhatsAppSendPdf: "Send via WhatsApp",
+        waAlertTitle: "Reminder for user",
+        waAlertBody: "The print window will open to save the report as a PDF on your device first. After saving, please manually attach and send the file in the WhatsApp chat that opens automatically."
     }
 };
 
@@ -363,6 +397,15 @@ let state = {
     showProductList: true,
     lockTheme: false,
     lockedTheme: 'luxury-gold',
+    visibleButtons: {
+        copyReport: true,
+        exportPdf: true,
+        exportCsv: true,
+        whatsappSendPdf: true,
+        createQuotation: true,
+        saveProject: true,
+        loadProject: true
+    },
     users: [
         { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
     ],
@@ -415,7 +458,6 @@ let state = {
         group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
         pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
         quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-        whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
         copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
     }
 };
@@ -510,7 +552,6 @@ const btnAddGroup = document.getElementById('btnAddGroup');
 const currencySelect = document.getElementById('currencySelect');
 const customCurrencyGroup = document.getElementById('customCurrencyGroup');
 const customCurrencyInput = document.getElementById('customCurrency');
-const btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
 const btnCopyReport = document.getElementById('btnCopyReport');
 const toastMessage = document.getElementById('toastMessage');
 
@@ -545,6 +586,164 @@ function applyTheme(theme) {
     if (theme && theme !== 'luxury-gold') {
         document.body.classList.add('theme-' + theme);
     }
+}
+
+// Show/Hide action buttons based on admin settings visibility state
+function applyVisibleButtons() {
+    const copyBtn = document.getElementById('btnCopyReport');
+    const pdfBtn = document.getElementById('btnCreateResultsPdf');
+    const csvBtn = document.getElementById('btnExportCSV');
+    const waBtn = document.getElementById('btnWhatsAppSendPdf');
+    const quoteBtn = document.getElementById('btnCreateQuotation');
+    const saveBtn = document.getElementById('btnSaveProject');
+    const loadBtn = document.getElementById('btnLoadProject');
+
+    if (copyBtn) copyBtn.style.display = state.visibleButtons.copyReport ? 'inline-flex' : 'none';
+    if (pdfBtn) pdfBtn.style.display = state.visibleButtons.exportPdf ? 'inline-flex' : 'none';
+    if (csvBtn) csvBtn.style.display = state.visibleButtons.exportCsv ? 'inline-flex' : 'none';
+    if (waBtn) waBtn.style.display = state.visibleButtons.whatsappSendPdf ? 'inline-flex' : 'none';
+    if (quoteBtn) quoteBtn.style.display = state.visibleButtons.createQuotation ? 'inline-flex' : 'none';
+    if (saveBtn) saveBtn.style.display = state.visibleButtons.saveProject ? 'inline-flex' : 'none';
+    if (loadBtn) loadBtn.style.display = state.visibleButtons.loadProject ? 'inline-flex' : 'none';
+    
+    // Hide utility bar if both are hidden
+    const utilityBar = document.querySelector('.utility-actions-bar');
+    if (utilityBar) {
+        const isAnyVisible = state.visibleButtons.saveProject || state.visibleButtons.loadProject;
+        utilityBar.style.display = isAnyVisible ? 'flex' : 'none';
+    }
+}
+
+// Populate action buttons visibility checkboxes in Admin Settings
+function populateVisibilityCheckboxes() {
+    const copyCb = document.getElementById('visibilityBtnCopyReport');
+    const pdfCb = document.getElementById('visibilityBtnCreateResultsPdf');
+    const csvCb = document.getElementById('visibilityBtnExportCSV');
+    const waCb = document.getElementById('visibilityBtnWhatsAppSendPdf');
+    const quoteCb = document.getElementById('visibilityBtnCreateQuotation');
+    const saveCb = document.getElementById('visibilityBtnSaveProject');
+    const loadCb = document.getElementById('visibilityBtnLoadProject');
+
+    if (copyCb) copyCb.checked = state.visibleButtons.copyReport;
+    if (pdfCb) pdfCb.checked = state.visibleButtons.exportPdf;
+    if (csvCb) csvCb.checked = state.visibleButtons.exportCsv;
+    if (waCb) waCb.checked = state.visibleButtons.whatsappSendPdf;
+    if (quoteCb) quoteCb.checked = state.visibleButtons.createQuotation;
+    if (saveCb) saveCb.checked = state.visibleButtons.saveProject;
+    if (loadCb) loadCb.checked = state.visibleButtons.loadProject;
+}
+
+// Format Saudi phone number and trigger PDF print + WhatsApp redirect after alert modal confirmation
+function triggerWhatsAppSendPDF(phoneInputId) {
+    const lang = state.language || 'ar';
+    const modal = document.getElementById('whatsappAlertModal');
+    
+    // Set text labels dynamically in the current language
+    const titleEl = document.querySelector('#whatsappAlertModal h3 span[data-i18n="waAlertTitle"]');
+    if (titleEl) titleEl.textContent = translations[lang].waAlertTitle;
+    
+    const bodyEl = document.getElementById('waAlertBodyText');
+    if (bodyEl) bodyEl.textContent = translations[lang].waAlertBody;
+    
+    const confirmBtn = document.getElementById('btnConfirmWhatsAppAlert');
+    const cancelBtn = document.getElementById('btnCancelWhatsAppAlert');
+    const closeBtn = document.getElementById('btnCloseWhatsAppAlert');
+    
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+    
+    // Define confirmation handler
+    const onConfirm = () => {
+        modal.style.display = 'none';
+        cleanupListeners();
+        executeWhatsAppSendPDF(phoneInputId);
+    };
+    
+    // Define cancel handler
+    const onCancel = () => {
+        modal.style.display = 'none';
+        cleanupListeners();
+    };
+    
+    const cleanupListeners = () => {
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        closeBtn.removeEventListener('click', onCancel);
+    };
+    
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    closeBtn.addEventListener('click', onCancel);
+}
+
+// Executes print layout and redirects to WhatsApp Web with cleaned client-facing message
+function executeWhatsAppSendPDF(phoneInputId) {
+    const phoneVal = document.getElementById(phoneInputId) ? document.getElementById(phoneInputId).value.trim() : '';
+    
+    // 1. Format the Saudi phone number if entered
+    let cleanedPhone = '';
+    if (phoneVal) {
+        cleanedPhone = phoneVal.replace(/\D/g, ''); // keep only digits
+        if (cleanedPhone.startsWith('05')) {
+            cleanedPhone = '966' + cleanedPhone.substring(1);
+        } else if (cleanedPhone.startsWith('5') && cleanedPhone.length === 9) {
+            cleanedPhone = '966' + cleanedPhone;
+        }
+    }
+    
+    // 2. Trigger printing layout
+    const isQuotation = (phoneInputId === 'quoteCustomerPhone');
+    
+    if (isQuotation) {
+        // Sync printer values for quotation print layout
+        const nameVal = document.getElementById('quoteCustomerName').value.trim();
+        const phoneInputVal = document.getElementById('quoteCustomerPhone').value.trim();
+        const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
+        const branchVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
+        const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
+        
+        document.getElementById('printCustomerName').textContent = nameVal || '--';
+        document.getElementById('printCustomerPhone').textContent = phoneInputVal || '--';
+        document.getElementById('printQuoteCompanyName').textContent = compVal;
+        document.getElementById('printQuoteBranchName').textContent = branchVal;
+        document.getElementById('printQuotePreparedBy').textContent = prepVal;
+        
+        document.getElementById('quoteCustomerName').setAttribute('value', nameVal);
+        document.getElementById('quoteCustomerPhone').setAttribute('value', phoneInputVal);
+        document.getElementById('quoteCompanyName').setAttribute('value', compVal);
+        document.getElementById('quoteBranchName').setAttribute('value', branchVal);
+        document.getElementById('quotePreparedByInput').setAttribute('value', prepVal);
+        
+        document.body.classList.add('printing-quote');
+    } else {
+        // Sync printer values for results PDF print layout
+        const nameVal = document.getElementById('pdfCustomerName').value.trim();
+        const phoneInputVal = document.getElementById('pdfCustomerPhone').value.trim();
+        
+        document.getElementById('printPdfCustomerName').textContent = nameVal || '--';
+        document.getElementById('printPdfCustomerPhone').textContent = phoneInputVal || '--';
+        
+        document.getElementById('pdfCustomerName').setAttribute('value', nameVal);
+        document.getElementById('pdfCustomerPhone').setAttribute('value', phoneInputVal);
+        
+        document.body.classList.add('printing-results');
+    }
+
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            document.body.classList.remove('printing-quote');
+            document.body.classList.remove('printing-results');
+            
+            // 3. Open WhatsApp link with cleaned prefilled text message
+            const message = encodeURIComponent(`السلام عليكم، مرفق لكم ملف الـ PDF الخاص بالمعادلات وعرض السعر من حاسبة الدهمشي الذكية.`);
+            const whatsappUrl = cleanedPhone 
+                ? `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${message}`
+                : `https://api.whatsapp.com/send?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        }, 1000);
+    }, 150);
 }
 
 // Load state from localStorage on init
@@ -613,6 +812,12 @@ function init() {
             state.groups.forEach(g => {
                 if (!Array.isArray(g.products)) {
                     g.products = [{ id: generateId(), name: '', price: '', quantity: '' }];
+                } else {
+                    g.products.forEach(p => {
+                        if (p.name && (p.name.includes('\n') || p.name.includes('تقرير بنتيجة') || p.name.includes('Result Report') || p.name.includes('🛍️') || p.name.includes('-----\n'))) {
+                            p.name = '';
+                        }
+                    });
                 }
                 if (!Array.isArray(g.discounts)) g.discounts = [];
                 if (g.collapsed === undefined) g.collapsed = false;
@@ -646,6 +851,27 @@ function init() {
             if (state.lockTheme === undefined) state.lockTheme = false;
             if (state.lockedTheme === undefined) state.lockedTheme = 'luxury-gold';
             if (state.programTitle === undefined) state.programTitle = '';
+            
+            if (!state.visibleButtons) {
+                state.visibleButtons = {
+                    copyReport: true,
+                    exportPdf: true,
+                    exportCsv: true,
+                    whatsappSendPdf: true,
+                    createQuotation: true,
+                    saveProject: true,
+                    loadProject: true
+                };
+            } else {
+                if (state.visibleButtons.copyReport === undefined) state.visibleButtons.copyReport = true;
+                if (state.visibleButtons.exportPdf === undefined) state.visibleButtons.exportPdf = true;
+                if (state.visibleButtons.exportCsv === undefined) state.visibleButtons.exportCsv = true;
+                if (state.visibleButtons.whatsappSendPdf === undefined) state.visibleButtons.whatsappSendPdf = true;
+                if (state.visibleButtons.createQuotation === undefined) state.visibleButtons.createQuotation = true;
+                if (state.visibleButtons.saveProject === undefined) state.visibleButtons.saveProject = true;
+                if (state.visibleButtons.loadProject === undefined) state.visibleButtons.loadProject = true;
+            }
+
             if (!Array.isArray(state.users)) {
                 state.users = [
                     { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
@@ -680,9 +906,11 @@ function init() {
                     group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
                     pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
                     quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-                    whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
                     copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
                 };
+            }
+            if (!state.customTutorials) {
+                state.customTutorials = [];
             }
             
             saveState(); // save migrated state
@@ -733,6 +961,7 @@ function init() {
     setLanguage(state.language);
 
     setupEventListeners();
+    applyVisibleButtons();
     updateUIForSession();
     handleStats();
     checkAdminHash();
@@ -751,8 +980,10 @@ function checkAdminHash() {
             document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
             document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
             renderSettingsUsersList();
+            populateVisibilityCheckboxes();
             renderAdminSuggestionsList();
             renderAdminTutorialLinksList();
+            renderAdminCustomVideosList();
         } else {
             loginModal.style.display = 'flex';
             document.getElementById('loginUsername').value = '';
@@ -940,7 +1171,6 @@ function renderAdminTutorialLinksList() {
             group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
             pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
             quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-            whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
             copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
         };
     }
@@ -951,7 +1181,6 @@ function renderAdminTutorialLinksList() {
         { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
         { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
         { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
-        { key: 'whatsapp', label: translations[lang].tutWhatsapp || 'إرسال عبر واتساب' },
         { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
     ];
     
@@ -1343,132 +1572,7 @@ function renderResultsPdf() {
     pdfGrandFinalSum.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
 }
 
-// Helper function to print clean HTML in a new, unconstrained window
-function openPrintWindow(htmlContent, title) {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        alert(state.language === 'ar' ? 'يرجى السماح بالنوافذ المنبثقة للطباعة!' : 'Please allow popups to print!');
-        return;
-    }
-    
-    let stylesHtml = '';
-    try {
-        for (let styleSheet of document.styleSheets) {
-            try {
-                let rules = [];
-                for (let rule of styleSheet.cssRules) {
-                    rules.push(rule.cssText);
-                }
-                stylesHtml += `<style>${rules.join('\n')}</style>`;
-            } catch (e) {
-                // Ignore cross-origin security rules
-            }
-        }
-    } catch (err) {
-        console.warn("Could not read stylesheets, falling back", err);
-    }
-    
-    if (!stylesHtml) {
-        stylesHtml = `<link rel="stylesheet" href="style.css">`;
-    }
-    
-    const direction = document.documentElement.dir || 'rtl';
-    const lang = document.documentElement.lang || 'ar';
-    
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="${lang}" dir="${direction}">
-        <head>
-            <meta charset="UTF-8">
-            <title>${title}</title>
-            ${stylesHtml}
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <style>
-                body {
-                    background: #fff !important;
-                    color: #333 !important;
-                    padding: 2rem !important;
-                    margin: 0 !important;
-                    direction: ${direction} !important;
-                    text-align: right !important;
-                }
-                .printable-quotation-content, .printable-results-pdf-content {
-                    display: block !important;
-                }
-                .no-print {
-                    display: none !important;
-                }
-                .pdf-group-card {
-                    page-break-inside: avoid !important;
-                }
-                table {
-                    width: 100% !important;
-                    border-collapse: collapse !important;
-                }
-                th, td {
-                    border: 1px solid #cbd5e1 !important;
-                    padding: 0.75rem 0.5rem !important;
-                }
-                th {
-                    background: #f1f5f9 !important;
-                    color: #1e293b !important;
-                }
-                .customer-info-section {
-                    background: #f8fafc !important;
-                    border: 1px solid #cbd5e1 !important;
-                }
-                #quoteTermsPrintList {
-                    display: block !important;
-                }
-                .print-box-field {
-                    display: inline-block !important;
-                    border: 1px solid #cbd5e1 !important;
-                    background: #fff !important;
-                    color: #333 !important;
-                    padding: 0.35rem 0.6rem !important;
-                    border-radius: 4px !important;
-                    min-width: 180px !important;
-                    text-align: right !important;
-                    font-size: 0.95rem !important;
-                    font-weight: 500 !important;
-                    font-family: 'Tajawal', sans-serif !important;
-                    margin-top: 0.2rem !important;
-                }
-                @media print {
-                    body {
-                        padding: 0 !important;
-                    }
-                    @page {
-                        size: A4 portrait;
-                        margin: 1.5cm;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <div class="quotation-print-container" style="max-width: 800px; margin: 0 auto;">
-                ${htmlContent}
-            </div>
-            <script>
-                window.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(() => {
-                        if (navigator.webdriver) {
-                            console.log("Mock print execution for automation");
-                        } else {
-                            window.print();
-                        }
-                    }, 500);
-                });
-                window.addEventListener('afterprint', () => {
-                    window.close();
-                });
-            </script>
-        </body>
-        </html>
-    `);
-    
-    printWindow.document.close();
-}
+// openPrintWindow removed - printing is now inline
 
 // Setup all event listeners
 function setupEventListeners() {
@@ -1538,7 +1642,6 @@ function setupEventListeners() {
     });
 
     btnCopyReport.addEventListener('click', copyReportToClipboard);
-    btnShareWhatsApp.addEventListener('click', shareOnWhatsApp);
 
     // Modal toggle buttons & elements
     const btnUserLogin = document.getElementById('btnUserLogin');
@@ -1584,8 +1687,10 @@ function setupEventListeners() {
             document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
             document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
             renderSettingsUsersList();
+            populateVisibilityCheckboxes();
             renderAdminSuggestionsList();
             renderAdminTutorialLinksList();
+            renderAdminCustomVideosList();
         } else {
             document.getElementById('loginErrorMsg').style.display = 'block';
         }
@@ -1611,6 +1716,10 @@ function setupEventListeners() {
         document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
         document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
         renderSettingsUsersList();
+        populateVisibilityCheckboxes();
+        renderAdminSuggestionsList();
+        renderAdminTutorialLinksList();
+        renderAdminCustomVideosList();
     });
     
     btnCloseSettings.addEventListener('click', () => {
@@ -1621,6 +1730,28 @@ function setupEventListeners() {
         state.showProductList = document.getElementById('settingsToggleProductList').checked;
         saveState();
         renderGroups();
+    });
+
+    // Button visibility settings listeners
+    const btnVisibilityToggles = [
+        { id: 'visibilityBtnCopyReport', key: 'copyReport' },
+        { id: 'visibilityBtnCreateResultsPdf', key: 'exportPdf' },
+        { id: 'visibilityBtnExportCSV', key: 'exportCsv' },
+        { id: 'visibilityBtnWhatsAppSendPdf', key: 'whatsappSendPdf' },
+        { id: 'visibilityBtnCreateQuotation', key: 'createQuotation' },
+        { id: 'visibilityBtnSaveProject', key: 'saveProject' },
+        { id: 'visibilityBtnLoadProject', key: 'loadProject' }
+    ];
+
+    btnVisibilityToggles.forEach(item => {
+        const el = document.getElementById(item.id);
+        if (el) {
+            el.addEventListener('change', () => {
+                state.visibleButtons[item.key] = el.checked;
+                saveState();
+                applyVisibleButtons();
+            });
+        }
     });
     
     document.getElementById('settingsToggleThemeLock').addEventListener('change', () => {
@@ -1702,22 +1833,26 @@ function setupEventListeners() {
         });
     }
 
-    // Tutorial dropdown navigation
+    // Tutorial dropdown navigation -> Video Gallery Modal
     document.getElementById('tutorialSelect').addEventListener('change', (e) => {
         const val = e.target.value;
-        const links = state.tutorialLinks || {
-            product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
-            discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
-            group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
-            pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
-            quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-            whatsapp: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+ارسال+واتساب',
-            copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
-        };
-        if (val && links[val]) {
-            window.open(links[val], '_blank');
-            e.target.value = ''; // Reset select placeholder
+        if (!val) return;
+        
+        const allVideos = getAllVideosList();
+        let activeIdx = -1;
+        
+        if (val.startsWith('custom_')) {
+            const idx = parseInt(val.replace('custom_', ''), 10);
+            activeIdx = allVideos.findIndex(v => v.isCustom && v.customIndex === idx);
+        } else {
+            activeIdx = allVideos.findIndex(v => !v.isCustom && v.key === val);
         }
+        
+        if (activeIdx !== -1) {
+            openVideoGallery(activeIdx);
+        }
+        
+        e.target.value = ''; // Reset select placeholder
     });
 
     // Form to add autocomplete product suggestions
@@ -1814,6 +1949,8 @@ function setupEventListeners() {
 
     const resultsPdfModal = document.getElementById('resultsPdfModal');
     const aboutModal = document.getElementById('aboutModal');
+    const videoGalleryModal = document.getElementById('videoGalleryModal');
+    const whatsappAlertModal = document.getElementById('whatsappAlertModal');
     // Close modal when clicking outside card
     window.addEventListener('click', (e) => {
         if (e.target === loginModal) loginModal.style.display = 'none';
@@ -1821,7 +1958,53 @@ function setupEventListeners() {
         if (e.target === quotationModal) quotationModal.style.display = 'none';
         if (e.target === resultsPdfModal) resultsPdfModal.style.display = 'none';
         if (e.target === aboutModal) aboutModal.style.display = 'none';
+        if (e.target === videoGalleryModal) closeVideoGallery();
+        if (e.target === whatsappAlertModal) whatsappAlertModal.style.display = 'none';
     });
+    
+    // Video Gallery Buttons listeners
+    const btnCloseVideoGallery = document.getElementById('btnCloseVideoGallery');
+    if (btnCloseVideoGallery) {
+        btnCloseVideoGallery.addEventListener('click', closeVideoGallery);
+    }
+    const btnGalleryPrev = document.getElementById('btnGalleryPrev');
+    if (btnGalleryPrev) {
+        btnGalleryPrev.addEventListener('click', prevVideo);
+    }
+    const btnGalleryNext = document.getElementById('btnGalleryNext');
+    if (btnGalleryNext) {
+        btnGalleryNext.addEventListener('click', nextVideo);
+    }
+
+    // Form to add custom video tutorial
+    const addCustomVideoForm = document.getElementById('addCustomVideoForm');
+    if (addCustomVideoForm) {
+        addCustomVideoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('newVideoTitle');
+            const urlInput = document.getElementById('newVideoUrl');
+            
+            const title = titleInput.value.trim();
+            const url = urlInput.value.trim();
+            
+            if (title && url) {
+                if (!state.customTutorials) {
+                    state.customTutorials = [];
+                }
+                state.customTutorials.push({ title, url });
+                saveState();
+                
+                renderAdminCustomVideosList();
+                populateTutorialSelect();
+                
+                titleInput.value = '';
+                urlInput.value = '';
+                
+                const lang = state.language || 'ar';
+                alert(lang === 'ar' ? 'تم إضافة فيديو الشرح بنجاح!' : 'Video tutorial added successfully!');
+            }
+        });
+    }
     
     // Quotation events
     btnCreateQuotation.addEventListener('click', () => {
@@ -1882,20 +2065,13 @@ function setupEventListeners() {
         document.getElementById('quoteBranchName').setAttribute('value', branchVal);
         document.getElementById('quotePreparedByInput').setAttribute('value', prepVal);
         
-        const htmlContent = document.querySelector('.printable-quotation-content').innerHTML;
-        const title = state.language === 'ar' ? 'عرض سعر رسمي' : 'Official Quotation';
-        
-        openPrintWindow(htmlContent, title);
-    });
-    
-    document.getElementById('btnQuoteShareWhatsApp').addEventListener('click', () => {
-        triggerUsageStats();
-        
-        const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة_الأساسية';
-        const quoteNo = document.getElementById('quoteNumber').textContent;
-        const fileName = `${compVal.replace(/\s+/g, '_')}_${quoteNo}.pdf`;
-        
-        sharePdfViaWhatsApp('.printable-quotation-content', fileName, true);
+        document.body.classList.add('printing-quote');
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-quote');
+            }, 1000);
+        }, 150);
     });
 
     // Results PDF Events
@@ -1925,10 +2101,13 @@ function setupEventListeners() {
         document.getElementById('pdfCustomerName').setAttribute('value', nameVal);
         document.getElementById('pdfCustomerPhone').setAttribute('value', phoneVal);
         
-        const htmlContent = document.querySelector('.printable-results-pdf-content').innerHTML;
-        const title = state.language === 'ar' ? 'تقرير نتائج الحسابات' : 'Calculation Results Report';
-        
-        openPrintWindow(htmlContent, title);
+        document.body.classList.add('printing-results');
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-results');
+            }, 1000);
+        }, 150);
     });
 
     document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
@@ -1947,6 +2126,71 @@ function setupEventListeners() {
     document.getElementById('btnCloseAbout').addEventListener('click', () => {
         document.getElementById('aboutModal').style.display = 'none';
     });
+
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('printing-quote');
+        document.body.classList.remove('printing-results');
+    });
+
+    // Collapsible Report Toggle Event Listener
+    const btnToggleDetailedReport = document.getElementById('btnToggleDetailedReport');
+    const detailedReportWrapper = document.getElementById('detailedReportWrapper');
+    let showDetailedReport = false; // Collapsed by default
+    
+    btnToggleDetailedReport.addEventListener('click', () => {
+        showDetailedReport = !showDetailedReport;
+        if (showDetailedReport) {
+            detailedReportWrapper.style.display = 'flex';
+            btnToggleDetailedReport.setAttribute('data-i18n', 'btnHideDetailedReport');
+            btnToggleDetailedReport.innerHTML = `<i class="fa-solid fa-chevron-up" id="toggleReportIcon"></i> ${translations[state.language].btnHideDetailedReport}`;
+        } else {
+            detailedReportWrapper.style.display = 'none';
+            btnToggleDetailedReport.setAttribute('data-i18n', 'btnShowDetailedReport');
+            btnToggleDetailedReport.innerHTML = `<i class="fa-solid fa-chevron-down" id="toggleReportIcon"></i> ${translations[state.language].btnShowDetailedReport}`;
+        }
+    });
+
+    // Utility Actions Event Listeners
+    document.getElementById('btnExportCSV').addEventListener('click', exportCSV);
+    document.getElementById('btnSaveProject').addEventListener('click', saveProjectJSON);
+    
+    const btnLoadProject = document.getElementById('btnLoadProject');
+    const importProjectFile = document.getElementById('importProjectFile');
+    btnLoadProject.addEventListener('click', () => {
+        importProjectFile.click();
+    });
+    importProjectFile.addEventListener('change', loadProjectJSON);
+
+    // WhatsApp Send PDF Event Listeners
+    const btnWhatsAppSendPdf = document.getElementById('btnWhatsAppSendPdf');
+    if (btnWhatsAppSendPdf) {
+        btnWhatsAppSendPdf.addEventListener('click', () => {
+            renderResultsPdf();
+            document.getElementById('pdfCustomerName').value = '';
+            document.getElementById('pdfCustomerPhone').value = '';
+            document.getElementById('printPdfCustomerName').style.display = 'none';
+            document.getElementById('printPdfCustomerPhone').style.display = 'none';
+            document.getElementById('pdfCustomerName').style.display = 'inline-block';
+            document.getElementById('pdfCustomerPhone').style.display = 'inline-block';
+            
+            document.getElementById('resultsPdfModal').style.display = 'flex';
+            document.getElementById('pdfCustomerPhone').focus();
+        });
+    }
+
+    const btnPdfWhatsAppSend = document.getElementById('btnPdfWhatsAppSend');
+    if (btnPdfWhatsAppSend) {
+        btnPdfWhatsAppSend.addEventListener('click', () => {
+            triggerWhatsAppSendPDF('pdfCustomerPhone');
+        });
+    }
+
+    const btnQuoteWhatsAppSend = document.getElementById('btnQuoteWhatsAppSend');
+    if (btnQuoteWhatsAppSend) {
+        btnQuoteWhatsAppSend.addEventListener('click', () => {
+            triggerWhatsAppSendPDF('quoteCustomerPhone');
+        });
+    }
 }
 
 // Apply dynamic program title updates
@@ -2064,6 +2308,7 @@ function setLanguage(lang) {
 
 
     // Re-render lists with new language configurations
+    populateTutorialSelect();
     renderGroups();
     calculate();
 }
@@ -2672,11 +2917,333 @@ function calculate() {
 
     const grandFinalNet = preciseRound(grandNetSum + vatAmount);
     grandFinalPrice.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
+
+    // Update Deal Dashboard Section
+    const totalStructureValue = grandOriginalTotalValue + vatAmount;
+    
+    const segmentNet = document.getElementById('chartSegmentNet');
+    const segmentVat = document.getElementById('chartSegmentVat');
+    const segmentSaved = document.getElementById('chartSegmentSaved');
+    
+    const legendNetVal = document.getElementById('legendNetValue');
+    const legendNetPct = document.getElementById('legendNetPercent');
+    
+    const legendVatBox = document.getElementById('legendVatBox');
+    const legendVatVal = document.getElementById('legendVatValue');
+    const legendVatPct = document.getElementById('legendVatPercent');
+    
+    const legendSavedVal = document.getElementById('legendSavedValue');
+    const legendSavedPct = document.getElementById('legendSavedPercent');
+    
+    if (totalStructureValue > 0) {
+        const pctNet = (grandNetSum / totalStructureValue) * 100;
+        const pctVat = state.applyVat ? (vatAmount / totalStructureValue) * 100 : 0;
+        const pctSaved = (grandTotalSavedValue / totalStructureValue) * 100;
+        
+        // Update Chart segments
+        if (pctNet > 5) {
+            segmentNet.style.width = `${pctNet}%`;
+            segmentNet.textContent = `${pctNet.toFixed(0)}%`;
+        } else if (pctNet > 0) {
+            segmentNet.style.width = `${pctNet}%`;
+            segmentNet.textContent = '';
+        } else {
+            segmentNet.style.width = '0%';
+            segmentNet.textContent = '';
+        }
+        
+        if (state.applyVat && pctVat > 5) {
+            segmentVat.style.width = `${pctVat}%`;
+            segmentVat.textContent = `${pctVat.toFixed(0)}%`;
+            segmentVat.style.display = 'flex';
+        } else if (state.applyVat && pctVat > 0) {
+            segmentVat.style.width = `${pctVat}%`;
+            segmentVat.textContent = '';
+            segmentVat.style.display = 'flex';
+        } else {
+            segmentVat.style.width = '0%';
+            segmentVat.textContent = '';
+            segmentVat.style.display = 'none';
+        }
+        
+        if (pctSaved > 5) {
+            segmentSaved.style.width = `${pctSaved}%`;
+            segmentSaved.textContent = `${pctSaved.toFixed(0)}%`;
+        } else if (pctSaved > 0) {
+            segmentSaved.style.width = `${pctSaved}%`;
+            segmentSaved.textContent = '';
+        } else {
+            segmentSaved.style.width = '0%';
+            segmentSaved.textContent = '';
+        }
+        
+        // Update Legends
+        legendNetVal.textContent = `${formatNumber(grandNetSum)} ${currency}`;
+        legendNetPct.textContent = `(${pctNet.toFixed(1)}%)`;
+        
+        if (state.applyVat) {
+            legendVatBox.style.display = 'flex';
+            legendVatVal.textContent = `${formatNumber(vatAmount)} ${currency}`;
+            legendVatPct.textContent = `(${pctVat.toFixed(1)}%)`;
+        } else {
+            legendVatBox.style.display = 'none';
+        }
+        
+        legendSavedVal.textContent = `${formatNumber(grandTotalSavedValue)} ${currency}`;
+        legendSavedPct.textContent = `(${pctSaved.toFixed(1)}%)`;
+    } else {
+        segmentNet.style.width = '0%';
+        segmentNet.textContent = '';
+        segmentVat.style.width = '0%';
+        segmentVat.textContent = '';
+        segmentVat.style.display = 'none';
+        segmentSaved.style.width = '0%';
+        segmentSaved.textContent = '';
+        
+        legendNetVal.textContent = `0.00 ${currency}`;
+        legendNetPct.textContent = `(0%)`;
+        legendVatBox.style.display = state.applyVat ? 'flex' : 'none';
+        legendVatVal.textContent = `0.00 ${currency}`;
+        legendVatPct.textContent = `(0%)`;
+        legendSavedVal.textContent = `0.00 ${currency}`;
+        legendSavedPct.textContent = `(0%)`;
+    }
 }
 
 // Save state to localStorage
 function saveState() {
     safeSetLocalStorage('sales_calculator_state_v13', JSON.stringify(state));
+}
+
+// Export calculations data to a highly compatible Excel CSV spreadsheet
+function exportCSV() {
+    triggerUsageStats();
+    const lang = state.language;
+    const currency = getActiveCurrency();
+    
+    if (!state.groups || state.groups.length === 0) {
+        alert(translations[lang].noGroupData || "No data to export");
+        return;
+    }
+    
+    let csvContent = "\uFEFFsep=,\n"; // UTF-8 BOM and Excel separator declaration
+    
+    // Headers
+    const headers = lang === 'ar' ? 
+        ["المجموعة", "اسم الصنف", "سعر الوحدة", "الكمية", "الإجمالي قبل الخصم", "نسبة الخصم", "الصافي بعد الخصم"] :
+        ["Group", "Item Name", "Unit Price", "Quantity", "Total Before Discount", "Discount Ratio", "Net Price"];
+        
+    csvContent += headers.join(",") + "\n";
+    
+    let grandOriginal = 0;
+    let grandNet = 0;
+    
+    state.groups.forEach((group, gIndex) => {
+        const groupName = group.name.trim() || (lang === 'ar' ? `المجموعة ${gIndex + 1}` : `Group ${gIndex + 1}`);
+        
+        let groupOriginalTotal = 0;
+        group.products.forEach(p => groupOriginalTotal += (p.price || 0) * (p.quantity || 0));
+        
+        let currentPrice = groupOriginalTotal;
+        const totalQuantity = group.products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+        
+        // Calculate group net price after discounts
+        if (group.discounts.length > 0 && groupOriginalTotal > 0) {
+            group.discounts.forEach(discount => {
+                let discountAmount = 0;
+                if (discount.type === 'percent') {
+                    discountAmount = preciseRound(currentPrice * (discount.value / 100));
+                } else {
+                    discountAmount = preciseRound(discount.value * totalQuantity);
+                }
+                currentPrice = Math.max(0, preciseRound(currentPrice - discountAmount));
+            });
+        }
+        
+        const groupDiscountRatio = groupOriginalTotal > 0 ? (groupOriginalTotal - currentPrice) / groupOriginalTotal : 0;
+        
+        group.products.forEach((product) => {
+            const prodName = product.name.trim() || (lang === 'ar' ? "منتج بدون اسم" : "Unnamed Product");
+            const originalLineVal = (product.price || 0) * (product.quantity || 0);
+            const discountLineVal = originalLineVal * groupDiscountRatio;
+            const netLineVal = originalLineVal - discountLineVal;
+            
+            const row = [
+                `"${groupName.replace(/"/g, '""')}"`,
+                `"${prodName.replace(/"/g, '""')}"`,
+                product.price || 0,
+                product.quantity || 0,
+                originalLineVal,
+                `"${(groupDiscountRatio * 100).toFixed(1)}%"`,
+                netLineVal
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+        
+        grandOriginal += groupOriginalTotal;
+        grandNet += currentPrice;
+    });
+    
+    // Add blank row
+    csvContent += "\n";
+    
+    // Add Grand Totals summary
+    const labelCol = lang === 'ar' ? "الإجمالي العام" : "Grand Totals";
+    const savedVal = Math.max(0, preciseRound(grandOriginal - grandNet));
+    const effectivePct = grandOriginal > 0 ? (savedVal / grandOriginal) * 100 : 0;
+    let vatAmount = 0;
+    if (state.applyVat) {
+        vatAmount = preciseRound(grandNet * (state.vatRate / 100));
+    }
+    const finalNet = preciseRound(grandNet + vatAmount);
+    
+    const totals = [
+        [labelCol, lang === 'ar' ? "إجمالي السعر الأصلي الكلي" : "Grand Original Total", grandOriginal, currency],
+        [labelCol, lang === 'ar' ? "إجمالي الوفر الكلي" : "Grand Total Saved", savedVal, currency],
+        [labelCol, lang === 'ar' ? "النسبة الكلية الفعلية للخصم" : "Effective Discount Rate", `${effectivePct.toFixed(2)}%`, ""],
+        [labelCol, lang === 'ar' ? "الإجمالي قبل الضريبة" : "Grand Total Before VAT", grandNet, currency]
+    ];
+    
+    if (state.applyVat) {
+        totals.push([labelCol, `${lang === 'ar' ? 'ضريبة القيمة المضافة' : 'VAT'} (${state.vatRate}%)`, vatAmount, currency]);
+    }
+    totals.push([labelCol, lang === 'ar' ? "الصافي النهائي الكلي" : "Grand Final Net", finalNet, currency]);
+    
+    totals.forEach(t => {
+        const row = [
+            `"${t[0]}"`,
+            `"${t[1]}"`,
+            t[2],
+            "",
+            "",
+            "",
+            t[3] ? `"${t[2]} ${t[3]}"` : `"${t[2]}"`
+        ];
+        csvContent += row.join(",") + "\n";
+    });
+    
+    // Download triggering
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", lang === 'ar' ? "حسابات_المبيعات_الدهشي.csv" : "sales_calculations_report.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Export quote settings and data to JSON file safely (excluding secure login data)
+function saveProjectJSON() {
+    triggerUsageStats();
+    const lang = state.language;
+    
+    const exportData = {
+        groups: state.groups,
+        presets: state.presets,
+        terms: state.terms,
+        customProducts: state.customProducts,
+        currency: state.currency,
+        customCurrency: state.customCurrency,
+        applyVat: state.applyVat,
+        vatRate: state.vatRate,
+        programTitle: state.programTitle,
+        visibleButtons: state.visibleButtons
+    };
+    
+    const jsonString = JSON.stringify(exportData, null, 4);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", lang === 'ar' ? "مشروع_حسابات_الدهمشي.json" : "sales_calculator_project.json");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Import project calculations JSON back into the state
+function loadProjectJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const lang = state.language;
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate basic structure
+            if (!data || !Array.isArray(data.groups) || data.groups.length === 0) {
+                throw new Error("Invalid groups array");
+            }
+            
+            // Perform schema validation on groups
+            const isValid = data.groups.every(g => {
+                return g && typeof g === 'object' && g.id && typeof g.name === 'string' && Array.isArray(g.products) && Array.isArray(g.discounts);
+            });
+            
+            if (!isValid) {
+                throw new Error("Invalid group schema");
+            }
+            
+            // Safely merge imported project state
+            state.groups = data.groups;
+            if (Array.isArray(data.presets)) state.presets = data.presets;
+            if (Array.isArray(data.terms)) state.terms = data.terms;
+            if (Array.isArray(data.customProducts)) state.customProducts = data.customProducts;
+            if (data.currency) state.currency = data.currency;
+            if (data.customCurrency) state.customCurrency = data.customCurrency;
+            if (data.applyVat !== undefined) state.applyVat = data.applyVat;
+            if (data.vatRate !== undefined) state.vatRate = data.vatRate;
+            if (data.programTitle !== undefined) state.programTitle = data.programTitle;
+            if (data.visibleButtons) state.visibleButtons = { ...state.visibleButtons, ...data.visibleButtons };
+            
+            // Save state and update UI
+            saveState();
+            
+            // Sync UI widgets
+            currencySelect.value = state.currency;
+            customCurrencyInput.value = state.customCurrency;
+            toggleCustomCurrencyVisibility();
+            applyVatCheckbox.checked = state.applyVat;
+            vatRateInput.value = state.vatRate;
+            
+            if (state.lockTheme) {
+                themeSelect.value = state.lockedTheme;
+                themeSelect.disabled = true;
+                applyTheme(state.lockedTheme);
+            } else {
+                themeSelect.disabled = false;
+                themeSelect.value = state.theme;
+                applyTheme(state.theme);
+            }
+            
+            // Full redraw
+            applyProgramTitle();
+            renderDatalist();
+            renderGroups();
+            calculate();
+            applyVisibleButtons();
+            
+            alert(translations[lang].importSuccess || "Project imported successfully! 🎉");
+        } catch (err) {
+            console.error("Failed to import project JSON:", err);
+            alert(translations[lang].importError || "Failed to import project. Please check the file.");
+        } finally {
+            event.target.value = ''; // Reset input element so same file can be loaded again
+        }
+    };
+    
+    reader.onerror = function() {
+        alert(translations[lang].importError || "Failed to import project. Please check the file.");
+        event.target.value = '';
+    };
+    
+    reader.readAsText(file);
 }
 
 // Force formatting with English (Latin) numbers always
@@ -2842,22 +3409,7 @@ function showToast(lang) {
     }, 2500);
 }
 
-// Share the report directly to WhatsApp
-function shareOnWhatsApp() {
-    triggerUsageStats();
-    
-    // 1. Populate the results PDF content
-    renderResultsPdf();
-    
-    // 2. Set the default file name
-    const lang = state.language;
-    const defaultName = lang === 'ar' ? 'تقرير_الحسابات.pdf' : 'sales_report.pdf';
-    const customTitle = state.programTitle ? state.programTitle.trim().replace(/\s+/g, '_') : '';
-    const fileName = customTitle ? `${customTitle}_${lang === 'ar' ? 'تقرير' : 'report'}.pdf` : defaultName;
-    
-    // 3. Share it!
-    sharePdfViaWhatsApp('.printable-results-pdf-content', fileName, false);
-}
+
 
 // Helper to call CounterAPI
 async function handleStats() {
@@ -3021,157 +3573,318 @@ function hideLoading() {
     }
 }
 
-// Generate PDF blob and share to WhatsApp
-async function sharePdfViaWhatsApp(elementSelector, defaultFileName, isQuote) {
-    const lang = state.language;
-    showLoading(lang === 'ar' ? 'جاري تهيئة محرك الـ PDF...' : 'Initializing PDF engine...');
+
+
+
+// YouTube embed parser utility
+function getYoutubeEmbedUrl(url) {
+    if (!url) return null;
     
-    let modalRestorer = null;
-    
-    try {
-        // 1. Ensure html2pdf is loaded
-        if (!window.html2pdf) {
-            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
-        }
-        
-        showLoading(lang === 'ar' ? 'جاري تجهيز وتوليد ملف الـ PDF...' : 'Preparing and generating PDF...');
-        
-        // 2. Sync fields before printing
-        if (isQuote) {
-            const nameVal = document.getElementById('quoteCustomerName').value.trim();
-            const phoneVal = document.getElementById('quoteCustomerPhone').value.trim();
-            document.getElementById('printCustomerName').textContent = nameVal || '--';
-            document.getElementById('printCustomerPhone').textContent = phoneVal || '--';
-            
-            const compVal = document.getElementById('quoteCompanyName').value.trim() || 'الشركة الأساسية';
-            const branchVal = document.getElementById('quoteBranchName').value.trim() || 'فرع حفر الباطن';
-            const prepVal = document.getElementById('quotePreparedByInput').value.trim() || 'الموظف';
-            
-            document.getElementById('printQuoteCompanyName').textContent = compVal;
-            document.getElementById('printQuoteBranchName').textContent = branchVal;
-            document.getElementById('printQuotePreparedBy').textContent = prepVal;
-            
-            // If the quote modal is currently hidden, temporarily display with layout (opacity 0)
-            const modal = document.getElementById('quotationModal');
-            if (modal && modal.style.display === 'none') {
-                const prevDisplay = modal.style.display;
-                const prevOpacity = modal.style.opacity;
-                const prevPointerEvents = modal.style.pointerEvents;
-                
-                modal.style.display = 'flex';
-                modal.style.opacity = '0';
-                modal.style.pointerEvents = 'none';
-                
-                modalRestorer = () => {
-                    modal.style.display = prevDisplay;
-                    modal.style.opacity = prevOpacity;
-                    modal.style.pointerEvents = prevPointerEvents;
-                };
-            }
-        } else {
-            // It's results PDF, sync the modal fields
-            const nameVal = document.getElementById('pdfCustomerName').value.trim();
-            const phoneVal = document.getElementById('pdfCustomerPhone').value.trim();
-            document.getElementById('printPdfCustomerName').textContent = nameVal || '--';
-            document.getElementById('printPdfCustomerPhone').textContent = phoneVal || '--';
-            
-            // If the results modal is currently hidden, temporarily display with layout (opacity 0)
-            const modal = document.getElementById('resultsPdfModal');
-            if (modal && modal.style.display === 'none') {
-                const prevDisplay = modal.style.display;
-                const prevOpacity = modal.style.opacity;
-                const prevPointerEvents = modal.style.pointerEvents;
-                
-                modal.style.display = 'flex';
-                modal.style.opacity = '0';
-                modal.style.pointerEvents = 'none';
-                
-                modalRestorer = () => {
-                    modal.style.display = prevDisplay;
-                    modal.style.opacity = prevOpacity;
-                    modal.style.pointerEvents = prevPointerEvents;
-                };
-            }
-        }
-        
-        // 3. Temporarily hide input controls via class
-        document.body.classList.add('html2pdf-active');
-        
-        const element = document.querySelector(elementSelector);
-        
-        // Adjust style options for A4 format
-        const opt = {
-            margin: [8, 8, 8, 8],
-            filename: defaultFileName,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2.5, 
-                useCORS: true, 
-                letterRendering: true,
-                backgroundColor: '#ffffff'
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        
-        // Generate PDF blob
-        const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-        
-        // Restore styles and hidden modals immediately
-        document.body.classList.remove('html2pdf-active');
-        if (modalRestorer) {
-            modalRestorer();
-            modalRestorer = null;
-        }
-        
-        // Create file object (safe ASCII filename)
-        const file = new File([pdfBlob], defaultFileName, { type: "application/pdf" });
-        
-        // Detect mobile vs desktop
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            hideLoading();
-            await navigator.share({
-                files: [file],
-                title: defaultFileName,
-                text: lang === 'ar' ? 'مرفق لكم التقرير بصيغة PDF.' : 'Attached is the PDF report.'
-            });
-        } else {
-            // Force download PDF locally
-            const downloadUrl = URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = defaultFileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(downloadUrl);
-            
-            const msg = lang === 'ar' 
-                ? 'لقد تم حفظ التقرير كملف PDF بنجاح في جهازك. يرجى إرفاق الملف وإرساله للعميل.' 
-                : 'The report PDF has been downloaded. Please attach it in the chat.';
-            
-            hideLoading();
-            
-            // Route to WhatsApp Web on Desktop, and native WhatsApp app on Mobile
-            if (isMobile) {
-                window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-            } else {
-                window.open('https://web.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-            }
-        }
-    } catch (e) {
-        console.error("Error generating/sharing PDF", e);
-        document.body.classList.remove('html2pdf-active');
-        if (modalRestorer) {
-            modalRestorer();
-        }
-        hideLoading();
-        alert(lang === 'ar' 
-            ? 'حدث خطأ أثناء توليد ملف الـ PDF. يرجى التأكد من اتصال الإنترنت أو استخدام ميزة الطباعة العادية.' 
-            : 'An error occurred while generating the PDF. Please check your connection or use the normal print option.');
+    // Check if it's already an embed link
+    if (url.includes('youtube.com/embed/')) {
+        return url;
     }
+    
+    // Check standard watch url
+    // youtube.com/watch?v=ID or v=ID&...
+    let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    let match = url.match(regExp);
+    
+    if (match && match[2].length === 11) {
+        return `https://www.youtube.com/embed/${match[2]}?autoplay=1&rel=0`;
+    }
+    
+    // Check shorts url
+    // youtube.com/shorts/ID
+    if (url.includes('youtube.com/shorts/')) {
+        let parts = url.split('/shorts/');
+        if (parts[1]) {
+            let id = parts[1].split(/[?#&]/)[0];
+            return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+        }
+    }
+    
+    return null; // Not a direct video link
+}
+
+// Get unified list of default and custom videos
+function getAllVideosList() {
+    const lang = state.language || 'ar';
+    const defaults = [
+        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
+        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
+        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
+        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
+        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
+        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
+    ];
+    
+    const links = state.tutorialLinks || {
+        product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
+        discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
+        group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
+        pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
+        quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
+        copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
+    };
+    
+    const list = defaults.map(item => ({
+        key: item.key,
+        title: item.label,
+        url: links[item.key] || '',
+        isCustom: false
+    }));
+    
+    if (state.customTutorials && state.customTutorials.length > 0) {
+        state.customTutorials.forEach((item, index) => {
+            list.push({
+                key: `custom_${index}`,
+                title: item.title,
+                url: item.url,
+                isCustom: true,
+                customIndex: index
+            });
+        });
+    }
+    
+    return list;
+}
+
+// Populate the main tutorial dropdown dynamically
+function populateTutorialSelect() {
+    const select = document.getElementById('tutorialSelect');
+    if (!select) return;
+    
+    const lang = state.language || 'ar';
+    const currentVal = select.value;
+    
+    select.innerHTML = '';
+    
+    // Placeholder
+    const placeholderOpt = document.createElement('option');
+    placeholderOpt.value = '';
+    placeholderOpt.disabled = true;
+    placeholderOpt.selected = !currentVal;
+    placeholderOpt.textContent = translations[lang].tutorialSelectPlaceholder || (lang === 'ar' ? 'القائمة' : 'Menu');
+    select.appendChild(placeholderOpt);
+    
+    // Default tutorials
+    const defaults = [
+        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
+        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
+        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
+        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
+        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
+        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
+    ];
+    
+    defaults.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.key;
+        opt.selected = (currentVal === item.key);
+        opt.textContent = item.label;
+        select.appendChild(opt);
+    });
+    
+    // Custom tutorials
+    if (state.customTutorials && state.customTutorials.length > 0) {
+        state.customTutorials.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = `custom_${index}`;
+            opt.selected = (currentVal === `custom_${index}`);
+            opt.textContent = item.title;
+            select.appendChild(opt);
+        });
+    }
+}
+
+// Video Gallery Modal Management
+let currentVideoIndex = 0;
+
+function openVideoGallery(index) {
+    currentVideoIndex = index;
+    const modal = document.getElementById('videoGalleryModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        renderActiveVideo();
+    }
+}
+
+function renderActiveVideo() {
+    const allVideos = getAllVideosList();
+    if (currentVideoIndex < 0 || currentVideoIndex >= allVideos.length) {
+        currentVideoIndex = 0;
+    }
+    
+    const activeVideo = allVideos[currentVideoIndex];
+    if (!activeVideo) return;
+    
+    // Set title
+    document.getElementById('galleryActiveTitle').textContent = activeVideo.title;
+    
+    // Progress text
+    document.getElementById('galleryProgressText').textContent = `${currentVideoIndex + 1} / ${allVideos.length}`;
+    
+    // Check embed link
+    const embedUrl = getYoutubeEmbedUrl(activeVideo.url);
+    const iframe = document.getElementById('galleryIframe');
+    const fallbackUI = document.getElementById('galleryFallbackUI');
+    
+    if (embedUrl) {
+        iframe.src = embedUrl;
+        iframe.style.display = 'block';
+        fallbackUI.style.display = 'none';
+    } else {
+        iframe.src = '';
+        iframe.style.display = 'none';
+        fallbackUI.style.display = 'flex';
+        
+        document.getElementById('galleryFallbackText').textContent = 
+            state.language === 'ar' 
+            ? `الرابط "${activeVideo.title}" عبارة عن رابط خارجي أو بحث يوتيوب.`
+            : `The link for "${activeVideo.title}" is an external or search link.`;
+            
+        const fallbackLink = document.getElementById('galleryFallbackLink');
+        fallbackLink.href = activeVideo.url || '#';
+    }
+    
+    renderGalleryPlaylist();
+}
+
+function renderGalleryPlaylist() {
+    const track = document.getElementById('galleryPlaylistTrack');
+    if (!track) return;
+    track.innerHTML = '';
+    
+    const allVideos = getAllVideosList();
+    const lang = state.language || 'ar';
+    
+    allVideos.forEach((video, index) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item${index === currentVideoIndex ? ' active' : ''}`;
+        
+        const isEmbeddable = !!getYoutubeEmbedUrl(video.url);
+        const iconHtml = isEmbeddable 
+            ? '<i class="fa-solid fa-play"></i>' 
+            : '<i class="fa-solid fa-arrow-up-right-from-square"></i>';
+        const typeText = video.isCustom 
+            ? (lang === 'ar' ? 'فيديو مخصص' : 'Custom Video')
+            : (lang === 'ar' ? 'شرح أساسي' : 'Core Tutorial');
+            
+        item.innerHTML = `
+            <span class="playlist-item-title">${video.title}</span>
+            <div class="playlist-item-badge">
+                ${iconHtml}
+                <span>${typeText}</span>
+            </div>
+        `;
+        
+        item.addEventListener('click', () => {
+            currentVideoIndex = index;
+            renderActiveVideo();
+        });
+        
+        track.appendChild(item);
+    });
+    
+    // Auto scroll the active playlist item into view
+    setTimeout(() => {
+        const activeItem = track.querySelector('.playlist-item.active');
+        if (activeItem) {
+            const trackWidth = track.clientWidth;
+            const itemLeft = activeItem.offsetLeft;
+            const itemWidth = activeItem.clientWidth;
+            track.scrollLeft = itemLeft - (trackWidth / 2) + (itemWidth / 2);
+        }
+    }, 100);
+}
+
+function nextVideo() {
+    const allVideos = getAllVideosList();
+    if (allVideos.length === 0) return;
+    currentVideoIndex = (currentVideoIndex + 1) % allVideos.length;
+    renderActiveVideo();
+}
+
+function prevVideo() {
+    const allVideos = getAllVideosList();
+    if (allVideos.length === 0) return;
+    currentVideoIndex = (currentVideoIndex - 1 + allVideos.length) % allVideos.length;
+    renderActiveVideo();
+}
+
+function closeVideoGallery() {
+    const modal = document.getElementById('videoGalleryModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    const iframe = document.getElementById('galleryIframe');
+    if (iframe) {
+        iframe.src = ''; // immediately stops any playing video
+    }
+}
+
+// Render dynamic custom videos list in Admin settings
+function renderAdminCustomVideosList() {
+    const container = document.getElementById('adminCustomVideosListContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    state.customTutorials = state.customTutorials || [];
+    const lang = state.language || 'ar';
+    
+    if (state.customTutorials.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 1rem 0;';
+        emptyMsg.textContent = lang === 'ar' ? 'لا توجد شروحات فيديو مضافة حالياً.' : 'No custom videos added yet.';
+        container.appendChild(emptyMsg);
+        return;
+    }
+    
+    state.customTutorials.forEach((video, index) => {
+        const row = document.createElement('div');
+        row.className = 'settings-user-row';
+        row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.15); padding: 0.55rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 0.4rem; gap: 0.5rem;';
+        
+        const info = document.createElement('div');
+        info.style.cssText = 'display: flex; flex-direction: column; gap: 0.15rem; flex-grow: 1; min-width: 0;';
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.style.cssText = 'font-weight: 700; font-size: 0.9rem; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;';
+        titleSpan.textContent = video.title;
+        
+        const urlSpan = document.createElement('span');
+        urlSpan.style.cssText = 'font-size: 0.75rem; color: var(--text-muted); text-align: left; direction: ltr; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;';
+        urlSpan.textContent = video.url;
+        
+        info.appendChild(titleSpan);
+        info.appendChild(urlSpan);
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'lang-btn';
+        deleteBtn.style.cssText = 'background: rgba(220, 53, 69, 0.15); border-color: rgba(220, 53, 69, 0.3); color: #f87171; padding: 0.25rem 0.5rem; font-size: 0.8rem; height: auto; min-height: unset;';
+        deleteBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+        deleteBtn.title = lang === 'ar' ? 'حذف الفيديو' : 'Delete Video';
+        
+        deleteBtn.addEventListener('click', () => {
+            const confirmMsg = lang === 'ar'
+                ? `هل أنت متأكد من حذف فيديو الشرح "${video.title}"؟`
+                : `Are you sure you want to delete the video tutorial "${video.title}"?`;
+            if (confirm(confirmMsg)) {
+                state.customTutorials.splice(index, 1);
+                saveState();
+                renderAdminCustomVideosList();
+                populateTutorialSelect();
+            }
+        });
+        
+        row.appendChild(info);
+        row.appendChild(deleteBtn);
+        container.appendChild(row);
+    });
 }
 
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', init);
+
