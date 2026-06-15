@@ -116,7 +116,16 @@ const translations = {
         tutCopy: "نسخ التقرير المنسق",
         settingsSuggestions: "إدارة مقترحات المنتجات",
         btnAddSuggestion: "إضافة",
+        backupSuggestionsLabel: "نسخة احتياطية للمقترحات:",
+        btnDownloadSuggestions: "تنزيل النسخة",
+        btnUploadSuggestions: "استيراد النسخة",
+        settingsBackupRestoreHeader: "نسخ احتياطي واستيراد إعدادات البرنامج كاملة",
+        settingsBackupRestoreDesc: "تصدير جميع الإعدادات الحالية (الموظفين، روابط الشروحات، مقترحات المنتجات، وإعدادات المظهر) إلى ملف خارجي، للتمكن من استعادتها بسهولة عند تحديث البرنامج أو تغيير الجهاز.",
+        btnExportSettings: "تصدير الإعدادات (JSON)",
+        btnImportSettings: "استيراد الإعدادات (JSON)",
+        btnSaveAdminSettings: "حفظ واعتماد التعديلات",
         settingsTutorialLinks: "إدارة روابط شروحات البرنامج",
+        btnAddTutorialLink: "إضافة رابط شرح",
         settingsCustomVideos: "شروحات الفيديو الإضافية",
         btnAddCustomVideo: "إضافة فيديو شرح",
         otherVideosTitle: "جميع شروحات الفيديو:",
@@ -253,7 +262,16 @@ const translations = {
         tutCopy: "Copy formatted report",
         settingsSuggestions: "Manage Product Suggestions",
         btnAddSuggestion: "Add",
+        backupSuggestionsLabel: "Suggestions Backup:",
+        btnDownloadSuggestions: "Download Backup",
+        btnUploadSuggestions: "Import Backup",
+        settingsBackupRestoreHeader: "Full Program Settings Backup & Restore",
+        settingsBackupRestoreDesc: "Export all current settings (employees, tutorial links, product suggestions, and theme settings) to an external file to easily restore them when updating the program or changing devices.",
+        btnExportSettings: "Export Settings (JSON)",
+        btnImportSettings: "Import Settings (JSON)",
+        btnSaveAdminSettings: "Save & Apply Changes",
         settingsTutorialLinks: "Manage Tutorial Links",
+        btnAddTutorialLink: "Add Tutorial Link",
         settingsCustomVideos: "Additional Video Tutorials",
         btnAddCustomVideo: "Add Video Tutorial",
         otherVideosTitle: "All Video Tutorials:",
@@ -452,14 +470,14 @@ let state = {
         "لاعتراض أو تعديل العرض يرجى مراجعة إدارة الفرع بحفر الباطن."
     ],
     customProducts: [...defaultProducts],
-    tutorialLinks: {
-        product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
-        discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
-        group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
-        pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
-        quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-        copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
-    }
+    tutorialLinks: [
+        { key: 'product', label: 'إضافة منتج وحذفه', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه' },
+        { key: 'discount', label: 'إضافة نسبة وحذفها', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم' },
+        { key: 'group', label: 'إضافة مجموعة وحذفها', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة' },
+        { key: 'pdf', label: 'تصدير النتيجة إلى ملف PDF', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF' },
+        { key: 'quote', label: 'عرض سعر', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر' },
+        { key: 'copy', label: 'نسخ التقرير المنسق', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق' }
+    ]
 };
 
 // Unique ID Generator
@@ -900,14 +918,29 @@ function init() {
                 state.customProducts = [...defaultProducts];
             }
             if (!state.tutorialLinks) {
-                state.tutorialLinks = {
-                    product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
-                    discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
-                    group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
-                    pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
-                    quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-                    copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
-                };
+                state.tutorialLinks = [
+                    { key: 'product', label: 'إضافة منتج وحذفه', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه' },
+                    { key: 'discount', label: 'إضافة نسبة وحذفها', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم' },
+                    { key: 'group', label: 'إضافة مجموعة وحذفها', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة' },
+                    { key: 'pdf', label: 'تصدير النتيجة إلى ملف PDF', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF' },
+                    { key: 'quote', label: 'عرض سعر', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر' },
+                    { key: 'copy', label: 'نسخ التقرير المنسق', url: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق' }
+                ];
+            } else if (!Array.isArray(state.tutorialLinks)) {
+                const obj = state.tutorialLinks;
+                const defaults = [
+                    { key: 'product', label: 'إضافة منتج وحذفه' },
+                    { key: 'discount', label: 'إضافة نسبة وحذفها' },
+                    { key: 'group', label: 'إضافة مجموعة وحذفها' },
+                    { key: 'pdf', label: 'تصدير النتيجة إلى ملف PDF' },
+                    { key: 'quote', label: 'عرض سعر' },
+                    { key: 'copy', label: 'نسخ التقرير المنسق' }
+                ];
+                state.tutorialLinks = defaults.map(item => ({
+                    key: item.key,
+                    label: item.label,
+                    url: obj[item.key] || ''
+                }));
             }
             if (!state.customTutorials) {
                 state.customTutorials = [];
@@ -1162,49 +1195,72 @@ function renderAdminTutorialLinksList() {
     const container = document.getElementById('adminTutorialLinksContainer');
     if (!container) return;
     container.innerHTML = '';
-    const lang = state.language;
+    const lang = state.language || 'ar';
     
-    if (!state.tutorialLinks) {
-        state.tutorialLinks = {
-            product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
-            discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
-            group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
-            pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
-            quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-            copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
-        };
+    if (!Array.isArray(state.tutorialLinks)) {
+        state.tutorialLinks = [];
     }
     
-    const topics = [
-        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
-        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
-        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
-        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
-        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
-        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
-    ];
+    if (state.tutorialLinks.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 1rem 0;';
+        emptyMsg.textContent = lang === 'ar' ? 'لا توجد شروحات مضافة حالياً.' : 'No tutorial links added yet.';
+        container.appendChild(emptyMsg);
+        return;
+    }
     
-    topics.forEach(topic => {
+    state.tutorialLinks.forEach((item, index) => {
         const row = document.createElement('div');
-        row.style.cssText = 'display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.5rem;';
+        row.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.02); padding: 0.55rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.04); margin-bottom: 0.4rem; flex-wrap: wrap;';
         
-        const label = document.createElement('label');
-        label.style.cssText = 'font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);';
-        label.textContent = topic.label;
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'lang-btn';
+        deleteBtn.style.cssText = 'background: rgba(220, 53, 69, 0.15); border-color: rgba(220, 53, 69, 0.3); color: #f87171; padding: 0.25rem 0.5rem; font-size: 0.8rem; height: auto; min-height: unset; display: flex; align-items: center; justify-content: center;';
+        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        deleteBtn.title = lang === 'ar' ? 'حذف رابط الشرح' : 'Delete Tutorial Link';
         
-        const input = document.createElement('input');
-        input.type = 'url';
-        input.value = state.tutorialLinks[topic.key] || '';
-        input.placeholder = 'https://...';
-        input.style.cssText = 'font-size: 0.85rem; padding: 0.35rem 0.6rem; text-align: left; direction: ltr; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: rgba(0, 0, 0, 0.2); color: var(--text-primary);';
+        deleteBtn.addEventListener('click', () => {
+            const confirmMsg = lang === 'ar'
+                ? `هل أنت متأكد من حذف رابط الشرح "${item.label}"؟`
+                : `Are you sure you want to delete the tutorial link "${item.label}"?`;
+            if (confirm(confirmMsg)) {
+                state.tutorialLinks.splice(index, 1);
+                saveState();
+                renderAdminTutorialLinksList();
+                populateTutorialSelect();
+            }
+        });
         
-        input.addEventListener('input', () => {
-            state.tutorialLinks[topic.key] = input.value.trim();
+        // Title input
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.value = item.label || '';
+        titleInput.placeholder = lang === 'ar' ? 'عنوان الشرح' : 'Tutorial Title';
+        titleInput.style.cssText = 'flex: 1 1 150px; font-size: 0.85rem; padding: 0.35rem 0.6rem; text-align: right; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: rgba(0, 0, 0, 0.25); color: var(--text-primary); font-family: var(--font-family) !important;';
+        
+        titleInput.addEventListener('input', () => {
+            state.tutorialLinks[index].label = titleInput.value.trim();
+            saveState();
+            populateTutorialSelect();
+        });
+        
+        // URL input
+        const urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.value = item.url || '';
+        urlInput.placeholder = 'https://...';
+        urlInput.style.cssText = 'flex: 2 1 250px; font-size: 0.85rem; padding: 0.35rem 0.6rem; text-align: left; direction: ltr; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; background: rgba(0, 0, 0, 0.25); color: var(--text-primary);';
+        
+        urlInput.addEventListener('input', () => {
+            state.tutorialLinks[index].url = urlInput.value.trim();
             saveState();
         });
         
-        row.appendChild(label);
-        row.appendChild(input);
+        row.appendChild(deleteBtn);
+        row.appendChild(titleInput);
+        row.appendChild(urlInput);
         container.appendChild(row);
     });
 }
@@ -1944,6 +2000,211 @@ function setupEventListeners() {
             } else {
                 alert(state.language === 'ar' ? 'لم يتم العثور على الكلمة في أي من المقترحات.' : 'Term not found in any suggestions.');
             }
+        });
+    }
+
+    // Form to add a new tutorial link
+    const addTutorialLinkForm = document.getElementById('addTutorialLinkForm');
+    if (addTutorialLinkForm) {
+        addTutorialLinkForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById('newTutorialTitle');
+            const urlInput = document.getElementById('newTutorialUrl');
+            const title = titleInput.value.trim();
+            const url = urlInput.value.trim();
+            
+            if (title && url) {
+                if (!Array.isArray(state.tutorialLinks)) {
+                    state.tutorialLinks = [];
+                }
+                state.tutorialLinks.push({
+                    key: generateId(),
+                    label: title,
+                    url: url
+                });
+                saveState();
+                renderAdminTutorialLinksList();
+                populateTutorialSelect();
+                
+                titleInput.value = '';
+                urlInput.value = '';
+                alert(state.language === 'ar' ? 'تم إضافة رابط الشرح بنجاح.' : 'Tutorial link added successfully.');
+            }
+        });
+    }
+
+    // Download suggestions backup
+    const btnDownloadSuggestions = document.getElementById('btnDownloadSuggestions');
+    if (btnDownloadSuggestions) {
+        btnDownloadSuggestions.addEventListener('click', () => {
+            if (!state.customProducts || state.customProducts.length === 0) {
+                alert(state.language === 'ar' ? 'لا توجد مقترحات منتجات لأخذ نسخة احتياطية لها.' : 'No suggestions available to back up.');
+                return;
+            }
+            const fileContent = state.customProducts.join('\n');
+            const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'suggestions_backup.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+
+    // Trigger upload file input
+    const btnTriggerUploadSuggestions = document.getElementById('btnTriggerUploadSuggestions');
+    const uploadSuggestionsFile = document.getElementById('uploadSuggestionsFile');
+    if (btnTriggerUploadSuggestions && uploadSuggestionsFile) {
+        btnTriggerUploadSuggestions.addEventListener('click', () => {
+            uploadSuggestionsFile.click();
+        });
+    }
+
+    // Handle file upload
+    if (uploadSuggestionsFile) {
+        uploadSuggestionsFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const text = evt.target.result;
+                const imported = text.split('\n')
+                                     .map(line => line.trim())
+                                     .filter(line => line.length > 0);
+                
+                if (imported.length === 0) {
+                    alert(state.language === 'ar' ? 'الملف فارغ أو لا يحتوي على مقترحات صالحة.' : 'The file is empty or does not contain valid suggestions.');
+                    return;
+                }
+                
+                const confirmReplace = confirm(
+                    state.language === 'ar'
+                        ? `تم العثور على ${imported.length} مقترح.\n\nهل تريد استبدال (مسح) المقترحات الحالية بالمقترحات المستوردة؟\nاضغط "موافق" للاستبدال، أو "إلغاء" للإضافة للمقترحات الحالية.`
+                        : `Found ${imported.length} suggestions.\n\nDo you want to replace (clear) the current suggestions with the imported ones?\nClick "OK" to replace, or "Cancel" to append/add them.`
+                );
+                
+                if (!state.customProducts) {
+                    state.customProducts = [];
+                }
+                
+                if (confirmReplace) {
+                    state.customProducts = imported;
+                } else {
+                    // Append unique items
+                    const set = new Set([...state.customProducts, ...imported]);
+                    state.customProducts = Array.from(set);
+                }
+                
+                saveState();
+                renderAdminSuggestionsList();
+                renderDatalist();
+                
+                alert(state.language === 'ar' ? 'تم استيراد النسخة الاحتياطية بنجاح! 🎉' : 'Backup imported successfully! 🎉');
+                e.target.value = ''; // reset file input
+            };
+            reader.readAsText(file);
+        });
+    }
+
+    // Save settings explicitly and notify user
+    const btnSaveAdminSettings = document.getElementById('btnSaveAdminSettings');
+    if (btnSaveAdminSettings) {
+        btnSaveAdminSettings.addEventListener('click', () => {
+            saveState();
+            alert(state.language === 'ar' ? 'تم حفظ واعتماد التعديلات بنجاح في المتصفح! 🎉' : 'Settings saved and applied successfully in browser! 🎉');
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal) settingsModal.style.display = 'none';
+        });
+    }
+
+    // Export all program settings as a JSON file
+    const btnExportSettings = document.getElementById('btnExportSettings');
+    if (btnExportSettings) {
+        btnExportSettings.addEventListener('click', () => {
+            const settingsData = {
+                programTitle: state.programTitle || '',
+                customProducts: state.customProducts || [],
+                tutorialLinks: state.tutorialLinks || [],
+                customTutorials: state.customTutorials || [],
+                visibleButtons: state.visibleButtons || {},
+                users: state.users || [],
+                lockTheme: state.lockTheme || false,
+                lockedTheme: state.lockedTheme || 'luxury-gold',
+                showProductList: state.showProductList !== false,
+                currency: state.currency || 'SAR',
+                customCurrency: state.customCurrency || '',
+                applyVat: state.applyVat !== false,
+                vatRate: state.vatRate || 15,
+                terms: state.terms || []
+            };
+            const blob = new Blob([JSON.stringify(settingsData, null, 4)], { type: 'application/json;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'calculator_settings_backup.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+
+    // Trigger full settings JSON file upload
+    const btnTriggerImportSettings = document.getElementById('btnTriggerImportSettings');
+    const importSettingsFile = document.getElementById('importSettingsFile');
+    if (btnTriggerImportSettings && importSettingsFile) {
+        btnTriggerImportSettings.addEventListener('click', () => {
+            importSettingsFile.click();
+        });
+    }
+
+    // Handle full settings JSON file import
+    if (importSettingsFile) {
+        importSettingsFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    
+                    if (data.users && Array.isArray(data.users)) {
+                        state.users = data.users;
+                    }
+                    if (data.customProducts && Array.isArray(data.customProducts)) {
+                        state.customProducts = data.customProducts;
+                    }
+                    if (data.tutorialLinks && Array.isArray(data.tutorialLinks)) {
+                        state.tutorialLinks = data.tutorialLinks;
+                    }
+                    if (data.customTutorials && Array.isArray(data.customTutorials)) {
+                        state.customTutorials = data.customTutorials;
+                    }
+                    if (data.visibleButtons) {
+                        state.visibleButtons = { ...state.visibleButtons, ...data.visibleButtons };
+                    }
+                    if (data.programTitle !== undefined) state.programTitle = data.programTitle;
+                    if (data.lockTheme !== undefined) state.lockTheme = data.lockTheme;
+                    if (data.lockedTheme !== undefined) state.lockedTheme = data.lockedTheme;
+                    if (data.showProductList !== undefined) state.showProductList = data.showProductList;
+                    if (data.currency !== undefined) state.currency = data.currency;
+                    if (data.customCurrency !== undefined) state.customCurrency = data.customCurrency;
+                    if (data.applyVat !== undefined) state.applyVat = data.applyVat;
+                    if (data.vatRate !== undefined) state.vatRate = data.vatRate;
+                    if (data.terms && Array.isArray(data.terms)) {
+                        state.terms = data.terms;
+                    }
+                    
+                    saveState();
+                    alert(state.language === 'ar' ? 'تم استيراد إعدادات البرنامج وتطبيقها بنجاح! 💾🎉 وسيتم تحديث الصفحة الآن.' : 'Settings imported and applied successfully! 💾🎉 Reloading page now.');
+                    window.location.reload();
+                } catch (err) {
+                    alert(state.language === 'ar' ? 'فشل استيراد ملف الإعدادات. يرجى التأكد من صحة ملف الـ JSON.' : 'Failed to import settings. Please check the JSON file.');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
         });
     }
 
@@ -3411,7 +3672,7 @@ function showToast(lang) {
 
 
 
-// Helper to call CounterAPI
+// Helper to call CounterAPI with local caching for robust fallbacks
 async function handleStats() {
     const namespace = "yousef_aldahmashy_calculators";
     const visitorKey = "visitor_count";
@@ -3419,6 +3680,13 @@ async function handleStats() {
 
     const visitorValEl = document.getElementById('visitorCountVal');
     const usageValEl = document.getElementById('usageCountVal');
+
+    // 0. Load last known values from localStorage immediately to prevent layout shifts or empty state
+    const cachedVisitors = safeGetLocalStorage('last_known_visitors') || "1,248";
+    const cachedUsage = safeGetLocalStorage('last_known_usage') || "954";
+
+    if (visitorValEl) visitorValEl.textContent = cachedVisitors;
+    if (usageValEl) usageValEl.textContent = cachedUsage;
 
     // 1. Handle Visitor Count
     try {
@@ -3442,14 +3710,14 @@ async function handleStats() {
             }
         }
 
-        if (visitorCount && visitorValEl) {
-            visitorValEl.textContent = formatStatNumber(visitorCount);
-        } else if (visitorValEl) {
-            visitorValEl.textContent = "1,248"; // Good fallback if API is unreachable
+        if (visitorCount) {
+            const formatted = formatStatNumber(visitorCount);
+            if (visitorValEl) visitorValEl.textContent = formatted;
+            safeSetLocalStorage('last_known_visitors', formatted);
         }
     } catch (e) {
         console.error("Error loading visitor count:", e);
-        if (visitorValEl) visitorValEl.textContent = "1,248";
+        // Retains cached value
     }
 
     // 2. Handle Usage Count (Get current value)
@@ -3460,14 +3728,14 @@ async function handleStats() {
             const data = await res.json();
             usageCount = data.value;
         }
-        if (usageCount && usageValEl) {
-            usageValEl.textContent = formatStatNumber(usageCount);
-        } else if (usageValEl) {
-            usageValEl.textContent = "954"; // Good fallback if API is unreachable
+        if (usageCount) {
+            const formatted = formatStatNumber(usageCount);
+            if (usageValEl) usageValEl.textContent = formatted;
+            safeSetLocalStorage('last_known_usage', formatted);
         }
     } catch (e) {
         console.error("Error loading usage count:", e);
-        if (usageValEl) usageValEl.textContent = "954";
+        // Retains cached value
     }
 }
 
@@ -3483,9 +3751,11 @@ async function triggerUsageStats() {
             if (res.ok) {
                 const data = await res.json();
                 safeSetSessionStorage('used', 'true');
+                const formatted = formatStatNumber(data.value);
                 if (usageValEl) {
-                    usageValEl.textContent = formatStatNumber(data.value);
+                    usageValEl.textContent = formatted;
                 }
+                safeSetLocalStorage('last_known_usage', formatted);
             }
         } catch (e) {
             console.error("Error incrementing usage count:", e);
@@ -3609,31 +3879,18 @@ function getYoutubeEmbedUrl(url) {
 
 // Get unified list of default and custom videos
 function getAllVideosList() {
-    const lang = state.language || 'ar';
-    const defaults = [
-        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
-        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
-        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
-        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
-        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
-        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
-    ];
+    const list = [];
     
-    const links = state.tutorialLinks || {
-        product: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+منتج+وحذفه',
-        discount: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+نسبة+وخصم',
-        group: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+اضافة+مجموعة',
-        pdf: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تصدير+النتيجة+PDF',
-        quote: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+تجهيز+عرض+سعر',
-        copy: 'https://www.youtube.com/results?search_query=حاسبة+الدهمشي+شرح+نسخ+التقرير+المنسق'
-    };
-    
-    const list = defaults.map(item => ({
-        key: item.key,
-        title: item.label,
-        url: links[item.key] || '',
-        isCustom: false
-    }));
+    if (Array.isArray(state.tutorialLinks)) {
+        state.tutorialLinks.forEach((item, index) => {
+            list.push({
+                key: item.key || `tutorial_${index}`,
+                title: item.label || '',
+                url: item.url || '',
+                isCustom: false
+            });
+        });
+    }
     
     if (state.customTutorials && state.customTutorials.length > 0) {
         state.customTutorials.forEach((item, index) => {
@@ -3668,23 +3925,16 @@ function populateTutorialSelect() {
     placeholderOpt.textContent = translations[lang].tutorialSelectPlaceholder || (lang === 'ar' ? 'القائمة' : 'Menu');
     select.appendChild(placeholderOpt);
     
-    // Default tutorials
-    const defaults = [
-        { key: 'product', label: translations[lang].tutProduct || 'إضافة منتج وحذفه' },
-        { key: 'discount', label: translations[lang].tutDiscount || 'إضافة نسبة وحذفها' },
-        { key: 'group', label: translations[lang].tutGroup || 'إضافة مجموعة وحذفها' },
-        { key: 'pdf', label: translations[lang].tutPdf || 'تصدير النتيجة إلى ملف PDF' },
-        { key: 'quote', label: translations[lang].tutQuote || 'عرض سعر' },
-        { key: 'copy', label: translations[lang].tutCopy || 'نسخ التقرير المنسق' }
-    ];
-    
-    defaults.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.key;
-        opt.selected = (currentVal === item.key);
-        opt.textContent = item.label;
-        select.appendChild(opt);
-    });
+    // Dynamic tutorial links
+    if (Array.isArray(state.tutorialLinks)) {
+        state.tutorialLinks.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = item.key || `tutorial_${index}`;
+            opt.selected = (currentVal === (item.key || `tutorial_${index}`));
+            opt.textContent = item.label || '';
+            select.appendChild(opt);
+        });
+    }
     
     // Custom tutorials
     if (state.customTutorials && state.customTutorials.length > 0) {
