@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Dynamically set base href to support both root domains (Netlify, localhost) and subdirectories (GitHub Pages)
+        const base = document.createElement('base');
+        const path = window.location.pathname;
+        if (path.includes('/sales-calculator/')) {
+            base.href = '/sales-calculator/';
+        } else {
+            base.href = '/';
+        }
+        document.head.appendChild(base);
+    </script>
     <title>حاسبة الدهمشي الذكية الاحترافية للمبيعات</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="style.css">
     <!-- FontAwesome for beautiful icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="theme-color" content="#d4af37">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 
@@ -869,11 +880,11 @@
         </div>
     </div>
 
-    <script src="/app.js"></script>
+    <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             const registerSW = () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js')
                     .then(reg => console.log('Service Worker registered successfully!', reg))
                     .catch(err => console.error('Service Worker registration failed:', err));
             };
