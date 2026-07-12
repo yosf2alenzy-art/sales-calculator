@@ -2358,14 +2358,17 @@ function setupEventListeners() {
         document.getElementById('quoteCustomerPhone').style.display = 'inline-block';
         
         quotationModal.style.display = 'flex';
+        quotationModal.classList.add('active-print');
     });
     
     btnCloseQuotation.addEventListener('click', () => {
         quotationModal.style.display = 'none';
+        quotationModal.classList.remove('active-print');
     });
     
     btnCloseQuotationFooter.addEventListener('click', () => {
         quotationModal.style.display = 'none';
+        quotationModal.classList.remove('active-print');
     });
     
     document.getElementById('btnQuoteAddTerm').addEventListener('click', () => {
@@ -2419,7 +2422,9 @@ function setupEventListeners() {
         document.getElementById('pdfCustomerName').style.display = 'inline-block';
         document.getElementById('pdfCustomerPhone').style.display = 'inline-block';
         
-        document.getElementById('resultsPdfModal').style.display = 'flex';
+        const resultsPdfModal = document.getElementById('resultsPdfModal');
+        resultsPdfModal.style.display = 'flex';
+        resultsPdfModal.classList.add('active-print');
     });
 
     document.getElementById('btnPdfPrintPDF').addEventListener('click', () => {
@@ -2443,11 +2448,15 @@ function setupEventListeners() {
     });
 
     document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
-        document.getElementById('resultsPdfModal').style.display = 'none';
+        const resultsPdfModal = document.getElementById('resultsPdfModal');
+        resultsPdfModal.style.display = 'none';
+        resultsPdfModal.classList.remove('active-print');
     });
 
     document.getElementById('btnCloseResultsPdfFooter').addEventListener('click', () => {
-        document.getElementById('resultsPdfModal').style.display = 'none';
+        const resultsPdfModal = document.getElementById('resultsPdfModal');
+        resultsPdfModal.style.display = 'none';
+        resultsPdfModal.classList.remove('active-print');
     });
 
     // About Modal Events
