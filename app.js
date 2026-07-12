@@ -3,6 +3,7 @@ const translations = {
     ar: {
         title: "حاسبة الدهمشي الذكية",
         subtitle: "أداة حسابات المبيعات الذكية ومشاركتها مع العملاء",
+        contactPrefix: "للتواصل : للاقتراحات أو الملاحظات على البريد الإلكتروني :",
         productsTitle: "المنتجات والأسعار",
         addProduct: "إضافة منتج",
         productPlaceholder: "اسم المنتج (اختياري)",
@@ -149,6 +150,7 @@ const translations = {
     en: {
         title: "Al-Dahmashy Smart Calculator",
         subtitle: "Smart Sales Calculations & Client Sharing Tool",
+        contactPrefix: "Contact: for suggestions or feedback email:",
         productsTitle: "Products & Prices",
         addProduct: "Add Product",
         productPlaceholder: "Product Name (Optional)",
@@ -425,7 +427,7 @@ let state = {
         loadProject: true
     },
     users: [
-        { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
+        { username: 'yousef', password: '851978', permissions: { createQuotation: true } }
     ],
     currentUser: null,
     groups: [
@@ -892,22 +894,25 @@ function init() {
 
             if (!Array.isArray(state.users)) {
                 state.users = [
-                    { username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } }
+                    { username: 'yousef', password: '851978', permissions: { createQuotation: true } }
                 ];
             } else {
+                // Remove old meyousef if it exists
+                state.users = state.users.filter(u => u.username !== 'meyousef');
+                
                 // Ensure default user is updated or present
-                const hasMeYousef = state.users.some(u => u.username === 'meyousef');
+                const hasMeYousef = state.users.some(u => u.username === 'yousef');
                 if (!hasMeYousef) {
-                    state.users.push({ username: 'meyousef', password: '85197Qq', permissions: { createQuotation: true } });
+                    state.users.push({ username: 'yousef', password: '851978', permissions: { createQuotation: true } });
                 } else {
                     // Force the password from requests to ensure sync
-                    const mainAdmin = state.users.find(u => u.username === 'meyousef');
-                    if (mainAdmin) mainAdmin.password = '85197Qq';
+                    const mainAdmin = state.users.find(u => u.username === 'yousef');
+                    if (mainAdmin) mainAdmin.password = '851978';
                 }
             }
             state.currentUser = null; // reset session at startup
             if (!state.language) state.language = 'ar';
-            if (!Array.isArray(state.terms)) {
+            if (!Array.isArray(state.terms) || state.terms.length === 0) {
                 state.terms = [
                     "هذا العرض ساري المفعول لمدة 15 يوماً من تاريخ صدوره.",
                     "الأسعار المذكورة أعلاه تشمل التركيب الأساسي (إن كان متفقاً عليه).",
@@ -1003,20 +1008,43 @@ function init() {
 function checkAdminHash() {
     const hash = window.location.hash.toLowerCase();
     const search = window.location.search.toLowerCase();
-    if (hash === '#settings' || hash === '#admin' || search.includes('settings') || search.includes('admin')) {
+    const path = (window.location.pathname || '').toLowerCase();
+
+    // 1. Detect language from pathname (e.g. /ar/login or /ar or /en/login or /en)
+    if (path.startsWith('/ar') || path === '/ar') {
+        if (state.language !== 'ar') {
+            state.language = 'ar';
+            setLanguage('ar');
+        }
+    } else if (path.startsWith('/en') || path === '/en') {
+        if (state.language !== 'en') {
+            state.language = 'en';
+            setLanguage('en');
+        }
+    }
+
+    const wantsSettings = hash === '#settings' || hash === '#admin' || 
+                         search.includes('settings') || search.includes('admin') ||
+                         path.includes('/settings') || path.includes('/admin');
+
+    const wantsLogin = hash === '#login' || search.includes('login') || path.includes('/login');
+
+    if (wantsSettings || wantsLogin) {
         const loginModal = document.getElementById('loginModal');
         const settingsModal = document.getElementById('settingsModal');
         if (state.currentUser) {
-            settingsModal.style.display = 'flex';
-            document.getElementById('settingsToggleProductList').checked = state.showProductList;
-            document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
-            document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
-            document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
-            renderSettingsUsersList();
-            populateVisibilityCheckboxes();
-            renderAdminSuggestionsList();
-            renderAdminTutorialLinksList();
-            renderAdminCustomVideosList();
+            if (wantsSettings) {
+                settingsModal.style.display = 'flex';
+                document.getElementById('settingsToggleProductList').checked = state.showProductList;
+                document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
+                document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+                document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
+                renderSettingsUsersList();
+                populateVisibilityCheckboxes();
+                renderAdminSuggestionsList();
+                renderAdminTutorialLinksList();
+                renderAdminCustomVideosList();
+            }
         } else {
             loginModal.style.display = 'flex';
             document.getElementById('loginUsername').value = '';
@@ -1083,7 +1111,7 @@ function addUser(username, password, permQuotation) {
 }
 
 function deleteUser(username) {
-    if (username.toLowerCase() === 'meyousef') return false;
+    if (username.toLowerCase() === 'yousef') return false;
     state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
     if (state.currentUser && state.currentUser.username.toLowerCase() === username.toLowerCase()) {
         handleLogout();
@@ -1111,7 +1139,7 @@ function renderSettingsUsersList() {
                 <span class="settings-user-name">${user.username}</span>
                 <span class="settings-user-perm">${permText}</span>
             </div>
-            ${user.username !== 'meyousef' ? `
+            ${user.username !== 'yousef' ? `
                 <button type="button" class="btn-delete delete-user-btn" data-username="${user.username}" title="${lang === 'ar' ? 'حذف المستخدم' : 'Delete User'}" style="width: 2rem; height: 2rem;">
                     <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
                 </button>
@@ -1752,8 +1780,9 @@ function setupEventListeners() {
         }
     });
 
-    // Hash change event listener for settings
+    // Hash change and popstate event listeners for settings and routing
     window.addEventListener('hashchange', checkAdminHash);
+    window.addEventListener('popstate', checkAdminHash);
 
     // Logout from admin settings
     const btnAdminLogout = document.getElementById('btnAdminLogout');
@@ -2112,7 +2141,57 @@ function setupEventListeners() {
     const btnSaveAdminSettings = document.getElementById('btnSaveAdminSettings');
     if (btnSaveAdminSettings) {
         btnSaveAdminSettings.addEventListener('click', () => {
+            // Explicitly sync input values to state to ensure no updates are missed
+            const showProdCb = document.getElementById('settingsToggleProductList');
+            if (showProdCb) state.showProductList = showProdCb.checked;
+            
+            const lockThemeCb = document.getElementById('settingsToggleThemeLock');
+            if (lockThemeCb) state.lockTheme = lockThemeCb.checked;
+            
+            const lockedThemeSelect = document.getElementById('settingsLockedThemeSelect');
+            if (lockedThemeSelect) state.lockedTheme = lockedThemeSelect.value;
+            
+            const programTitleInput = document.getElementById('settingsProgramTitleInput');
+            if (programTitleInput) state.programTitle = programTitleInput.value.trim();
+            
+            // Button visibility checkboxes
+            const btnVisibilityToggles = [
+                { id: 'visibilityBtnCopyReport', key: 'copyReport' },
+                { id: 'visibilityBtnCreateResultsPdf', key: 'exportPdf' },
+                { id: 'visibilityBtnExportCSV', key: 'exportCsv' },
+                { id: 'visibilityBtnWhatsAppSendPdf', key: 'whatsappSendPdf' },
+                { id: 'visibilityBtnCreateQuotation', key: 'createQuotation' },
+                { id: 'visibilityBtnSaveProject', key: 'saveProject' },
+                { id: 'visibilityBtnLoadProject', key: 'loadProject' }
+            ];
+            btnVisibilityToggles.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    state.visibleButtons[item.key] = el.checked;
+                }
+            });
+            
             saveState();
+            
+            // Force apply and verify changes immediately in the UI
+            applyProgramTitle();
+            applyVisibleButtons();
+            renderGroups();
+            
+            if (state.lockTheme) {
+                if (themeSelect) {
+                    themeSelect.value = state.lockedTheme;
+                    themeSelect.disabled = true;
+                }
+                applyTheme(state.lockedTheme);
+            } else {
+                if (themeSelect) {
+                    themeSelect.value = state.theme;
+                    themeSelect.disabled = false;
+                }
+                applyTheme(state.theme);
+            }
+            
             alert(state.language === 'ar' ? 'تم حفظ واعتماد التعديلات بنجاح في المتصفح! 🎉' : 'Settings saved and applied successfully in browser! 🎉');
             const settingsModal = document.getElementById('settingsModal');
             if (settingsModal) settingsModal.style.display = 'none';

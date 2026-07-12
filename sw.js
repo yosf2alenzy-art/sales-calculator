@@ -1,14 +1,14 @@
-const CACHE_NAME = 'sales-calc-cache-v15';
+const CACHE_NAME = 'sales-calc-cache-v18';
 const ASSETS = [
-    './',
-    './index.html',
-    './style.css',
-    './app.js',
-    './manifest.json',
-    './icon-192.png',
-    './icon-512.png',
-    './screenshot.png',
-    './screenshot-mobile.png',
+    '/',
+    '/index.html',
+    '/style.css',
+    '/app.js',
+    '/manifest.json',
+    '/icon-192.png',
+    '/icon-512.png',
+    '/screenshot.png',
+    '/screenshot-mobile.png',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
