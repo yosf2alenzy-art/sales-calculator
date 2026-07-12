@@ -1286,14 +1286,42 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         position: static !important;
     }
     
-    .container, .modal-overlay, .toast, .top-bar, .settings-bar, header, .stats-container, #groupsContainer, #resultsSection, .action-grid, #footerCredit, .no-print {
+    /* Hide all elements that should not print */
+    body.printing-quote .container,
+    body.printing-quote #resultsPdfModal,
+    body.printing-quote #aboutModal,
+    body.printing-quote .toast,
+    body.printing-quote .top-bar,
+    body.printing-quote .settings-bar,
+    body.printing-quote header,
+    body.printing-quote .stats-container,
+    body.printing-quote #groupsContainer,
+    body.printing-quote #resultsSection,
+    body.printing-quote .action-grid,
+    body.printing-quote #footerCredit,
+    body.printing-quote .no-print,
+    
+    body.printing-results .container,
+    body.printing-results #quotationModal,
+    body.printing-results #aboutModal,
+    body.printing-results .toast,
+    body.printing-results .top-bar,
+    body.printing-results .settings-bar,
+    body.printing-results header,
+    body.printing-results .stats-container,
+    body.printing-results #groupsContainer,
+    body.printing-results #resultsSection,
+    body.printing-results .action-grid,
+    body.printing-results #footerCredit,
+    body.printing-results .no-print {
         display: none !important;
     }
 
-    /* Isolate and display the quotation or results modal */
-    #quotationModal, #resultsPdfModal {
+    /* Isolate and display the active print modal */
+    body.printing-quote #quotationModal,
+    body.printing-results #resultsPdfModal {
         position: static !important;
-        display: none !important;
+        display: block !important;
         width: 100% !important;
         height: auto !important;
         background: transparent !important;
@@ -1304,14 +1332,6 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         z-index: auto !important;
         overflow: visible !important;
         animation: none !important;
-    }
-
-    body.printing-quote #quotationModal {
-        display: block !important;
-    }
-
-    body.printing-results #resultsPdfModal {
-        display: block !important;
     }
 
     #quotationModal .modal-card, #resultsPdfModal .modal-card {

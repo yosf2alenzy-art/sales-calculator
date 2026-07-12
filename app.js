@@ -482,6 +482,8 @@ let state = {
     ]
 };
 
+let pendingPrintRedirect = null;
+
 // Unique ID Generator
 function generateId() {
     return '_' + Math.random().toString(36).substr(2, 9);
@@ -750,20 +752,16 @@ function executeWhatsAppSendPDF(phoneInputId) {
         document.body.classList.add('printing-results');
     }
 
+    const message = encodeURIComponent(`السلام عليكم، مرفق لكم ملف الـ PDF الخاص بالمعادلات وعرض السعر من حاسبة الدهمشي الذكية.`);
+    const whatsappUrl = cleanedPhone 
+        ? `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${message}`
+        : `https://api.whatsapp.com/send?text=${message}`;
+    
+    pendingPrintRedirect = whatsappUrl;
+
     setTimeout(() => {
         window.print();
-        setTimeout(() => {
-            document.body.classList.remove('printing-quote');
-            document.body.classList.remove('printing-results');
-            
-            // 3. Open WhatsApp link with cleaned prefilled text message
-            const message = encodeURIComponent(`السلام عليكم، مرفق لكم ملف الـ PDF الخاص بالمعادلات وعرض السعر من حاسبة الدهمشي الذكية.`);
-            const whatsappUrl = cleanedPhone 
-                ? `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${message}`
-                : `https://api.whatsapp.com/send?text=${message}`;
-            window.open(whatsappUrl, '_blank');
-        }, 1000);
-    }, 150);
+    }, 350);
 }
 
 // Load state from localStorage on init
@@ -2408,10 +2406,7 @@ function setupEventListeners() {
         document.body.classList.add('printing-quote');
         setTimeout(() => {
             window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-quote');
-            }, 1000);
-        }, 150);
+        }, 350);
     });
 
     // Results PDF Events
@@ -2444,10 +2439,7 @@ function setupEventListeners() {
         document.body.classList.add('printing-results');
         setTimeout(() => {
             window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-results');
-            }, 1000);
-        }, 150);
+        }, 350);
     });
 
     document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
@@ -2467,9 +2459,23 @@ function setupEventListeners() {
         document.getElementById('aboutModal').style.display = 'none';
     });
 
-    window.addEventListener('afterprint', () => {
+    const cleanupPrintClasses = () => {
         document.body.classList.remove('printing-quote');
         document.body.classList.remove('printing-results');
+        if (pendingPrintRedirect) {
+            const redirectUrl = pendingPrintRedirect;
+            pendingPrintRedirect = null;
+            window.open(redirectUrl, '_blank');
+        }
+    };
+
+    window.addEventListener('afterprint', cleanupPrintClasses);
+    
+    // Focus event fallback for mobile webviews where afterprint might not trigger correctly
+    window.addEventListener('focus', () => {
+        if (document.body.classList.contains('printing-quote') || document.body.classList.contains('printing-results')) {
+            setTimeout(cleanupPrintClasses, 500);
+        }
     });
 
     // Collapsible Report Toggle Event Listener

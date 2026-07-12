@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sales-calc-cache-v18';
+const CACHE_NAME = 'sales-calc-cache-v19';
 const ASSETS = [
     '/',
     '/index.html',

@@ -1293,14 +1293,42 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         position: static !important;
     }
     
-    .container, .modal-overlay, .toast, .top-bar, .settings-bar, header, .stats-container, #groupsContainer, #resultsSection, .action-grid, #footerCredit, .no-print {
+    /* Hide all elements that should not print */
+    body.printing-quote .container,
+    body.printing-quote #resultsPdfModal,
+    body.printing-quote #aboutModal,
+    body.printing-quote .toast,
+    body.printing-quote .top-bar,
+    body.printing-quote .settings-bar,
+    body.printing-quote header,
+    body.printing-quote .stats-container,
+    body.printing-quote #groupsContainer,
+    body.printing-quote #resultsSection,
+    body.printing-quote .action-grid,
+    body.printing-quote #footerCredit,
+    body.printing-quote .no-print,
+    
+    body.printing-results .container,
+    body.printing-results #quotationModal,
+    body.printing-results #aboutModal,
+    body.printing-results .toast,
+    body.printing-results .top-bar,
+    body.printing-results .settings-bar,
+    body.printing-results header,
+    body.printing-results .stats-container,
+    body.printing-results #groupsContainer,
+    body.printing-results #resultsSection,
+    body.printing-results .action-grid,
+    body.printing-results #footerCredit,
+    body.printing-results .no-print {
         display: none !important;
     }
 
-    /* Isolate and display the quotation or results modal */
-    #quotationModal, #resultsPdfModal {
+    /* Isolate and display the active print modal */
+    body.printing-quote #quotationModal,
+    body.printing-results #resultsPdfModal {
         position: static !important;
-        display: none !important;
+        display: block !important;
         width: 100% !important;
         height: auto !important;
         background: transparent !important;
@@ -1311,14 +1339,6 @@ input, select, .result-value, .new-subtotal, .discount-detail, .discount-number,
         z-index: auto !important;
         overflow: visible !important;
         animation: none !important;
-    }
-
-    body.printing-quote #quotationModal {
-        display: block !important;
-    }
-
-    body.printing-results #resultsPdfModal {
-        display: block !important;
     }
 
     #quotationModal .modal-card, #resultsPdfModal .modal-card {
@@ -3093,6 +3113,8 @@ let state = {
     ]
 };
 
+let pendingPrintRedirect = null;
+
 // Unique ID Generator
 function generateId() {
     return '_' + Math.random().toString(36).substr(2, 9);
@@ -3361,20 +3383,16 @@ function executeWhatsAppSendPDF(phoneInputId) {
         document.body.classList.add('printing-results');
     }
 
+    const message = encodeURIComponent(`السلام عليكم، مرفق لكم ملف الـ PDF الخاص بالمعادلات وعرض السعر من حاسبة الدهمشي الذكية.`);
+    const whatsappUrl = cleanedPhone 
+        ? `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${message}`
+        : `https://api.whatsapp.com/send?text=${message}`;
+    
+    pendingPrintRedirect = whatsappUrl;
+
     setTimeout(() => {
         window.print();
-        setTimeout(() => {
-            document.body.classList.remove('printing-quote');
-            document.body.classList.remove('printing-results');
-            
-            // 3. Open WhatsApp link with cleaned prefilled text message
-            const message = encodeURIComponent(`السلام عليكم، مرفق لكم ملف الـ PDF الخاص بالمعادلات وعرض السعر من حاسبة الدهمشي الذكية.`);
-            const whatsappUrl = cleanedPhone 
-                ? `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${message}`
-                : `https://api.whatsapp.com/send?text=${message}`;
-            window.open(whatsappUrl, '_blank');
-        }, 1000);
-    }, 150);
+    }, 350);
 }
 
 // Load state from localStorage on init
@@ -5019,10 +5037,7 @@ function setupEventListeners() {
         document.body.classList.add('printing-quote');
         setTimeout(() => {
             window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-quote');
-            }, 1000);
-        }, 150);
+        }, 350);
     });
 
     // Results PDF Events
@@ -5055,10 +5070,7 @@ function setupEventListeners() {
         document.body.classList.add('printing-results');
         setTimeout(() => {
             window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-results');
-            }, 1000);
-        }, 150);
+        }, 350);
     });
 
     document.getElementById('btnCloseResultsPdf').addEventListener('click', () => {
@@ -5078,9 +5090,23 @@ function setupEventListeners() {
         document.getElementById('aboutModal').style.display = 'none';
     });
 
-    window.addEventListener('afterprint', () => {
+    const cleanupPrintClasses = () => {
         document.body.classList.remove('printing-quote');
         document.body.classList.remove('printing-results');
+        if (pendingPrintRedirect) {
+            const redirectUrl = pendingPrintRedirect;
+            pendingPrintRedirect = null;
+            window.open(redirectUrl, '_blank');
+        }
+    };
+
+    window.addEventListener('afterprint', cleanupPrintClasses);
+    
+    // Focus event fallback for mobile webviews where afterprint might not trigger correctly
+    window.addEventListener('focus', () => {
+        if (document.body.classList.contains('printing-quote') || document.body.classList.contains('printing-results')) {
+            setTimeout(cleanupPrintClasses, 500);
+        }
     });
 
     // Collapsible Report Toggle Event Listener
