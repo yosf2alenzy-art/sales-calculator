@@ -145,7 +145,23 @@ const translations = {
         settingsButtonsVisibility: "إعدادات ظهور أزرار العمليات الكبرى",
         btnWhatsAppSendPdf: "إرسال عبر واتساب",
         waAlertTitle: "تنبيه لمستخدم الحاسبة",
-        waAlertBody: "سيتم الآن فتح نافذة طباعة التقرير لحفظه كملف PDF على جهازك أولاً. بعد حفظ الملف، يرجى إرفاقه وإرساله يدوياً للعميل في محادثة الواتساب التي ستفتح تلقائياً."
+        waAlertBody: "سيتم الآن فتح نافذة طباعة التقرير لحفظه كملف PDF على جهازك أولاً. بعد حفظ الملف، يرجى إرفاقه وإرساله يدوياً للعميل في محادثة الواتساب التي ستفتح تلقائياً.",
+        smartImportBtn: "القارئ الذكي ✨",
+        smartImportHeader: "القارئ الذكي للطلبات ✨",
+        tabTextTitle: "استيراد نصي (الواتساب)",
+        tabVoiceTitle: "الإملاء الصوتي الذكي 🎙️",
+        textImportDesc: "انسخ قائمة الطلبات من الواتساب (سواء كانت سطرية، مفصولة بفواصل، أو بكلمة \"و\") والصقها هنا:",
+        textImportPlaceholder: "مثال: بصل طماط خيار بيبسي لبن كاتشاب حار وآيسكريم فانيلا وبطاط",
+        voiceImportDesc: "انقر على الميكروفون وابدأ بنطق أسماء المنتجات (مثل: \"بصل، طماط، خيار، بيبسي\"):",
+        voiceStatusReady: "مستعد للتسجيل...",
+        voiceStatusListening: "جاري الاستماع... تحدث الآن 🎙️",
+        voiceStatusProcessing: "جاري معالجة الصوت...",
+        voiceStatusError: "حدث خطأ في التسجيل الصوتي.",
+        voiceStatusUnsupported: "متصفحك الحالي لا يدعم التعرف الصوتي.",
+        parsedPreviewTitle: "المنتجات المستخرجة للمعاينة:",
+        noImportItemsYet: "لم يتم استخراج أي منتجات بعد...",
+        btnImportConfirm: "تأكيد وإدراج للتسعير",
+        btnImportCancel: "إلغاء"
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -292,7 +308,23 @@ const translations = {
         settingsButtonsVisibility: "Action Buttons Visibility Settings",
         btnWhatsAppSendPdf: "Send via WhatsApp",
         waAlertTitle: "Reminder for user",
-        waAlertBody: "The print window will open to save the report as a PDF on your device first. After saving, please manually attach and send the file in the WhatsApp chat that opens automatically."
+        waAlertBody: "The print window will open to save the report as a PDF on your device first. After saving, please manually attach and send the file in the WhatsApp chat that opens automatically.",
+        smartImportBtn: "Smart Reader ✨",
+        smartImportHeader: "Smart List Reader ✨",
+        tabTextTitle: "Text Import (WhatsApp)",
+        tabVoiceTitle: "Smart Voice Dictation 🎙️",
+        textImportDesc: "Copy the list of requests from WhatsApp (whether newline, comma, or space-separated) and paste it here:",
+        textImportPlaceholder: "e.g., onions tomato cucumber pepsi milk hot ketchup and vanilla ice cream and potatoes",
+        voiceImportDesc: "Click the microphone and start speaking product names (e.g. \"onions, tomato, cucumber, pepsi\"): ",
+        voiceStatusReady: "Ready to record...",
+        voiceStatusListening: "Listening... Speak now 🎙️",
+        voiceStatusProcessing: "Processing audio...",
+        voiceStatusError: "An error occurred during voice recording.",
+        voiceStatusUnsupported: "Your current browser does not support Speech Recognition.",
+        parsedPreviewTitle: "Extracted Products Preview:",
+        noImportItemsYet: "No products extracted yet...",
+        btnImportConfirm: "Confirm & Insert for Pricing",
+        btnImportCancel: "Cancel"
     }
 };
 
@@ -2546,6 +2578,192 @@ function setupEventListeners() {
             triggerWhatsAppSendPDF('quoteCustomerPhone');
         });
     }
+
+    // Groups Smart Import Button Click
+    groupsContainer.addEventListener('click', (e) => {
+        const smartImportBtn = e.target.closest('.smart-import-btn');
+        if (smartImportBtn) {
+            const groupCard = smartImportBtn.closest('.group-card');
+            const gIndex = Array.from(groupsContainer.children).indexOf(groupCard);
+            openSmartImportModal(gIndex);
+        }
+    });
+
+    // Close Smart Import Modal
+    const smartImportModal = document.getElementById('smartImportModal');
+    const closeSmartImport = () => {
+        smartImportModal.style.display = 'none';
+        if (isSpeechRecording && speechRecognition) {
+            speechRecognition.stop();
+        }
+    };
+    document.getElementById('btnCloseSmartImport').addEventListener('click', closeSmartImport);
+    document.getElementById('btnCancelSmartImport').addEventListener('click', closeSmartImport);
+
+    // Tab switches
+    const tabTextImport = document.getElementById('tabTextImport');
+    const tabVoiceImport = document.getElementById('tabVoiceImport');
+    const contentTextImport = document.getElementById('contentTextImport');
+    const contentVoiceImport = document.getElementById('contentVoiceImport');
+
+    tabTextImport.addEventListener('click', () => {
+        tabTextImport.classList.add('active');
+        tabVoiceImport.classList.remove('active');
+        contentTextImport.style.display = 'block';
+        contentVoiceImport.style.display = 'none';
+        if (isSpeechRecording && speechRecognition) {
+            speechRecognition.stop();
+        }
+    });
+
+    tabVoiceImport.addEventListener('click', () => {
+        tabVoiceImport.classList.add('active');
+        tabTextImport.classList.remove('active');
+        contentVoiceImport.style.display = 'block';
+        contentTextImport.style.display = 'none';
+    });
+
+    // Text Area Input Parser listener
+    const importTextArea = document.getElementById('importTextArea');
+    importTextArea.addEventListener('input', (e) => {
+        parsedImportItems = parseTextItems(e.target.value);
+        updateImportBadges();
+    });
+
+    // Remove badge event listener delegation
+    document.getElementById('importBadgesContainer').addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('.remove-badge');
+        if (removeBtn) {
+            const index = parseInt(removeBtn.dataset.index, 10);
+            parsedImportItems.splice(index, 1);
+            updateImportBadges();
+            
+            // Sync text area if it was a manual text paste
+            if (tabTextImport.classList.contains('active')) {
+                importTextArea.value = parsedImportItems.join('، ');
+            }
+        }
+    });
+
+    // Voice dictation events
+    const btnVoiceRecord = document.getElementById('btnVoiceRecord');
+    const voiceWaves = document.getElementById('voiceWaves');
+    const voiceMicIcon = document.getElementById('voiceMicIcon');
+    const voiceStatusText = document.getElementById('voiceStatusText');
+
+    btnVoiceRecord.addEventListener('click', () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            voiceStatusText.setAttribute('data-i18n', 'voiceStatusUnsupported');
+            voiceStatusText.textContent = translations[state.language].voiceStatusUnsupported;
+            return;
+        }
+
+        if (!speechRecognition) {
+            speechRecognition = new SpeechRecognition();
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = false;
+            
+            speechRecognition.onstart = () => {
+                isSpeechRecording = true;
+                btnVoiceRecord.classList.add('recording');
+                voiceWaves.style.display = 'flex';
+                voiceMicIcon.className = 'fa-solid fa-square';
+                voiceStatusText.setAttribute('data-i18n', 'voiceStatusListening');
+                voiceStatusText.textContent = translations[state.language].voiceStatusListening;
+            };
+
+            speechRecognition.onend = () => {
+                isSpeechRecording = false;
+                btnVoiceRecord.classList.remove('recording');
+                voiceWaves.style.display = 'none';
+                voiceMicIcon.className = 'fa-solid fa-microphone';
+                voiceStatusText.setAttribute('data-i18n', 'voiceStatusReady');
+                voiceStatusText.textContent = translations[state.language].voiceStatusReady;
+            };
+
+            speechRecognition.onerror = (e) => {
+                console.error('Speech recognition error:', e);
+                voiceStatusText.setAttribute('data-i18n', 'voiceStatusError');
+                voiceStatusText.textContent = translations[state.language].voiceStatusError;
+            };
+
+            speechRecognition.onresult = (event) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                if (finalTranscript.trim()) {
+                    const newItems = parseTextItems(finalTranscript);
+                    newItems.forEach(item => {
+                        if (!parsedImportItems.includes(item)) {
+                            parsedImportItems.push(item);
+                        }
+                    });
+                    updateImportBadges();
+                }
+            };
+        }
+
+        speechRecognition.lang = state.language === 'ar' ? 'ar-SA' : 'en-US';
+
+        if (isSpeechRecording) {
+            speechRecognition.stop();
+        } else {
+            speechRecognition.start();
+        }
+    });
+
+    // Confirm Smart Import Action
+    document.getElementById('btnConfirmSmartImport').addEventListener('click', () => {
+        if (parsedImportItems.length === 0) {
+            closeSmartImport();
+            return;
+        }
+
+        const group = state.groups[currentImportGIndex];
+        if (!group) return;
+
+        // Initialize products array if missing
+        group.products = group.products || [];
+
+        // Save index of the first newly added product
+        const startFocusIndex = group.products.length;
+
+        // Add parsed items to products list
+        parsedImportItems.forEach(itemName => {
+            group.products.push({
+                id: generateId(),
+                name: itemName,
+                price: 0,
+                quantity: 1
+            });
+        });
+
+        saveState();
+        renderGroups();
+        calculate();
+        closeSmartImport();
+
+        // Auto-focus loop: Focus on the price field of the first newly added product row!
+        setTimeout(() => {
+            const groupCards = groupsContainer.querySelectorAll('.group-card');
+            const targetGroupCard = groupCards[currentImportGIndex];
+            if (targetGroupCard) {
+                const productRows = targetGroupCard.querySelectorAll('.product-row');
+                const firstNewRow = productRows[startFocusIndex];
+                if (firstNewRow) {
+                    const priceInput = firstNewRow.querySelector('.product-price-input');
+                    if (priceInput) {
+                        priceInput.focus();
+                        priceInput.select();
+                    }
+                }
+            }
+        }, 100);
+    });
 }
 
 // Apply dynamic program title updates
@@ -2729,11 +2947,16 @@ function renderGroups() {
             <div class="group-card-body" style="${group.collapsed ? 'display: none;' : ''}">
                 <!-- Products Section -->
                 <div style="margin-bottom: 1.5rem;">
-                    <div class="discounts-section-title" style="margin-bottom: 1rem;">
+                    <div class="discounts-section-title" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
                         <h2><i class="fa-solid fa-cart-shopping"></i> <span>${translations[lang].productsTitle}</span></h2>
-                        <button type="button" class="btn btn-secondary add-product-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;">
-                            <i class="fa-solid fa-plus"></i> <span>${translations[lang].addProduct}</span>
-                        </button>
+                        <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary add-product-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;">
+                                <i class="fa-solid fa-plus"></i> <span>${translations[lang].addProduct}</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary smart-import-btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem; border: 1px dashed var(--primary); color: var(--primary); background: transparent;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> <span>${translations[lang].smartImportBtn}</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="products-list-container" style="display: flex; flex-direction: column; gap: 0.85rem;">
                         <!-- Dynamic products rows go here -->
@@ -4226,6 +4449,124 @@ function renderAdminCustomVideosList() {
         row.appendChild(info);
         row.appendChild(deleteBtn);
         container.appendChild(row);
+    });
+}
+
+let currentImportGIndex = 0;
+let parsedImportItems = [];
+let speechRecognition = null;
+let isSpeechRecording = false;
+
+// Clean leading Arabic waw prefix from word
+function cleanArabicWawPrefix(word) {
+    word = word.trim();
+    // List of common Arabic words starting with Waw that we should NOT strip Waw from
+    const keepWaw = ["ورق", "ولد", "وفاء", "وطن", "وضوء", "وجه", "وقت", "وسام", "وجبة", "وصفة", "ورد", "وردة", "وبر", "وتد", "وتار", "وجع", "وحش", "وداد", "وديع", "وسادة", "وسخ", "وسط", "وسيط", "وصف", "وصل", "وصول", "وعد", "وفاة", "وفد", "وقود", "وقوف", "وكيل", "ولاء", "وليد", "وهب", "وهج", "وهم"];
+    if (word.startsWith('و') && word.length > 2) {
+        // Check if the first word itself is a known word starting with Waw
+        const firstWordOfItem = word.split(/\s+/)[0];
+        if (keepWaw.some(k => firstWordOfItem.startsWith(k))) {
+            return word;
+        }
+        return word.substring(1).trim();
+    }
+    return word;
+}
+
+// Parse text list of items
+function parseTextItems(text) {
+    if (!text) return [];
+    const trimmed = text.trim();
+    // Split by newlines, commas, semicolons, dashes, bullet points, or " و " / " أو " / " ثم "
+    const rawTokens = trimmed.split(/[\n\r،,؛;\-•*]|\s+و\s+|\s+أو\s+|\s+ثم\s+/);
+    let items = [];
+    
+    rawTokens.forEach(token => {
+        let cleaned = token.trim();
+        if (!cleaned) return;
+        cleaned = cleanArabicWawPrefix(cleaned);
+        if (cleaned) {
+            items.push(cleaned);
+        }
+    });
+    
+    // Fallback for space-separated single lines (like: "بصل طماط خيار")
+    if (items.length === 1 && trimmed.split(/\s+/).length > 1 && !trimmed.includes('،') && !trimmed.includes(',') && !trimmed.includes('\n') && !trimmed.includes('\r')) {
+        const words = trimmed.split(/\s+/);
+        items = [];
+        words.forEach(word => {
+            let cleaned = word.trim();
+            if (!cleaned) return;
+            cleaned = cleanArabicWawPrefix(cleaned);
+            if (cleaned) {
+                items.push(cleaned);
+            }
+        });
+    }
+    
+    return items;
+}
+
+// Open Smart Import dialog
+function openSmartImportModal(gIndex) {
+    currentImportGIndex = gIndex;
+    parsedImportItems = [];
+    
+    // Reset inputs
+    document.getElementById('importTextArea').value = '';
+    
+    // Reset tabs
+    document.getElementById('tabTextImport').classList.add('active');
+    document.getElementById('tabVoiceImport').classList.remove('active');
+    document.getElementById('contentTextImport').style.display = 'block';
+    document.getElementById('contentVoiceImport').style.display = 'none';
+    
+    // Stop recording if active
+    if (isSpeechRecording && speechRecognition) {
+        speechRecognition.stop();
+    }
+    
+    // Reset speech states
+    const recordBtn = document.getElementById('btnVoiceRecord');
+    recordBtn.classList.remove('recording');
+    document.getElementById('voiceWaves').style.display = 'none';
+    document.getElementById('voiceMicIcon').className = 'fa-solid fa-microphone';
+    document.getElementById('voiceStatusText').setAttribute('data-i18n', 'voiceStatusReady');
+    document.getElementById('voiceStatusText').textContent = translations[state.language].voiceStatusReady;
+    
+    updateImportBadges();
+    
+    const smartImportModal = document.getElementById('smartImportModal');
+    smartImportModal.style.display = 'flex';
+}
+
+// Update badges container
+function updateImportBadges() {
+    const container = document.getElementById('importBadgesContainer');
+    const noItemsText = document.getElementById('noImportItemsText');
+    const countBadge = document.getElementById('parsedCountBadge');
+    
+    // Remove existing badges except the "no items" text
+    const badges = container.querySelectorAll('.import-badge');
+    badges.forEach(b => b.remove());
+    
+    countBadge.textContent = parsedImportItems.length;
+    
+    if (parsedImportItems.length === 0) {
+        noItemsText.style.display = 'block';
+        return;
+    }
+    
+    noItemsText.style.display = 'none';
+    
+    parsedImportItems.forEach((item, index) => {
+        const badge = document.createElement('div');
+        badge.className = 'import-badge';
+        badge.innerHTML = `
+            <span>${item}</span>
+            <span class="remove-badge" data-index="${index}">&times;</span>
+        `;
+        container.appendChild(badge);
     });
 }
 

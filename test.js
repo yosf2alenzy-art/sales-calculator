@@ -4,7 +4,12 @@ const path = require('path');
 
 // Mock window and document
 global.window = {
-    addEventListener: () => {}
+    addEventListener: () => {},
+    location: { hash: '', search: '' }
+};
+global.sessionStorage = {
+    getItem: () => null,
+    setItem: () => {}
 };
 
 // Map to store elements for assertion checks
@@ -14,18 +19,32 @@ const dummyElement = (id = '') => {
     const el = {
         id: id,
         value: '',
+        checked: false,
+        disabled: false,
+        dataset: {},
         style: { display: '' },
         classList: {
             add: () => {},
             remove: () => {},
-            contains: () => {}
+            contains: () => false,
+            toggle: () => {}
         },
-        addEventListener: () => {},
-        appendChild: () => {},
-        setAttribute: () => {},
+        listeners: {},
+        addEventListener: function(event, callback) {
+            this.listeners[event] = callback;
+        },
+        trigger: function(event, ...args) {
+            if (this.listeners[event]) {
+                this.listeners[event](...args);
+            }
+        },
+        appendChild: () => dummyElement(),
+        getAttribute: (attr) => '',
+        setAttribute: (attr, val) => {},
         querySelector: () => dummyElement(),
         querySelectorAll: () => [dummyElement()],
         innerHTML: '',
+        outerHTML: '',
         textContent: ''
     };
     if (id) {
@@ -35,11 +54,13 @@ const dummyElement = (id = '') => {
 };
 
 global.document = {
+    body: dummyElement('body'),
     getElementById: (id) => {
         if (elementMap[id]) return elementMap[id];
         return dummyElement(id);
     },
-    querySelectorAll: () => [],
+    querySelector: () => dummyElement(),
+    querySelectorAll: () => [dummyElement()],
     createElement: (tag) => dummyElement(),
     documentElement: {
         dir: '',
@@ -60,10 +81,14 @@ let appJsContent = fs.readFileSync(appJsPath, 'utf8');
 appJsContent = appJsContent.replace('let state =', 'global.state =');
 appJsContent = appJsContent.replace('function calculate()', 'global.calculate = function calculate()');
 appJsContent = appJsContent.replace('function preciseRound(num)', 'global.preciseRound = function preciseRound(num)');
+appJsContent = appJsContent.replace('function init()', 'global.init = function init()');
 
 // We want to run app.js in this context
 // Let's eval it so that it registers the variables and functions on global
 eval(appJsContent);
+
+// Initialize application listeners and settings
+init();
 
 // Assert helper
 function assert(condition, message) {
@@ -134,4 +159,66 @@ assert(resFinalPrice.textContent.includes("11,500.00"), "Final price should be 1
 console.log(`preciseRound(29.175) = ${preciseRound(29.175)}`);
 assert(preciseRound(29.175) === 29.18, "preciseRound should round 29.175 to 29.18");
 
+// Test Scenario 2: Settings Save Validation
+console.log("Starting Settings Save & Sync unit tests...");
+global.alert = () => {}; // mock alert
+
+// Grab references to settings controls
+const saveBtn = elementMap['btnSaveAdminSettings'];
+const titleInput = elementMap['settingsProgramTitleInput'] || dummyElement('settingsProgramTitleInput');
+const showProductListCb = elementMap['settingsToggleProductList'] || dummyElement('settingsToggleProductList');
+const lockThemeCb = elementMap['settingsToggleThemeLock'] || dummyElement('settingsToggleThemeLock');
+const lockedThemeSelect = elementMap['settingsLockedThemeSelect'] || dummyElement('settingsLockedThemeSelect');
+
+// Configure checkboxes and inputs
+titleInput.value = 'حاسبة الدهمشي المميزة';
+showProductListCb.checked = false;
+lockThemeCb.checked = true;
+lockedThemeSelect.value = 'royal-dark';
+
+// Verify state before save
+assert(state.programTitle !== 'حاسبة الدهمشي المميزة', "State title should not be set yet");
+
+// Trigger save button click event handler
+assert(saveBtn && typeof saveBtn.listeners.click === 'function', "Save button click handler should be registered");
+saveBtn.trigger('click');
+
+// Assertions after save settings handler ran
+assert(state.programTitle === 'حاسبة الدهمشي المميزة', "State programTitle should be updated in state");
+assert(state.showProductList === false, "State showProductList should be updated to false");
+assert(state.lockTheme === true, "State lockTheme should be updated to true");
+assert(state.lockedTheme === 'royal-dark', "State lockedTheme should be updated to royal-dark");
+assert(elementMap['mainProgramTitle'].textContent === 'حاسبة الدهمشي المميزة', "Main title DOM text should be updated immediately");
+
+console.log("All settings unit tests passed successfully! 🎉");
+
+// Test Scenario 3: Smart Text Parser Validation
+console.log("Starting Smart Text Parser unit tests...");
+
+assert(typeof parseTextItems === 'function', "parseTextItems should be defined");
+assert(typeof cleanArabicWawPrefix === 'function', "cleanArabicWawPrefix should be defined");
+
+// Test cleanArabicWawPrefix
+assert(cleanArabicWawPrefix("وبصل") === "بصل", "Should strip leading Waw from وبصل");
+assert(cleanArabicWawPrefix("ورق عنب") === "ورق عنب", "Should NOT strip leading Waw from ورق عنب");
+assert(cleanArabicWawPrefix("وخيار حار") === "خيار حار", "Should strip leading Waw from وخيار حار");
+
+// Test parseTextItems with different separators
+// 1. Commas
+const list1 = parseTextItems("بصل، طماط، خيار");
+assert(list1.length === 3 && list1[0] === "بصل" && list1[1] === "طماط" && list1[2] === "خيار", "Should parse comma-separated list");
+
+// 2. Spaces (fallback)
+const list2 = parseTextItems("بصل طماط خيار وبطاط");
+assert(list2.length === 4 && list2[0] === "بصل" && list2[1] === "طماط" && list2[2] === "خيار" && list2[3] === "بطاط", "Should parse space-separated list and clean waw");
+
+// 3. Newlines
+const list3 = parseTextItems("بصل\nطماط\nخيار");
+assert(list3.length === 3 && list3[0] === "بصل" && list3[1] === "طماط" && list3[2] === "خيار", "Should parse newline-separated list");
+
+// 4. "و" conjunction with spaces
+const list4 = parseTextItems("بصل و طماط و خيار");
+assert(list4.length === 3 && list4[0] === "بصل" && list4[1] === "طماط" && list4[2] === "خيار", "Should parse list joined by space-waw-space");
+
+console.log("All text parser unit tests passed successfully! 🎉");
 console.log("All unit tests passed successfully! 🎉");

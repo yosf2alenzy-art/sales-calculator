@@ -14,13 +14,13 @@ try {
 
     // Replace CSS link with embedded styles
     html = html.replace(
-        '<link rel="stylesheet" href="style.css">',
+        '<link rel="stylesheet" href="/style.css">',
         () => `<style>\n${css}\n</style>`
     );
 
     // Replace JS script tag with embedded scripts
     html = html.replace(
-        '<script src="app.js"></script>',
+        '<script src="/app.js"></script>',
         () => `<script>\n${js}\n</script>`
     );
 

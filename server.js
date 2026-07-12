@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8080;
+const PORT = 3000;
 const PUBLIC_DIR = __dirname;
 
 const MIME_TYPES = {
@@ -17,11 +17,23 @@ const MIME_TYPES = {
     '.ico': 'image/x-icon'
 };
 
+function serveFile(filePath, res) {
+    const extname = path.extname(filePath);
+    let contentType = MIME_TYPES[extname] || 'application/octet-stream';
+    fs.readFile(filePath, (error, content) => {
+        if (error) {
+            res.writeHead(500);
+            res.end(`Server Error: ${error.code}`);
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content, 'utf-8');
+        }
+    });
+}
+
 const server = http.createServer((req, res) => {
-    let filePath = path.join(PUBLIC_DIR, req.url.split('?')[0]);
-    if (filePath === PUBLIC_DIR || filePath.endsWith(path.sep)) {
-        filePath = path.join(filePath, 'index.html');
-    }
+    const urlPath = req.url.split('?')[0];
+    let filePath = path.join(PUBLIC_DIR, urlPath);
     
     // Decode URI to support Arabic characters in filenames
     try {
@@ -30,25 +42,41 @@ const server = http.createServer((req, res) => {
         // ignore
     }
 
-    const extname = path.extname(filePath);
-    let contentType = MIME_TYPES[extname] || 'application/octet-stream';
-
-    fs.readFile(filePath, (error, content) => {
-        if (error) {
-            if (error.code === 'ENOENT') {
+    fs.stat(filePath, (err, stats) => {
+        if (!err && stats.isFile()) {
+            serveFile(filePath, res);
+        } else if (!err && stats.isDirectory()) {
+            const indexPath = path.join(filePath, 'index.html');
+            fs.stat(indexPath, (indexErr, indexStats) => {
+                if (!indexErr && indexStats.isFile()) {
+                    serveFile(indexPath, res);
+                } else {
+                    serveFile(path.join(PUBLIC_DIR, 'index.html'), res);
+                }
+            });
+        } else {
+            // File does not exist. If it has a file extension, return 404.
+            // Otherwise, route it to index.html (SPA routing).
+            const extname = path.extname(filePath);
+            if (extname) {
                 res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
                 res.end('<h1>404 Not Found / الملف غير موجود</h1>', 'utf-8');
             } else {
-                res.writeHead(500);
-                res.end(`Server Error: ${error.code}`);
+                serveFile(path.join(PUBLIC_DIR, 'index.html'), res);
             }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
         }
     });
+});
+
+server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+        console.error(`\nError: Port ${PORT} is already in use by another program.`);
+        console.error(`Please close the other program or choose another port in server.js.\n`);
+        process.exit(1);
+    }
 });
 
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
+
