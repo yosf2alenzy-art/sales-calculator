@@ -245,5 +245,15 @@ assert(q5.length === 1 && q5[0].name === "مكيف جري 5 طن" && q5[0].quant
 const voiceList = parseTextItems("ملفوف بنفسجي", false);
 assert(voiceList.length === 1 && voiceList[0].name === "ملفوف بنفسجي" && voiceList[0].quantity === 1, "Should not split spaces for voice input");
 
+// 6. Price and Synonym parsing tests
+const p1 = parseTextItems("مكيف جري 5 طن العدد 4 سعر 1500 ريال");
+assert(p1.length === 1 && p1[0].name === "مكيف جري 5 طن" && p1[0].quantity === 4 && p1[0].price === 1500, "Should parse 'مكيف جري 5 طن العدد 4 سعر 1500 ريال'");
+
+const p2 = parseTextItems("مكيف جري 5 طن بسعر 1500 ريال عدد 4");
+assert(p2.length === 1 && p2[0].name === "مكيف جري 5 طن" && p2[0].quantity === 4 && p2[0].price === 1500, "Should parse 'مكيف جري 5 طن بسعر 1500 ريال عدد 4'");
+
+const p3 = parseTextItems("تفاح الكمية 10 بقيمة 20.5");
+assert(p3.length === 1 && p3[0].name === "تفاح" && p3[0].quantity === 10 && p3[0].price === 20.5, "Should parse 'تفاح الكمية 10 بقيمة 20.5'");
+
 console.log("All text parser unit tests passed successfully! 🎉");
 console.log("All unit tests passed successfully! 🎉");

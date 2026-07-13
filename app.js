@@ -2641,7 +2641,14 @@ function setupEventListeners() {
             // Sync text area if it was a manual text paste
             if (tabTextImport.classList.contains('active')) {
                 importTextArea.value = parsedImportItems.map(item => {
-                    return item.quantity > 1 ? `${item.quantity} ${item.name}` : item.name;
+                    let str = item.name;
+                    if (item.quantity > 1) {
+                        str = `${item.quantity} ${str}`;
+                    }
+                    if (item.price > 0) {
+                        str = `${str} بسعر ${item.price}`;
+                    }
+                    return str;
                 }).join('، ');
             }
         }
@@ -4480,44 +4487,14 @@ function cleanArabicWawPrefix(word) {
 function parseQuantityAndName(token) {
     let name = token.trim();
     let quantity = 1;
-    
-    // 1. Check for explicit "عدد [رقم]" at the end
-    // Example: "مكيف جري 5 طن عدد 2" or "طماطم عدد 4"
-    const countAtEndRegex = /^(.*?)\s+عدد\s+(\d+)$/;
-    let match = name.match(countAtEndRegex);
-    if (match) {
-        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
-    }
-    
-    // 2. Check for number at the start: "[رقم] [اسم]"
-    // Example: "3 تفاح" or "15 علبة مناديل"
-    const numAtStartRegex = /^(\d+)\s+(.+)$/;
-    match = name.match(numAtStartRegex);
-    if (match) {
-        let qty = parseInt(match[1], 10);
-        let rest = match[2].trim();
-        // Remove unit if present at the start of rest, e.g. "علبة مناديل" -> "مناديل"
-        const unitStartRegex = /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)\s+(.+)$/;
-        let unitMatch = rest.match(unitStartRegex);
-        if (unitMatch) {
-            rest = unitMatch[2].trim();
-        }
-        return { name: rest, quantity: qty, hasQuantity: true };
-    }
+    let price = 0;
+    let hasQuantity = false;
+    let hasPrice = false;
 
-    // 3. Check for number + unit at the end: "[اسم] [رقم] [وحدة]"
-    // Example: "تفاح 5 حبات" or "طماطم 2 كرتون"
-    const numUnitAtEndRegex = /^(.*?)\s+(\d+)\s*(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/;
-    match = name.match(numUnitAtEndRegex);
-    if (match) {
-        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
-    }
-
-    // 4. Check for Arabic number word at start
-    // Example: "ثلاثة تفاح" or "خمس حبات بصل"
+    // Arabic numbers map
     const arabicNumbersMap = {
         'واحد': 1, 'واحدة': 1,
-        'اثنين': 2, 'اثنان': 2, 'زوج': 2,
+        'اثنين': 2, 'اثنان': 2, 'زوج': 2, 'حبتين': 2,
         'ثلاثة': 3, 'ثلاث': 3, 'تلاتة': 3, 'تلات': 3,
         'أربعة': 4, 'أربع': 4,
         'خمسة': 5, 'خمس': 5,
@@ -4527,54 +4504,118 @@ function parseQuantityAndName(token) {
         'تسعة': 9, 'تسع': 9,
         'عشرة': 10, 'عشر': 10
     };
-    
-    const words = name.split(/\s+/);
-    if (words.length > 1) {
-        const firstWord = words[0];
-        if (arabicNumbersMap[firstWord]) {
-            let qty = arabicNumbersMap[firstWord];
-            let restIndex = 1;
-            // check if second word is a unit like "حبات" or "كرتون"
-            if (words.length > 2 && /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(words[1])) {
-                restIndex = 2;
-            }
-            const restName = words.slice(restIndex).join(' ').trim();
-            if (restName) {
-                return { name: restName, quantity: qty, hasQuantity: true };
-            }
+
+    // 1. Explicit Quantity extraction with keywords
+    // Keywords: عدد, العدد, كمية, الكمية
+    const qtyKeywordsRegex = /(العدد|عدد|الكمية|كمية)\s*[:=-]?\s*(\d+|واحد|واحدة|اثنين|اثنان|زوج|حبتين|ثلاثة|ثلاث|تلاتة|تلات|أربعة|أربع|خمسة|خمس|ستة|ست|سبعة|سبع|ثمانية|ثمان|تمانية|تمان|تسعة|تسع|عشرة|عشر)/i;
+    let qtyMatch = name.match(qtyKeywordsRegex);
+    if (qtyMatch) {
+        hasQuantity = true;
+        const val = qtyMatch[2].trim();
+        if (arabicNumbersMap[val]) {
+            quantity = arabicNumbersMap[val];
+        } else {
+            quantity = parseInt(val, 10);
         }
+        // Remove from string
+        name = name.replace(qtyKeywordsRegex, '').replace(/\s+/g, ' ').trim();
     }
 
-    // 5. Check for Arabic number word or unit at end
-    // Example: "تفاح حبتين" or "تفاح ثلاث حبات"
-    if (words.length > 1) {
-        const lastWord = words[words.length - 1];
-        if (lastWord === 'حبتين' || lastWord === 'زوج') {
-            const restName = words.slice(0, words.length - 1).join(' ').trim();
-            return { name: restName, quantity: 2, hasQuantity: true };
+    // 2. Explicit Price extraction with keywords
+    // Keywords: السعر, سعر, بسعر, بقيمة, قيمة, القيمة
+    const priceKeywordsRegex = /(السعر|سعر|بسعر|بقيمة|قيمة|القيمة)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)?/i;
+    let priceMatch = name.match(priceKeywordsRegex);
+    if (priceMatch) {
+        hasPrice = true;
+        price = parseFloat(priceMatch[2]);
+        // Remove from string
+        name = name.replace(priceKeywordsRegex, '').replace(/\s+/g, ' ').trim();
+    }
+
+    // 3. Fallback/Legacy Quantity extraction on the remaining text (only if not already found via keywords)
+    if (!hasQuantity) {
+        // A. Check for number at the start: "[رقم] [اسم]"
+        const numAtStartRegex = /^(\d+)\s+(.+)$/;
+        let match = name.match(numAtStartRegex);
+        if (match) {
+            let qty = parseInt(match[1], 10);
+            let rest = match[2].trim();
+            const unitStartRegex = /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)\s+(.+)$/;
+            let unitMatch = rest.match(unitStartRegex);
+            if (unitMatch) {
+                rest = unitMatch[2].trim();
+            }
+            name = rest;
+            quantity = qty;
+            hasQuantity = true;
         }
-        
-        if (words.length > 2) {
-            const secondToLast = words[words.length - 2];
-            const last = words[words.length - 1];
-            if (/^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(last)) {
-                if (arabicNumbersMap[secondToLast]) {
-                    const restName = words.slice(0, words.length - 2).join(' ').trim();
-                    return { name: restName, quantity: arabicNumbersMap[secondToLast], hasQuantity: true };
+        // B. Check for number + unit at the end: "[اسم] [رقم] [وحدة]"
+        else {
+            const numUnitAtEndRegex = /^(.*?)\s+(\d+)\s*(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/;
+            match = name.match(numUnitAtEndRegex);
+            if (match) {
+                name = match[1].trim();
+                quantity = parseInt(match[2], 10);
+                hasQuantity = true;
+            }
+            // C. Check for Arabic number word at start
+            else {
+                const words = name.split(/\s+/);
+                if (words.length > 1) {
+                    const firstWord = words[0];
+                    if (arabicNumbersMap[firstWord]) {
+                        let qty = arabicNumbersMap[firstWord];
+                        let restIndex = 1;
+                        if (words.length > 2 && /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(words[1])) {
+                            restIndex = 2;
+                        }
+                        const restName = words.slice(restIndex).join(' ').trim();
+                        if (restName) {
+                            name = restName;
+                            quantity = qty;
+                            hasQuantity = true;
+                        }
+                    }
+                }
+                
+                // D. Check for Arabic number word or unit at end
+                if (!hasQuantity && words.length > 1) {
+                    const lastWord = words[words.length - 1];
+                    if (lastWord === 'حبتين' || lastWord === 'زوج') {
+                        name = words.slice(0, words.length - 1).join(' ').trim();
+                        quantity = 2;
+                        hasQuantity = true;
+                    } else if (words.length > 2) {
+                        const secondToLast = words[words.length - 2];
+                        const last = words[words.length - 1];
+                        if (/^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(last)) {
+                            if (arabicNumbersMap[secondToLast]) {
+                                name = words.slice(0, words.length - 2).join(' ').trim();
+                                quantity = arabicNumbersMap[secondToLast];
+                                hasQuantity = true;
+                            }
+                        }
+                    }
+                }
+
+                // E. Check for simple number at the end: "[اسم] [رقم]"
+                if (!hasQuantity) {
+                    const numAtEndRegex = /^(.*?)\s+(\d+)$/;
+                    match = name.match(numAtEndRegex);
+                    if (match) {
+                        name = match[1].trim();
+                        quantity = parseInt(match[2], 10);
+                        hasQuantity = true;
+                    }
                 }
             }
         }
     }
 
-    // 6. Check for simple number at the end: "[اسم] [رقم]"
-    // Example: "تفاح 3"
-    const numAtEndRegex = /^(.*?)\s+(\d+)$/;
-    match = name.match(numAtEndRegex);
-    if (match) {
-        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
-    }
-    
-    return { name, quantity, hasQuantity: false };
+    // Clean up any double spaces or trailing punctuation
+    name = name.replace(/\s+/g, ' ').replace(/^[,،;\-\s]+|[,،;\-\s]+$/g, '').trim();
+
+    return { name, quantity, price, hasQuantity, hasPrice };
 }
 
 // Parse text list of items
@@ -4673,8 +4714,9 @@ function updateImportBadges() {
         const badge = document.createElement('div');
         badge.className = 'import-badge';
         const quantityLabel = item.quantity > 1 ? ` (${item.quantity}x)` : '';
+        const priceLabel = item.price > 0 ? ` [${item.price} ر.س]` : '';
         badge.innerHTML = `
-            <span>${item.name}${quantityLabel}</span>
+            <span>${item.name}${quantityLabel}${priceLabel}</span>
             <span class="remove-badge" data-index="${index}">&times;</span>
         `;
         container.appendChild(badge);
