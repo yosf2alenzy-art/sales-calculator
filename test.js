@@ -169,12 +169,14 @@ const titleInput = elementMap['settingsProgramTitleInput'] || dummyElement('sett
 const showProductListCb = elementMap['settingsToggleProductList'] || dummyElement('settingsToggleProductList');
 const lockThemeCb = elementMap['settingsToggleThemeLock'] || dummyElement('settingsToggleThemeLock');
 const lockedThemeSelect = elementMap['settingsLockedThemeSelect'] || dummyElement('settingsLockedThemeSelect');
+const disableOfflineCb = elementMap['settingsToggleDisableOffline'] || dummyElement('settingsToggleDisableOffline');
 
 // Configure checkboxes and inputs
 titleInput.value = 'حاسبة الدهمشي المميزة';
 showProductListCb.checked = false;
 lockThemeCb.checked = true;
 lockedThemeSelect.value = 'royal-dark';
+disableOfflineCb.checked = true;
 
 // Verify state before save
 assert(state.programTitle !== 'حاسبة الدهمشي المميزة', "State title should not be set yet");
@@ -188,6 +190,7 @@ assert(state.programTitle === 'حاسبة الدهمشي المميزة', "State
 assert(state.showProductList === false, "State showProductList should be updated to false");
 assert(state.lockTheme === true, "State lockTheme should be updated to true");
 assert(state.lockedTheme === 'royal-dark', "State lockedTheme should be updated to royal-dark");
+assert(state.disableOffline === true, "State disableOffline should be updated to true");
 assert(elementMap['mainProgramTitle'].textContent === 'حاسبة الدهمشي المميزة', "Main title DOM text should be updated immediately");
 
 console.log("All settings unit tests passed successfully! 🎉");
@@ -255,5 +258,25 @@ assert(p2.length === 1 && p2[0].name === "مكيف جري 5 طن" && p2[0].quant
 const p3 = parseTextItems("تفاح الكمية 10 بقيمة 20.5");
 assert(p3.length === 1 && p3[0].name === "تفاح" && p3[0].quantity === 10 && p3[0].price === 20.5, "Should parse 'تفاح الكمية 10 بقيمة 20.5'");
 
+// Additional synonyms
+const p4 = parseTextItems("مكيف جري 5 طن عدد 6 قيمة 2500");
+assert(p4.length === 1 && p4[0].name === "مكيف جري 5 طن" && p4[0].quantity === 6 && p4[0].price === 2500, "Should parse 'قيمة'");
+
+const p5 = parseTextItems("مكيف جري 5 طن عدد 6 مبلغ 2500");
+assert(p5.length === 1 && p5[0].name === "مكيف جري 5 طن" && p5[0].quantity === 6 && p5[0].price === 2500, "Should parse 'مبلغ'");
+
+const p6 = parseTextItems("مكيف جري 5 طن عدد 6 بمبلغ 2500");
+assert(p6.length === 1 && p6[0].name === "مكيف جري 5 طن" && p6[0].quantity === 6 && p6[0].price === 2500, "Should parse 'بمبلغ'");
+
+const p7 = parseTextItems("مكيف جري 5 طن عدد 6 بي 2500");
+assert(p7.length === 1 && p7[0].name === "مكيف جري 5 طن" && p7[0].quantity === 6 && p7[0].price === 2500, "Should parse 'بي'");
+
+const p8 = parseTextItems("مكيف جري 5 طن عدد 6 بـ 2500");
+assert(p8.length === 1 && p8[0].name === "مكيف جري 5 طن" && p8[0].quantity === 6 && p8[0].price === 2500, "Should parse 'بـ'");
+
+const p9 = parseTextItems("مكيف جري 5 طن عدد 6 ب 2500");
+assert(p9.length === 1 && p9[0].name === "مكيف جري 5 طن" && p9[0].quantity === 6 && p9[0].price === 2500, "Should parse 'ب'");
+
 console.log("All text parser unit tests passed successfully! 🎉");
 console.log("All unit tests passed successfully! 🎉");
+

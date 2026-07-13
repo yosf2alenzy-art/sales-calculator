@@ -161,7 +161,10 @@ const translations = {
         parsedPreviewTitle: "المنتجات المستخرجة للمعاينة:",
         noImportItemsYet: "لم يتم استخراج أي منتجات بعد...",
         btnImportConfirm: "تأكيد وإدراج للتسعير",
-        btnImportCancel: "إلغاء"
+        btnImportCancel: "إلغاء",
+        settingsDisableOffline: "تعطيل العمل بالبرنامج بدون اتصال بالإنترنت",
+        offlineBlockedTitle: "عذراً، العمل بدون إنترنت معطل",
+        offlineBlockedDesc: "تم إيقاف صلاحية استخدام هذا التطبيق بدون اتصال بالإنترنت من قبل الإدارة. يرجى الاتصال بالإنترنت للمتابعة."
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -324,7 +327,10 @@ const translations = {
         parsedPreviewTitle: "Extracted Products Preview:",
         noImportItemsYet: "No products extracted yet...",
         btnImportConfirm: "Confirm & Insert for Pricing",
-        btnImportCancel: "Cancel"
+        btnImportCancel: "Cancel",
+        settingsDisableOffline: "Disable offline usage of the application",
+        offlineBlockedTitle: "Offline mode is disabled",
+        offlineBlockedDesc: "Using this application offline has been disabled by the administrator. Please connect to the internet to proceed."
     }
 };
 
@@ -447,6 +453,7 @@ let state = {
     applyVat: true,
     vatRate: 15,
     showProductList: true,
+    disableOffline: false,
     lockTheme: false,
     lockedTheme: 'luxury-gold',
     visibleButtons: {
@@ -898,6 +905,7 @@ function init() {
             
             // Migrate to v11 fields
             if (state.showProductList === undefined) state.showProductList = true;
+            if (state.disableOffline === undefined) state.disableOffline = false;
             if (state.lockTheme === undefined) state.lockTheme = false;
             if (state.lockedTheme === undefined) state.lockedTheme = 'luxury-gold';
             if (state.programTitle === undefined) state.programTitle = '';
@@ -1066,6 +1074,7 @@ function checkAdminHash() {
             if (wantsSettings) {
                 settingsModal.style.display = 'flex';
                 document.getElementById('settingsToggleProductList').checked = state.showProductList;
+                document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
                 document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
                 document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
                 document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
@@ -1797,6 +1806,7 @@ function setupEventListeners() {
             loginModal.style.display = 'none';
             document.getElementById('settingsModal').style.display = 'flex';
             document.getElementById('settingsToggleProductList').checked = state.showProductList;
+            document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
             document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
             document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
             document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
@@ -1827,6 +1837,7 @@ function setupEventListeners() {
     btnAdminSettings.addEventListener('click', () => {
         settingsModal.style.display = 'flex';
         document.getElementById('settingsToggleProductList').checked = state.showProductList;
+        document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
         document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
         document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
         document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
@@ -1845,6 +1856,12 @@ function setupEventListeners() {
         state.showProductList = document.getElementById('settingsToggleProductList').checked;
         saveState();
         renderGroups();
+    });
+
+    document.getElementById('settingsToggleDisableOffline').addEventListener('change', () => {
+        state.disableOffline = document.getElementById('settingsToggleDisableOffline').checked;
+        saveState();
+        checkOfflineStatus();
     });
 
     // Button visibility settings listeners
@@ -2175,6 +2192,9 @@ function setupEventListeners() {
             const showProdCb = document.getElementById('settingsToggleProductList');
             if (showProdCb) state.showProductList = showProdCb.checked;
             
+            const disableOfflineCb = document.getElementById('settingsToggleDisableOffline');
+            if (disableOfflineCb) state.disableOffline = disableOfflineCb.checked;
+            
             const lockThemeCb = document.getElementById('settingsToggleThemeLock');
             if (lockThemeCb) state.lockTheme = lockThemeCb.checked;
             
@@ -2202,6 +2222,7 @@ function setupEventListeners() {
             });
             
             saveState();
+            checkOfflineStatus();
             
             // Force apply and verify changes immediately in the UI
             applyProgramTitle();
@@ -2242,6 +2263,7 @@ function setupEventListeners() {
                 lockTheme: state.lockTheme || false,
                 lockedTheme: state.lockedTheme || 'luxury-gold',
                 showProductList: state.showProductList !== false,
+                disableOffline: !!state.disableOffline,
                 currency: state.currency || 'SAR',
                 customCurrency: state.customCurrency || '',
                 applyVat: state.applyVat !== false,
@@ -2297,6 +2319,7 @@ function setupEventListeners() {
                     if (data.lockTheme !== undefined) state.lockTheme = data.lockTheme;
                     if (data.lockedTheme !== undefined) state.lockedTheme = data.lockedTheme;
                     if (data.showProductList !== undefined) state.showProductList = data.showProductList;
+                    if (data.disableOffline !== undefined) state.disableOffline = data.disableOffline;
                     if (data.currency !== undefined) state.currency = data.currency;
                     if (data.customCurrency !== undefined) state.customCurrency = data.customCurrency;
                     if (data.applyVat !== undefined) state.applyVat = data.applyVat;
@@ -2774,6 +2797,29 @@ function setupEventListeners() {
             }
         }, 100);
     });
+
+    window.addEventListener('online', checkOfflineStatus);
+    window.addEventListener('offline', checkOfflineStatus);
+    checkOfflineStatus();
+}
+
+function checkOfflineStatus() {
+    const overlay = document.getElementById('offlineBlockedOverlay');
+    if (!overlay) return;
+    
+    if (state.disableOffline && !navigator.onLine) {
+        overlay.style.display = 'flex';
+        const titleEl = document.getElementById('offlineBlockedTitle');
+        const descEl = document.getElementById('offlineBlockedDesc');
+        if (titleEl) {
+            titleEl.textContent = translations[state.language].offlineBlockedTitle;
+        }
+        if (descEl) {
+            descEl.textContent = translations[state.language].offlineBlockedDesc;
+        }
+    } else {
+        overlay.style.display = 'none';
+    }
 }
 
 // Apply dynamic program title updates
@@ -4023,7 +4069,7 @@ async function handleStats() {
             const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}/up`);
             if (res.ok) {
                 const data = await res.json();
-                visitorCount = data.value;
+                visitorCount = data.count || data.value;
                 safeSetSessionStorage('visited', 'true');
             }
         }
@@ -4033,7 +4079,7 @@ async function handleStats() {
             const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}`);
             if (res.ok) {
                 const data = await res.json();
-                visitorCount = data.value;
+                visitorCount = data.count || data.value;
             }
         }
 
@@ -4053,7 +4099,7 @@ async function handleStats() {
         let usageCount;
         if (res.ok) {
             const data = await res.json();
-            usageCount = data.value;
+            usageCount = data.count || data.value;
         }
         if (usageCount) {
             const formatted = formatStatNumber(usageCount);
@@ -4078,7 +4124,7 @@ async function triggerUsageStats() {
             if (res.ok) {
                 const data = await res.json();
                 safeSetSessionStorage('used', 'true');
-                const formatted = formatStatNumber(data.value);
+                const formatted = formatStatNumber(data.count || data.value);
                 if (usageValEl) {
                     usageValEl.textContent = formatted;
                 }
@@ -4091,7 +4137,8 @@ async function triggerUsageStats() {
 }
 
 function formatStatNumber(num) {
-    return num.toLocaleString('en-US');
+    if (num === undefined || num === null) return "0";
+    return Number(num).toLocaleString('en-US');
 }
 
 // Dynamic script loader helper
@@ -4522,8 +4569,8 @@ function parseQuantityAndName(token) {
     }
 
     // 2. Explicit Price extraction with keywords
-    // Keywords: السعر, سعر, بسعر, بقيمة, قيمة, القيمة
-    const priceKeywordsRegex = /(السعر|سعر|بسعر|بقيمة|قيمة|القيمة)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)?/i;
+    // Keywords: السعر, سعر, بسعر, بقيمة, قيمة, القيمة, مبلغ, بمبلغ, بي, بـ, ب
+    const priceKeywordsRegex = /(?:^|\s)(السعر|سعر|بسعر|بقيمة|قيمة|القيمة|مبلغ|بمبلغ|بي|بـ|ب)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)?/i;
     let priceMatch = name.match(priceKeywordsRegex);
     if (priceMatch) {
         hasPrice = true;
