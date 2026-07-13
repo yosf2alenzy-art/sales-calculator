@@ -206,19 +206,44 @@ assert(cleanArabicWawPrefix("وخيار حار") === "خيار حار", "Should 
 // Test parseTextItems with different separators
 // 1. Commas
 const list1 = parseTextItems("بصل، طماط، خيار");
-assert(list1.length === 3 && list1[0] === "بصل" && list1[1] === "طماط" && list1[2] === "خيار", "Should parse comma-separated list");
+assert(list1.length === 3 && list1[0].name === "بصل" && list1[1].name === "طماط" && list1[2].name === "خيار", "Should parse comma-separated list");
 
 // 2. Spaces (fallback)
 const list2 = parseTextItems("بصل طماط خيار وبطاط");
-assert(list2.length === 4 && list2[0] === "بصل" && list2[1] === "طماط" && list2[2] === "خيار" && list2[3] === "بطاط", "Should parse space-separated list and clean waw");
+assert(list2.length === 4 && list2[0].name === "بصل" && list2[1].name === "طماط" && list2[2].name === "خيار" && list2[3].name === "بطاط", "Should parse space-separated list and clean waw");
 
 // 3. Newlines
 const list3 = parseTextItems("بصل\nطماط\nخيار");
-assert(list3.length === 3 && list3[0] === "بصل" && list3[1] === "طماط" && list3[2] === "خيار", "Should parse newline-separated list");
+assert(list3.length === 3 && list3[0].name === "بصل" && list3[1].name === "طماط" && list3[2].name === "خيار", "Should parse newline-separated list");
 
 // 4. "و" conjunction with spaces
 const list4 = parseTextItems("بصل و طماط و خيار");
-assert(list4.length === 3 && list4[0] === "بصل" && list4[1] === "طماط" && list4[2] === "خيار", "Should parse list joined by space-waw-space");
+assert(list4.length === 3 && list4[0].name === "بصل" && list4[1].name === "طماط" && list4[2].name === "خيار", "Should parse list joined by space-waw-space");
+
+// 5. Quantity parsing tests
+// Digit at start
+const q1 = parseTextItems("3 تفاح");
+assert(q1.length === 1 && q1[0].name === "تفاح" && q1[0].quantity === 3, "Should parse '3 تفاح' as 3 of تفاح");
+
+// Digit at end
+const q2 = parseTextItems("تفاح 5");
+assert(q2.length === 1 && q2[0].name === "تفاح" && q2[0].quantity === 5, "Should parse 'تفاح 5' as 5 of تفاح");
+
+// Arabic word at start
+const q3 = parseTextItems("خمسة بصل");
+assert(q3.length === 1 && q3[0].name === "بصل" && q3[0].quantity === 5, "Should parse 'خمسة بصل' as 5 of بصل");
+
+// Arabic word + unit at start
+const q4 = parseTextItems("ثلاث حبات طماطم");
+assert(q4.length === 1 && q4[0].name === "طماطم" && q4[0].quantity === 3, "Should parse 'ثلاث حبات طماطم' as 3 of طماطم");
+
+// Name with number inside and quantity at end
+const q5 = parseTextItems("مكيف جري 5 طن عدد 2");
+assert(q5.length === 1 && q5[0].name === "مكيف جري 5 طن" && q5[0].quantity === 2, "Should parse 'مكيف جري 5 طن عدد 2' as 2 of مكيف جري 5 طن");
+
+// Voice continuous speech (no splitSpaces)
+const voiceList = parseTextItems("ملفوف بنفسجي", false);
+assert(voiceList.length === 1 && voiceList[0].name === "ملفوف بنفسجي" && voiceList[0].quantity === 1, "Should not split spaces for voice input");
 
 console.log("All text parser unit tests passed successfully! 🎉");
 console.log("All unit tests passed successfully! 🎉");

@@ -2626,7 +2626,7 @@ function setupEventListeners() {
     // Text Area Input Parser listener
     const importTextArea = document.getElementById('importTextArea');
     importTextArea.addEventListener('input', (e) => {
-        parsedImportItems = parseTextItems(e.target.value);
+        parsedImportItems = parseTextItems(e.target.value, true);
         updateImportBadges();
     });
 
@@ -2640,7 +2640,9 @@ function setupEventListeners() {
             
             // Sync text area if it was a manual text paste
             if (tabTextImport.classList.contains('active')) {
-                importTextArea.value = parsedImportItems.join('، ');
+                importTextArea.value = parsedImportItems.map(item => {
+                    return item.quantity > 1 ? `${item.quantity} ${item.name}` : item.name;
+                }).join('، ');
             }
         }
     });
@@ -2696,9 +2698,10 @@ function setupEventListeners() {
                     }
                 }
                 if (finalTranscript.trim()) {
-                    const newItems = parseTextItems(finalTranscript);
+                    const newItems = parseTextItems(finalTranscript, false);
                     newItems.forEach(item => {
-                        if (!parsedImportItems.includes(item)) {
+                        const exists = parsedImportItems.some(existing => existing.name.toLowerCase() === item.name.toLowerCase());
+                        if (!exists) {
                             parsedImportItems.push(item);
                         }
                     });
@@ -2733,12 +2736,12 @@ function setupEventListeners() {
         const startFocusIndex = group.products.length;
 
         // Add parsed items to products list
-        parsedImportItems.forEach(itemName => {
+        parsedImportItems.forEach(item => {
             group.products.push({
                 id: generateId(),
-                name: itemName,
+                name: item.name,
                 price: 0,
-                quantity: 1
+                quantity: item.quantity
             });
         });
 
@@ -4473,8 +4476,109 @@ function cleanArabicWawPrefix(word) {
     return word;
 }
 
+// Parse quantity and name from a token
+function parseQuantityAndName(token) {
+    let name = token.trim();
+    let quantity = 1;
+    
+    // 1. Check for explicit "عدد [رقم]" at the end
+    // Example: "مكيف جري 5 طن عدد 2" or "طماطم عدد 4"
+    const countAtEndRegex = /^(.*?)\s+عدد\s+(\d+)$/;
+    let match = name.match(countAtEndRegex);
+    if (match) {
+        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
+    }
+    
+    // 2. Check for number at the start: "[رقم] [اسم]"
+    // Example: "3 تفاح" or "15 علبة مناديل"
+    const numAtStartRegex = /^(\d+)\s+(.+)$/;
+    match = name.match(numAtStartRegex);
+    if (match) {
+        let qty = parseInt(match[1], 10);
+        let rest = match[2].trim();
+        // Remove unit if present at the start of rest, e.g. "علبة مناديل" -> "مناديل"
+        const unitStartRegex = /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)\s+(.+)$/;
+        let unitMatch = rest.match(unitStartRegex);
+        if (unitMatch) {
+            rest = unitMatch[2].trim();
+        }
+        return { name: rest, quantity: qty, hasQuantity: true };
+    }
+
+    // 3. Check for number + unit at the end: "[اسم] [رقم] [وحدة]"
+    // Example: "تفاح 5 حبات" or "طماطم 2 كرتون"
+    const numUnitAtEndRegex = /^(.*?)\s+(\d+)\s*(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/;
+    match = name.match(numUnitAtEndRegex);
+    if (match) {
+        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
+    }
+
+    // 4. Check for Arabic number word at start
+    // Example: "ثلاثة تفاح" or "خمس حبات بصل"
+    const arabicNumbersMap = {
+        'واحد': 1, 'واحدة': 1,
+        'اثنين': 2, 'اثنان': 2, 'زوج': 2,
+        'ثلاثة': 3, 'ثلاث': 3, 'تلاتة': 3, 'تلات': 3,
+        'أربعة': 4, 'أربع': 4,
+        'خمسة': 5, 'خمس': 5,
+        'ستة': 6, 'ست': 6,
+        'سبعة': 7, 'سبع': 7,
+        'ثمانية': 8, 'ثمان': 8, 'تمانية': 8, 'تمان': 8,
+        'تسعة': 9, 'تسع': 9,
+        'عشرة': 10, 'عشر': 10
+    };
+    
+    const words = name.split(/\s+/);
+    if (words.length > 1) {
+        const firstWord = words[0];
+        if (arabicNumbersMap[firstWord]) {
+            let qty = arabicNumbersMap[firstWord];
+            let restIndex = 1;
+            // check if second word is a unit like "حبات" or "كرتون"
+            if (words.length > 2 && /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(words[1])) {
+                restIndex = 2;
+            }
+            const restName = words.slice(restIndex).join(' ').trim();
+            if (restName) {
+                return { name: restName, quantity: qty, hasQuantity: true };
+            }
+        }
+    }
+
+    // 5. Check for Arabic number word or unit at end
+    // Example: "تفاح حبتين" or "تفاح ثلاث حبات"
+    if (words.length > 1) {
+        const lastWord = words[words.length - 1];
+        if (lastWord === 'حبتين' || lastWord === 'زوج') {
+            const restName = words.slice(0, words.length - 1).join(' ').trim();
+            return { name: restName, quantity: 2, hasQuantity: true };
+        }
+        
+        if (words.length > 2) {
+            const secondToLast = words[words.length - 2];
+            const last = words[words.length - 1];
+            if (/^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(last)) {
+                if (arabicNumbersMap[secondToLast]) {
+                    const restName = words.slice(0, words.length - 2).join(' ').trim();
+                    return { name: restName, quantity: arabicNumbersMap[secondToLast], hasQuantity: true };
+                }
+            }
+        }
+    }
+
+    // 6. Check for simple number at the end: "[اسم] [رقم]"
+    // Example: "تفاح 3"
+    const numAtEndRegex = /^(.*?)\s+(\d+)$/;
+    match = name.match(numAtEndRegex);
+    if (match) {
+        return { name: match[1].trim(), quantity: parseInt(match[2], 10), hasQuantity: true };
+    }
+    
+    return { name, quantity, hasQuantity: false };
+}
+
 // Parse text list of items
-function parseTextItems(text) {
+function parseTextItems(text, splitSpaces = true) {
     if (!text) return [];
     const trimmed = text.trim();
     // Split by newlines, commas, semicolons, dashes, bullet points, or " و " / " أو " / " ثم "
@@ -4486,12 +4590,15 @@ function parseTextItems(text) {
         if (!cleaned) return;
         cleaned = cleanArabicWawPrefix(cleaned);
         if (cleaned) {
-            items.push(cleaned);
+            const parsed = parseQuantityAndName(cleaned);
+            if (parsed.name) {
+                items.push(parsed);
+            }
         }
     });
     
     // Fallback for space-separated single lines (like: "بصل طماط خيار")
-    if (items.length === 1 && trimmed.split(/\s+/).length > 1 && !trimmed.includes('،') && !trimmed.includes(',') && !trimmed.includes('\n') && !trimmed.includes('\r')) {
+    if (items.length === 1 && !items[0].hasQuantity && splitSpaces && trimmed.split(/\s+/).length > 1 && !trimmed.includes('،') && !trimmed.includes(',') && !trimmed.includes('\n') && !trimmed.includes('\r')) {
         const words = trimmed.split(/\s+/);
         items = [];
         words.forEach(word => {
@@ -4499,7 +4606,10 @@ function parseTextItems(text) {
             if (!cleaned) return;
             cleaned = cleanArabicWawPrefix(cleaned);
             if (cleaned) {
-                items.push(cleaned);
+                const parsed = parseQuantityAndName(cleaned);
+                if (parsed.name) {
+                    items.push(parsed);
+                }
             }
         });
     }
@@ -4562,8 +4672,9 @@ function updateImportBadges() {
     parsedImportItems.forEach((item, index) => {
         const badge = document.createElement('div');
         badge.className = 'import-badge';
+        const quantityLabel = item.quantity > 1 ? ` (${item.quantity}x)` : '';
         badge.innerHTML = `
-            <span>${item}</span>
+            <span>${item.name}${quantityLabel}</span>
             <span class="remove-badge" data-index="${index}">&times;</span>
         `;
         container.appendChild(badge);
