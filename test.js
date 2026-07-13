@@ -5,7 +5,12 @@ const path = require('path');
 // Mock window and document
 global.window = {
     addEventListener: () => {},
-    location: { hash: '', search: '' }
+    location: { hash: '', search: '' },
+    requestAnimationFrame: (cb) => {
+        if (typeof cb === 'function') {
+            setTimeout(() => cb(Date.now()), 0);
+        }
+    }
 };
 global.sessionStorage = {
     getItem: () => null,

@@ -476,12 +476,8 @@ let state = {
             products: [
                 { id: generateId(), name: '', price: '', quantity: '' }
             ],
-            discounts: [
-                { id: generateId(), type: 'percent', value: 35 },
-                { id: generateId(), type: 'percent', value: 5 },
-                { id: generateId(), type: 'percent', value: 5 }
-            ],
-            activePresetId: 'preset_1',
+            discounts: [],
+            activePresetId: '',
             collapsed: false
         }
     ],
@@ -805,8 +801,12 @@ function executeWhatsAppSendPDF(phoneInputId) {
 
 // Load state from localStorage on init
 function init() {
-    let savedState = safeGetLocalStorage('sales_calculator_state_v13');
+    let savedState = safeGetLocalStorage('sales_calculator_state_v14');
     let migrated = false;
+    if (!savedState) {
+        savedState = safeGetLocalStorage('sales_calculator_state_v13');
+        if (savedState) migrated = true;
+    }
     if (!savedState) {
         savedState = safeGetLocalStorage('sales_calculator_state_v12');
         if (savedState) migrated = true;
@@ -836,17 +836,24 @@ function init() {
                         id: 'group_1',
                         name: state.language === 'ar' ? 'المجموعة الأولى' : 'Group One',
                         products: state.products || [{ id: generateId(), name: '', price: '', quantity: '' }],
-                        discounts: state.discounts || [
-                            { id: generateId(), type: 'percent', value: 35 },
-                            { id: generateId(), type: 'percent', value: 5 },
-                            { id: generateId(), type: 'percent', value: 5 }
-                        ],
-                        activePresetId: state.activePresetId || 'preset_1'
+                        discounts: [],
+                        activePresetId: ''
                     }
                 ];
                 delete state.products;
                 delete state.discounts;
                 delete state.activePresetId;
+            } else if (migrated) {
+                // Reset workspace groups to the new clean default (no discounts) on migration
+                state.groups = [
+                    {
+                        id: 'group_1',
+                        name: state.language === 'ar' ? 'المجموعة الأولى' : 'Group One',
+                        products: [{ id: generateId(), name: '', price: '', quantity: '' }],
+                        discounts: [],
+                        activePresetId: ''
+                    }
+                ];
             }
 
             // Verify structure of groups
@@ -856,12 +863,8 @@ function init() {
                         id: 'group_1',
                         name: state.language === 'ar' ? 'المجموعة الأولى' : 'Group One',
                         products: [{ id: generateId(), name: '', price: '', quantity: '' }],
-                        discounts: [
-                            { id: generateId(), type: 'percent', value: 35 },
-                            { id: generateId(), type: 'percent', value: 5 },
-                            { id: generateId(), type: 'percent', value: 5 }
-                        ],
-                        activePresetId: 'preset_1'
+                        discounts: [],
+                        activePresetId: ''
                     }
                 ];
             }
@@ -3646,7 +3649,7 @@ function calculate() {
 
 // Save state to localStorage
 function saveState() {
-    safeSetLocalStorage('sales_calculator_state_v13', JSON.stringify(state));
+    safeSetLocalStorage('sales_calculator_state_v14', JSON.stringify(state));
 }
 
 // Export calculations data to a highly compatible Excel CSV spreadsheet
@@ -4046,6 +4049,33 @@ function showToast(lang) {
 
 
 // Helper to call CounterAPI with local caching for robust fallbacks
+// Helper to parse formatted string like "1,248" to number
+function parseFormattedNumber(str) {
+    if (!str) return 0;
+    return parseInt(str.toString().replace(/,/g, ''), 10) || 0;
+}
+
+// Smooth count-up animation for stats values
+function animateCounter(element, start, end, duration = 1200) {
+    if (!element) return;
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        // Easing: easeOutQuad
+        const progressEased = progress * (2 - progress);
+        const value = Math.floor(progressEased * (end - start) + start);
+        element.textContent = formatStatNumber(value);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            element.textContent = formatStatNumber(end);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Helper to call CounterAPI with local caching for robust fallbacks
 async function handleStats() {
     const namespace = "yousef_aldahmashy_calculators";
     const visitorKey = "visitor_count";
@@ -4054,18 +4084,29 @@ async function handleStats() {
     const visitorValEl = document.getElementById('visitorCountVal');
     const usageValEl = document.getElementById('usageCountVal');
 
-    // 0. Load last known values from localStorage immediately to prevent layout shifts or empty state
-    const cachedVisitors = safeGetLocalStorage('last_known_visitors') || "1,248";
-    const cachedUsage = safeGetLocalStorage('last_known_usage') || "954";
+    // 0. Load last known values from localStorage immediately to prevent layout shifts
+    const cachedVisitorsStr = safeGetLocalStorage('last_known_visitors') || "1,248";
+    const cachedUsageStr = safeGetLocalStorage('last_known_usage') || "954";
 
-    if (visitorValEl) visitorValEl.textContent = cachedVisitors;
-    if (usageValEl) usageValEl.textContent = cachedUsage;
+    let localVisitors = parseFormattedNumber(cachedVisitorsStr);
+    let localUsage = parseFormattedNumber(cachedUsageStr);
 
-    // 1. Handle Visitor Count
+    // 0b. Increment visitor count locally on new session to give instant visual feedback
+    const isNewVisitorSession = !safeGetSessionStorage('visited');
+    if (isNewVisitorSession) {
+        localVisitors += 1;
+        safeSetLocalStorage('last_known_visitors', formatStatNumber(localVisitors));
+    }
+
+    // 0c. Trigger initial premium odometer/count-up animation
+    animateCounter(visitorValEl, 0, localVisitors, 1200);
+    animateCounter(usageValEl, 0, localUsage, 1200);
+
+    // 1. Handle Visitor Count from Server
     try {
-        let visitorCount;
-        if (!safeGetSessionStorage('visited')) {
-            // First time in this session, increment
+        let visitorCount = null;
+        if (isNewVisitorSession) {
+            // First time in this session, increment on server
             const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}/up`);
             if (res.ok) {
                 const data = await res.json();
@@ -4075,7 +4116,7 @@ async function handleStats() {
         }
         
         if (!visitorCount) {
-            // Get current count
+            // Get current count from server
             const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}`);
             if (res.ok) {
                 const data = await res.json();
@@ -4083,32 +4124,31 @@ async function handleStats() {
             }
         }
 
-        if (visitorCount) {
-            const formatted = formatStatNumber(visitorCount);
-            if (visitorValEl) visitorValEl.textContent = formatted;
-            safeSetLocalStorage('last_known_visitors', formatted);
+        if (visitorCount && visitorCount > localVisitors) {
+            // Animate from current local count to fresh server count smoothly
+            animateCounter(visitorValEl, localVisitors, visitorCount, 800);
+            safeSetLocalStorage('last_known_visitors', formatStatNumber(visitorCount));
         }
     } catch (e) {
         console.error("Error loading visitor count:", e);
-        // Retains cached value
+        // Fallback: We already incremented and animated locally, so the user sees a valid count!
     }
 
-    // 2. Handle Usage Count (Get current value)
+    // 2. Handle Usage Count from Server
     try {
         const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${usageKey}`);
-        let usageCount;
+        let usageCount = null;
         if (res.ok) {
             const data = await res.json();
             usageCount = data.count || data.value;
         }
-        if (usageCount) {
-            const formatted = formatStatNumber(usageCount);
-            if (usageValEl) usageValEl.textContent = formatted;
-            safeSetLocalStorage('last_known_usage', formatted);
+        if (usageCount && usageCount > localUsage) {
+            animateCounter(usageValEl, localUsage, usageCount, 800);
+            safeSetLocalStorage('last_known_usage', formatStatNumber(usageCount));
         }
     } catch (e) {
         console.error("Error loading usage count:", e);
-        // Retains cached value
+        // Fallback: Retains animated local count
     }
 }
 
@@ -4118,26 +4158,38 @@ async function triggerUsageStats() {
     const usageKey = "usage_count";
     const usageValEl = document.getElementById('usageCountVal');
 
+    const cachedUsageStr = safeGetLocalStorage('last_known_usage') || "954";
+    let localUsage = parseFormattedNumber(cachedUsageStr);
+
     if (!safeGetSessionStorage('used')) {
+        // Increment locally first for instant premium feedback
+        localUsage += 1;
+        safeSetLocalStorage('last_known_usage', formatStatNumber(localUsage));
+        if (usageValEl) {
+            usageValEl.textContent = formatStatNumber(localUsage);
+        }
+        safeSetSessionStorage('used', 'true');
+
+        // Increment on server
         try {
             const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${usageKey}/up`);
             if (res.ok) {
                 const data = await res.json();
-                safeSetSessionStorage('used', 'true');
-                const formatted = formatStatNumber(data.count || data.value);
-                if (usageValEl) {
-                    usageValEl.textContent = formatted;
+                const serverCount = data.count || data.value;
+                if (serverCount && serverCount > localUsage) {
+                    animateCounter(usageValEl, localUsage, serverCount, 600);
+                    safeSetLocalStorage('last_known_usage', formatStatNumber(serverCount));
                 }
-                safeSetLocalStorage('last_known_usage', formatted);
             }
         } catch (e) {
             console.error("Error incrementing usage count:", e);
+            // Fallback: Local increment stands, so UI remains updated!
         }
     }
 }
 
 function formatStatNumber(num) {
-    if (num === undefined || num === null) return "0";
+    if (num === undefined || num === null || isNaN(num)) return "0";
     return Number(num).toLocaleString('en-US');
 }
 
