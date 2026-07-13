@@ -2770,7 +2770,7 @@ function setupEventListeners() {
             group.products.push({
                 id: generateId(),
                 name: item.name,
-                price: 0,
+                price: item.price > 0 ? item.price : '',
                 quantity: item.quantity
             });
         });
