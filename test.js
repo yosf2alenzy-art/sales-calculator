@@ -277,6 +277,15 @@ assert(p8.length === 1 && p8[0].name === "مكيف جري 5 طن" && p8[0].quant
 const p9 = parseTextItems("مكيف جري 5 طن عدد 6 ب 2500");
 assert(p9.length === 1 && p9[0].name === "مكيف جري 5 طن" && p9[0].quantity === 6 && p9[0].price === 2500, "Should parse 'ب'");
 
+const p10 = parseTextItems("مكيف بيتك", false);
+assert(p10.length === 1 && p10[0].name === "مكيف بيسك", "Should replace 'مكيف بيتك' with 'مكيف بيسك'");
+
+const p11 = parseTextItems("مكيف جري 5 طن عدد 5 800 ريال", false);
+assert(p11.length === 1 && p11[0].name === "مكيف جري 5 طن" && p11[0].quantity === 5 && p11[0].price === 800, "Should parse 'مكيف جري 5 طن عدد 5 800 ريال'");
+
+const p12 = parseTextItems("مكيف بيسك 500 ريال", false);
+assert(p12.length === 1 && p12[0].name === "مكيف بيسك" && p12[0].price === 500, "Should parse 'مكيف بيسك 500 ريال'");
+
 console.log("All text parser unit tests passed successfully! 🎉");
 console.log("All unit tests passed successfully! 🎉");
 

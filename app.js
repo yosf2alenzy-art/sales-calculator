@@ -4533,6 +4533,10 @@ function cleanArabicWawPrefix(word) {
 // Parse quantity and name from a token
 function parseQuantityAndName(token) {
     let name = token.trim();
+    
+    // Voice replacement: replace misheard AC brands or similar
+    name = name.replace(/(مكيف|المكيف)\s+بيتك/g, '$1 بيسك');
+
     let quantity = 1;
     let price = 0;
     let hasQuantity = false;
@@ -4577,6 +4581,15 @@ function parseQuantityAndName(token) {
         price = parseFloat(priceMatch[2]);
         // Remove from string
         name = name.replace(priceKeywordsRegex, '').replace(/\s+/g, ' ').trim();
+    }
+
+    // 2b. Price extraction by currency suffix (e.g. 500 ريال)
+    const priceCurrencyRegex = /(?:^|\s)(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)/i;
+    let currencyMatch = name.match(priceCurrencyRegex);
+    if (!hasPrice && currencyMatch) {
+        hasPrice = true;
+        price = parseFloat(currencyMatch[1]);
+        name = name.replace(priceCurrencyRegex, '').replace(/\s+/g, ' ').trim();
     }
 
     // 3. Fallback/Legacy Quantity extraction on the remaining text (only if not already found via keywords)
