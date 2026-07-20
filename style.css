@@ -1854,5 +1854,68 @@ body.theme-elegant-light .import-badge {
     100% { transform: scale(1); opacity: 0.9; }
 }
 
+/* Audio File Drop Zone & Audio Player Styling */
+.audio-drop-zone {
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    background: rgba(212, 175, 55, 0.03);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.audio-drop-zone:hover, .audio-drop-zone.dragover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.audio-speed-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.audio-speed-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
+}
+
+.audio-speed-btn.active {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+body.theme-elegant-light .audio-speed-btn {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-secondary);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.theme-elegant-light .audio-speed-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+body.theme-elegant-light .audio-drop-zone {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: var(--primary);
+}
+
+
 
 

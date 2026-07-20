@@ -158,13 +158,30 @@ const translations = {
         voiceStatusProcessing: "جاري معالجة الصوت...",
         voiceStatusError: "حدث خطأ في التسجيل الصوتي.",
         voiceStatusUnsupported: "متصفحك الحالي لا يدعم التعرف الصوتي.",
+        tabAudioFileTitle: "رفع مقطع صوتي 🎵",
+        audioFileDesc: "قم برفع وتسجيل مقطع صوتي من الواتساب أو الجهاز لتفريغه آلياً والتأكد من سلامة الطلبات:",
+        btnSelectAudioFile: "اضغط هنا أو اسحب مقطع صوتي من الواتساب / الجهاز",
+        audioSupportedFormats: "الصيغ المدعومة: MP3, OGG, M4A, OPUS, WAV, WEBM",
+        btnChangeAudio: "تغيير المقطع",
+        lblAudioSpeed: "سرعة التسمع:",
+        btnAudioTranscribeAuto: "تفريغ الصوت آلياً ⚡",
+        audioLinkInputLabel: "أو أدخل رابط مقطع صوتي مباشر / أي رابط (تفريغ صوتي من الرابط 🔗):",
+        audioUrlInputPlaceholder: "https://example.com/audio.mp3 أو رابط Google Drive...",
+        btnTranscribeUrl: "تفريغ من الرابط ⚡",
+        audioTranscribeDesc: "مربع تفريغ النص الصوتي (تأكد من سلامة التفريغ والتعديل عليه بكل سهولة):",
+        audioTranscribePlaceholder: "النص المفرغ من المقطع الصوتي سيظهر هنا تلقائياً، أو يمكنك كتابته وتعديله مباشرةً...",
+        audioFileLoaded: "تم تحميل المقطع الصوتي بنجاح!",
+        noAudioFileSelected: "لم يتم اختيار مقطع صوتي بعد...",
+        voiceStatusTranscribing: "جاري استماع وتفريغ المقطع الصوتي...",
         parsedPreviewTitle: "المنتجات المستخرجة للمعاينة:",
         noImportItemsYet: "لم يتم استخراج أي منتجات بعد...",
         btnImportConfirm: "تأكيد وإدراج للتسعير",
         btnImportCancel: "إلغاء",
         settingsDisableOffline: "تعطيل العمل بالبرنامج بدون اتصال بالإنترنت",
         offlineBlockedTitle: "عذراً، العمل بدون إنترنت معطل",
-        offlineBlockedDesc: "تم إيقاف صلاحية استخدام هذا التطبيق بدون اتصال بالإنترنت من قبل الإدارة. يرجى الاتصال بالإنترنت للمتابعة."
+        offlineBlockedDesc: "تم إيقاف صلاحية استخدام هذا التطبيق بدون اتصال بالإنترنت من قبل الإدارة. يرجى الاتصال بالإنترنت للمتابعة.",
+        targetFinalPriceLabel: "تعديل مبلغ النتيجة النهائية مباشرة (حاسبة الخصم العكسي ⚡):",
+        btnApplyReverseDiscount: "تطبيق الخصم على الحسابات ⚡"
     },
     en: {
         title: "Al-Dahmashy Smart Calculator",
@@ -324,13 +341,30 @@ const translations = {
         voiceStatusProcessing: "Processing audio...",
         voiceStatusError: "An error occurred during voice recording.",
         voiceStatusUnsupported: "Your current browser does not support Speech Recognition.",
+        tabAudioFileTitle: "Upload Audio File 🎵",
+        audioFileDesc: "Upload a voice note from WhatsApp or device to transcribe automatically and check orders accuracy:",
+        btnSelectAudioFile: "Click here or drag an audio file from WhatsApp / Device",
+        audioSupportedFormats: "Supported formats: MP3, OGG, M4A, OPUS, WAV, WEBM",
+        btnChangeAudio: "Change Audio",
+        lblAudioSpeed: "Playback Speed:",
+        btnAudioTranscribeAuto: "Transcribe Automatically ⚡",
+        audioLinkInputLabel: "Or enter an audio clip URL / link (Audio Transcription from link 🔗):",
+        audioUrlInputPlaceholder: "https://example.com/audio.mp3 or Google Drive link...",
+        btnTranscribeUrl: "Transcribe from Link ⚡",
+        audioTranscribeDesc: "Audio Transcription Area (Verify transcription accuracy & edit easily):",
+        audioTranscribePlaceholder: "Transcribed audio text will appear here automatically, or you can type/edit it directly...",
+        audioFileLoaded: "Audio file loaded successfully!",
+        noAudioFileSelected: "No audio file selected yet...",
+        voiceStatusTranscribing: "Listening and transcribing audio clip...",
         parsedPreviewTitle: "Extracted Products Preview:",
         noImportItemsYet: "No products extracted yet...",
         btnImportConfirm: "Confirm & Insert for Pricing",
         btnImportCancel: "Cancel",
         settingsDisableOffline: "Disable offline usage of the application",
         offlineBlockedTitle: "Offline mode is disabled",
-        offlineBlockedDesc: "Using this application offline has been disabled by the administrator. Please connect to the internet to proceed."
+        offlineBlockedDesc: "Using this application offline has been disabled by the administrator. Please connect to the internet to proceed.",
+        targetFinalPriceLabel: "Edit Grand Final Price Directly (Reverse Discount Calculator ⚡):",
+        btnApplyReverseDiscount: "Apply Discount to Calculation ⚡"
     }
 };
 
@@ -2629,14 +2663,18 @@ function setupEventListeners() {
     // Tab switches
     const tabTextImport = document.getElementById('tabTextImport');
     const tabVoiceImport = document.getElementById('tabVoiceImport');
+    const tabAudioFileImport = document.getElementById('tabAudioFileImport');
     const contentTextImport = document.getElementById('contentTextImport');
     const contentVoiceImport = document.getElementById('contentVoiceImport');
+    const contentAudioFileImport = document.getElementById('contentAudioFileImport');
 
     tabTextImport.addEventListener('click', () => {
         tabTextImport.classList.add('active');
         tabVoiceImport.classList.remove('active');
+        if (tabAudioFileImport) tabAudioFileImport.classList.remove('active');
         contentTextImport.style.display = 'block';
         contentVoiceImport.style.display = 'none';
+        if (contentAudioFileImport) contentAudioFileImport.style.display = 'none';
         if (isSpeechRecording && speechRecognition) {
             speechRecognition.stop();
         }
@@ -2645,9 +2683,268 @@ function setupEventListeners() {
     tabVoiceImport.addEventListener('click', () => {
         tabVoiceImport.classList.add('active');
         tabTextImport.classList.remove('active');
+        if (tabAudioFileImport) tabAudioFileImport.classList.remove('active');
         contentVoiceImport.style.display = 'block';
         contentTextImport.style.display = 'none';
+        if (contentAudioFileImport) contentAudioFileImport.style.display = 'none';
     });
+
+    if (tabAudioFileImport) {
+        tabAudioFileImport.addEventListener('click', () => {
+            tabAudioFileImport.classList.add('active');
+            tabTextImport.classList.remove('active');
+            tabVoiceImport.classList.remove('active');
+            if (contentAudioFileImport) contentAudioFileImport.style.display = 'block';
+            contentTextImport.style.display = 'none';
+            contentVoiceImport.style.display = 'none';
+            if (isSpeechRecording && speechRecognition) {
+                speechRecognition.stop();
+            }
+        });
+    }
+
+    // Audio file import elements
+    const importAudioFile = document.getElementById('importAudioFile');
+    const audioDropZone = document.getElementById('audioDropZone');
+    const audioPlayerCard = document.getElementById('audioPlayerCard');
+    const audioFileName = document.getElementById('audioFileName');
+    const audioFileSize = document.getElementById('audioFileSize');
+    const audioElement = document.getElementById('audioElement');
+    const btnAudioChangeFile = document.getElementById('btnAudioChangeFile');
+    const btnAudioTranscribeAuto = document.getElementById('btnAudioTranscribeAuto');
+    const audioTranscribeTextArea = document.getElementById('audioTranscribeTextArea');
+
+    let currentSelectedAudioFile = null;
+
+    const triggerServerTranscription = async (file) => {
+        if (!file) return;
+        if (audioTranscribeTextArea) {
+            audioTranscribeTextArea.value = state.language === 'ar' ? 'جاري تفريغ المقطع الصوتي آلياً عبر الذكاء الاصطناعي... ⏳' : 'Transcribing audio clip automatically... ⏳';
+        }
+        if (btnAudioTranscribeAuto) {
+            btnAudioTranscribeAuto.disabled = true;
+            btnAudioTranscribeAuto.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.language === 'ar' ? 'جاري التفريغ...' : 'Transcribing...'}</span>`;
+        }
+
+        const startSpeechRecognitionFallback = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                if (audioTranscribeTextArea && audioTranscribeTextArea.value.includes('جاري')) {
+                    audioTranscribeTextArea.value = '';
+                }
+                return;
+            }
+            if (audioElement && audioElement.src) {
+                audioElement.play();
+            }
+            const rec = new SpeechRecognition();
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.lang = state.language === 'ar' ? 'ar-SA' : 'en-US';
+            rec.onresult = (event) => {
+                let currentTranscript = '';
+                for (let i = 0; i < event.results.length; ++i) {
+                    currentTranscript += event.results[i][0].transcript + ' ';
+                }
+                if (currentTranscript.trim()) {
+                    if (audioTranscribeTextArea) audioTranscribeTextArea.value = currentTranscript.trim();
+                    parsedImportItems = parseTextItems(currentTranscript, true);
+                    updateImportBadges();
+                }
+            };
+            rec.onerror = (e) => console.log('Audio transcribe rec error:', e);
+            rec.start();
+            if (audioElement) {
+                audioElement.onended = () => {
+                    rec.stop();
+                };
+            }
+        };
+
+        try {
+            const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/octet-stream' },
+                body: file
+            });
+            const data = await response.json();
+            if (data && data.success && data.text) {
+                if (audioTranscribeTextArea) audioTranscribeTextArea.value = data.text;
+                parsedImportItems = parseTextItems(data.text, true);
+                updateImportBadges();
+            } else {
+                startSpeechRecognitionFallback();
+            }
+        } catch (err) {
+            console.error('API Transcribe error:', err);
+            startSpeechRecognitionFallback();
+        } finally {
+            if (btnAudioTranscribeAuto) {
+                btnAudioTranscribeAuto.disabled = false;
+                btnAudioTranscribeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>${translations[state.language].btnAudioTranscribeAuto}</span>`;
+            }
+        }
+    };
+
+    const handleAudioFileSelected = (file) => {
+        if (!file) return;
+        const validExtensions = ['.mp3', '.ogg', '.opus', '.m4a', '.wav', '.webm', '.aac', '.flac'];
+        const fileName = file.name || 'audio_clip.ogg';
+        const isAudioType = file.type.startsWith('audio/') || validExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+        
+        if (!isAudioType) {
+            alert(state.language === 'ar' ? 'يرجى اختيار ملف صوتي صالح (MP3, OGG, M4A...)' : 'Please select a valid audio file.');
+            return;
+        }
+
+        currentSelectedAudioFile = file;
+        const sizeKb = Math.round(file.size / 1024);
+        if (audioFileName) audioFileName.textContent = fileName;
+        if (audioFileSize) audioFileSize.textContent = `(${sizeKb} KB)`;
+        
+        const fileUrl = URL.createObjectURL(file);
+        if (audioElement) audioElement.src = fileUrl;
+        if (audioPlayerCard) audioPlayerCard.style.display = 'flex';
+        
+        if (audioTranscribeTextArea) audioTranscribeTextArea.focus();
+
+        // Trigger automatic AI transcription
+        triggerServerTranscription(file);
+    };
+
+    if (audioDropZone) {
+        audioDropZone.addEventListener('click', () => importAudioFile.click());
+        audioDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            audioDropZone.classList.add('dragover');
+        });
+        audioDropZone.addEventListener('dragleave', () => audioDropZone.classList.remove('dragover'));
+        audioDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            audioDropZone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleAudioFileSelected(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    if (importAudioFile) {
+        importAudioFile.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleAudioFileSelected(e.target.files[0]);
+            }
+        });
+    }
+
+    if (btnAudioChangeFile) {
+        btnAudioChangeFile.addEventListener('click', () => importAudioFile.click());
+    }
+
+    // Audio Speed Controls
+    const speedBtns = document.querySelectorAll('.audio-speed-btn');
+    speedBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            speedBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const speed = parseFloat(btn.dataset.speed || 1);
+            if (audioElement) audioElement.playbackRate = speed;
+        });
+    });
+
+    // Auto transcribe audio playback button
+    if (btnAudioTranscribeAuto) {
+        btnAudioTranscribeAuto.addEventListener('click', () => {
+            if (audioElement && audioElement.src) {
+                audioElement.play();
+            }
+            if (currentSelectedAudioFile) {
+                triggerServerTranscription(currentSelectedAudioFile);
+            }
+        });
+    }
+
+    // URL Audio Transcribe logic
+    const audioUrlInput = document.getElementById('audioUrlInput');
+    const btnAudioTranscribeUrl = document.getElementById('btnAudioTranscribeUrl');
+
+    const triggerServerUrlTranscription = async (url) => {
+        if (!url || !url.startsWith('http')) {
+            alert(state.language === 'ar' ? 'يرجى إدخال رابط صوتي صالح يبدأ بـ http:// أو https://' : 'Please enter a valid audio URL starting with http:// or https://');
+            return;
+        }
+
+        if (audioTranscribeTextArea) {
+            audioTranscribeTextArea.value = state.language === 'ar' ? 'جاري تحميل وتفريغ المقطع الصوتي من الرابط آلياً عبر الذكاء الاصطناعي... ⏳' : 'Downloading & transcribing audio clip from URL automatically via AI... ⏳';
+        }
+
+        const activeBtn = btnAudioTranscribeUrl || btnAudioTranscribeAuto;
+        if (activeBtn) {
+            activeBtn.disabled = true;
+            activeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${state.language === 'ar' ? 'جاري التفريغ...' : 'Transcribing...'}</span>`;
+        }
+
+        // Try setting audio element source if playable link
+        if (audioElement) {
+            audioElement.src = url;
+            if (audioFileName) audioFileName.textContent = url.split('/').pop().split('?')[0] || 'audio_link';
+            if (audioFileSize) audioFileSize.textContent = '(رابط مباشر)';
+            if (audioPlayerCard) audioPlayerCard.style.display = 'flex';
+        }
+
+        try {
+            const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url })
+            });
+            const data = await response.json();
+            if (data && data.success && data.text) {
+                if (audioTranscribeTextArea) audioTranscribeTextArea.value = data.text;
+                parsedImportItems = parseTextItems(data.text, true);
+                updateImportBadges();
+            } else {
+                const errorMsg = data && data.error ? data.error : (state.language === 'ar' ? 'تعذر تفريغ الصوت من الرابط' : 'Failed to transcribe audio from URL');
+                if (audioTranscribeTextArea) audioTranscribeTextArea.value = `❌ ${errorMsg}`;
+                alert(errorMsg);
+            }
+        } catch (err) {
+            console.error('API Transcribe URL error:', err);
+            if (audioTranscribeTextArea) audioTranscribeTextArea.value = state.language === 'ar' ? '❌ حدث خطأ أثناء الاتصال بسيرفر التفريغ' : '❌ Error connecting to transcription server';
+        } finally {
+            if (btnAudioTranscribeUrl) {
+                btnAudioTranscribeUrl.disabled = false;
+                btnAudioTranscribeUrl.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>${translations[state.language].btnTranscribeUrl || 'تفريغ من الرابط ⚡'}</span>`;
+            }
+            if (btnAudioTranscribeAuto) {
+                btnAudioTranscribeAuto.disabled = false;
+                btnAudioTranscribeAuto.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>${translations[state.language].btnAudioTranscribeAuto}</span>`;
+            }
+        }
+    };
+
+    if (btnAudioTranscribeUrl) {
+        btnAudioTranscribeUrl.addEventListener('click', () => {
+            const url = audioUrlInput ? audioUrlInput.value.trim() : '';
+            triggerServerUrlTranscription(url);
+        });
+    }
+
+    if (audioUrlInput) {
+        audioUrlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                triggerServerUrlTranscription(audioUrlInput.value.trim());
+            }
+        });
+    }
+
+    // Audio Transcribe Textarea Input listener
+    if (audioTranscribeTextArea) {
+        audioTranscribeTextArea.addEventListener('input', (e) => {
+            parsedImportItems = parseTextItems(e.target.value, true);
+            updateImportBadges();
+        });
+    }
 
     // Text Area Input Parser listener
     const importTextArea = document.getElementById('importTextArea');
@@ -2667,6 +2964,17 @@ function setupEventListeners() {
             // Sync text area if it was a manual text paste
             if (tabTextImport.classList.contains('active')) {
                 importTextArea.value = parsedImportItems.map(item => {
+                    let str = item.name;
+                    if (item.quantity > 1) {
+                        str = `${item.quantity} ${str}`;
+                    }
+                    if (item.price > 0) {
+                        str = `${str} بسعر ${item.price}`;
+                    }
+                    return str;
+                }).join('، ');
+            } else if (tabAudioFileImport && tabAudioFileImport.classList.contains('active') && audioTranscribeTextArea) {
+                audioTranscribeTextArea.value = parsedImportItems.map(item => {
                     let str = item.name;
                     if (item.quantity > 1) {
                         str = `${item.quantity} ${str}`;
@@ -2765,6 +3073,11 @@ function setupEventListeners() {
         // Initialize products array if missing
         group.products = group.products || [];
 
+        // Clear default empty product row if it's the only row in the group
+        if (group.products.length === 1 && (!group.products[0].name || !group.products[0].name.trim()) && (!group.products[0].price || group.products[0].price === '')) {
+            group.products = [];
+        }
+
         // Save index of the first newly added product
         const startFocusIndex = group.products.length;
 
@@ -2774,7 +3087,7 @@ function setupEventListeners() {
                 id: generateId(),
                 name: item.name,
                 price: item.price > 0 ? item.price : '',
-                quantity: item.quantity
+                quantity: item.quantity || 1
             });
         });
 
@@ -2800,6 +3113,42 @@ function setupEventListeners() {
             }
         }, 100);
     });
+
+    // Interactive Target Price Input Listener
+    const targetInputEl = document.getElementById('targetFinalPriceInput');
+    if (targetInputEl) {
+        targetInputEl.addEventListener('input', updateReverseDiscountCalculation);
+        targetInputEl.addEventListener('change', updateReverseDiscountCalculation);
+        targetInputEl.addEventListener('focus', () => {
+            targetInputEl.select();
+            updateReverseDiscountCalculation();
+        });
+    }
+
+    // Apply Reverse Discount Button Listener
+    const btnApplyReverse = document.getElementById('btnApplyReverseDiscount');
+    if (btnApplyReverse) {
+        btnApplyReverse.addEventListener('click', () => {
+            if (calculatedReverseDiscountPct > 0 && state.groups && state.groups.length > 0) {
+                const roundedPct = parseFloat(calculatedReverseDiscountPct.toFixed(2));
+                state.groups.forEach(g => {
+                    g.discounts = [
+                        {
+                            id: generateId(),
+                            type: 'percent',
+                            value: roundedPct
+                        }
+                    ];
+                });
+                saveState();
+                renderGroups();
+                calculate();
+                
+                const badge = document.getElementById('reverseDiscountBadge');
+                if (badge) badge.style.display = 'none';
+            }
+        });
+    }
 
     window.addEventListener('online', checkOfflineStatus);
     window.addEventListener('offline', checkOfflineStatus);
@@ -3555,6 +3904,17 @@ function calculate() {
     const grandFinalNet = preciseRound(grandNetSum + vatAmount);
     grandFinalPrice.textContent = `${formatNumber(grandFinalNet)} ${currency}`;
 
+    // Update target final price input box if user is not currently typing in it
+    const targetInput = document.getElementById('targetFinalPriceInput');
+    const targetCurrencyLabel = document.getElementById('targetPriceCurrencyLabel');
+    if (targetCurrencyLabel) targetCurrencyLabel.textContent = currency;
+
+    if (targetInput && document.activeElement !== targetInput) {
+        targetInput.value = grandFinalNet > 0 ? formatNumber(grandFinalNet) : '';
+        const badge = document.getElementById('reverseDiscountBadge');
+        if (badge) badge.style.display = 'none';
+    }
+
     // Update Deal Dashboard Section
     const totalStructureValue = grandOriginalTotalValue + vatAmount;
     
@@ -3644,6 +4004,61 @@ function calculate() {
         legendVatPct.textContent = `(0%)`;
         legendSavedVal.textContent = `0.00 ${currency}`;
         legendSavedPct.textContent = `(0%)`;
+    }
+}
+
+// Reverse Effective Discount Calculation (Interactive Final Total Editor)
+let calculatedReverseDiscountPct = 0;
+
+function updateReverseDiscountCalculation() {
+    const targetInput = document.getElementById('targetFinalPriceInput');
+    const badge = document.getElementById('reverseDiscountBadge');
+    const pctVal = document.getElementById('reverseDiscountPctVal');
+    const amtVal = document.getElementById('reverseDiscountAmtVal');
+    
+    if (!targetInput || !badge) return;
+
+    const currency = getActiveCurrency();
+    const rawVal = toEnglishDigits(targetInput.value.replace(/,/g, '').trim());
+    const targetFinal = parseFloat(rawVal);
+
+    // Calculate grandOriginalSum from all products across all groups
+    let grandOriginalSum = 0;
+    if (state.groups) {
+        state.groups.forEach(g => {
+            if (g.products) {
+                g.products.forEach(p => {
+                    const qty = parseInt(p.quantity, 10) || 1;
+                    const price = parseFloat(p.price) || 0;
+                    grandOriginalSum += price * qty;
+                });
+            }
+        });
+    }
+
+    if (isNaN(targetFinal) || targetFinal <= 0 || grandOriginalSum <= 0) {
+        badge.style.display = 'none';
+        calculatedReverseDiscountPct = 0;
+        return;
+    }
+
+    let targetNetBeforeVat = targetFinal;
+    if (state.applyVat && state.vatRate > 0) {
+        targetNetBeforeVat = targetFinal / (1 + state.vatRate / 100);
+    }
+
+    const targetDiscountAmt = grandOriginalSum - targetNetBeforeVat;
+    const trueDiscountPct = (targetDiscountAmt / grandOriginalSum) * 100;
+    calculatedReverseDiscountPct = trueDiscountPct;
+
+    if (trueDiscountPct < 0) {
+        badge.style.display = 'flex';
+        pctVal.textContent = `0.00% (زيادة بالسعر)`;
+        amtVal.textContent = `0 ${currency}`;
+    } else {
+        badge.style.display = 'flex';
+        pctVal.textContent = `${trueDiscountPct.toFixed(2)}%`;
+        amtVal.textContent = `${formatNumber(preciseRound(targetDiscountAmt))} ${currency}`;
     }
 }
 
@@ -4582,191 +4997,175 @@ function cleanArabicWawPrefix(word) {
     return word;
 }
 
-// Parse quantity and name from a token
-function parseQuantityAndName(token) {
-    let name = token.trim();
-    
-    // Voice replacement: replace misheard AC brands or similar
-    name = name.replace(/(مكيف|المكيف)\s+بيتك/g, '$1 بيسك');
+const wordNumMap = {
+    'واحد': 1, 'واحدة': 1, 'طن': 1,
+    'اثنين': 2, 'اثنان': 2, 'حبتين': 2, 'زوج': 2, 'طنيين': 2, 'طنين': 2,
+    'ثلاثة': 3, 'ثلاث': 3, 'تلاتة': 3, 'تلات': 3,
+    'أربعة': 4, 'أربع': 4, 'اربعة': 4, 'اربع': 4,
+    'خمسة': 5, 'خمس': 5,
+    'ستة': 6, 'ست': 6,
+    'سبعة': 7, 'سبع': 7,
+    'ثمانية': 8, 'ثمان': 8, 'تمانية': 8, 'تمان': 8, 'ثمانة': 8, 'ثمانه': 8,
+    'تسعة': 9, 'تسع': 9,
+    'عشرة': 10, 'عشر': 10,
+    'عشرين': 20, 'ثلاثين': 30, 'تلاتين': 30, 'أربعين': 40, 'اربعين': 40,
+    'خمسين': 50, 'ستين': 60, 'سبعين': 70, 'ثمانين': 80, 'تمانين': 80, 'تسعين': 90,
+    'مية': 100, 'مائة': 100, 'ميتين': 200, 'ألف': 1000, 'الف': 1000, 'آلاف': 1000, 'الاف': 1000
+};
 
-    let quantity = 1;
+function parseArabicNumberWords(phrase) {
+    if (!phrase) return 0;
+    const clean = phrase.trim();
+    if (/^\d+(?:\.\d+)?$/.test(clean)) return parseFloat(clean);
+
+    const words = clean.split(/\s+/);
+    let total = 0;
+    let current = 0;
+
+    words.forEach(w => {
+        const val = wordNumMap[w];
+        if (val !== undefined) {
+            if (val === 1000) {
+                total += (current || 1) * 1000;
+                current = 0;
+            } else if (val === 100 || val === 200) {
+                total += val;
+            } else {
+                current += val;
+            }
+        } else if (/^\d+(?:\.\d+)?$/.test(w)) {
+            current += parseFloat(w);
+        }
+    });
+    return total + current;
+}
+
+function parseItemChunk(chunk) {
+    let text = chunk.trim();
+
+    // 1. Identify Brand (1: جري, 2: بيسك, 3: فيشر, 4: فوجي)
+    let brand = '';
+    if (/(جري|اجري|قري|gree)/i.test(text)) brand = 'جري';
+    else if (/(بيسك|بيتك|basic)/i.test(text)) brand = 'بيسك';
+    else if (/(فيشر|في\s*شر|fisher)/i.test(text)) brand = 'فيشر';
+    else if (/(فوجي|فوجى|fuji)/i.test(text)) brand = 'فوجي';
+
+    // 2. Extract Price
     let price = 0;
-    let hasQuantity = false;
     let hasPrice = false;
+    const priceRegex = /(?:بسعر|بقيمة|سعر|قيمتها|مبلغ|بمبلغ|بـ|ب)?\s*(\d+|واحد|واحدة|اثنين|اثنان|ثلاثة|ثلاث|أربعة|أربع|اربعة|اربع|خمسة|خمس|ستة|ست|سبعة|سبع|ثمانية|ثمان|تمانية|ثمانة|تسعة|تسع|عشرة|عشر|عشرين|ثلاثين|أربعين|خمسين|ستين|سبعين|ثمانين|تسعين|مية|مائة|ألف|الف|آلاف|الاف)\s*(?:ألاف|آلاف|الف|ألف)?\s*(?:ريال|ريالاً|ر\.س|SAR)/i;
+    let pMatch = text.match(priceRegex);
+    if (pMatch) {
+        const pricePhrase = pMatch[0].replace(/بسعر|بقيمة|سعر|قيمتها|مبلغ|بمبلغ|بـ|ب|ريال|ريالاً|ر\.س|SAR/gi, '').trim();
+        const pVal = parseArabicNumberWords(pricePhrase);
+        if (pVal > 0) {
+            price = pVal;
+            hasPrice = true;
+            text = text.replace(pMatch[0], '').trim();
+        }
+    } else {
+        const digitPriceRegex = /(?:بسعر|بقيمة|سعر|مبلغ)\s*(\d+(?:\.\d+)?)|(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|SAR)/i;
+        let dpMatch = text.match(digitPriceRegex);
+        if (dpMatch) {
+            const pVal = parseFloat(dpMatch[1] || dpMatch[2]);
+            if (pVal > 0) {
+                price = pVal;
+                hasPrice = true;
+                text = text.replace(dpMatch[0], '').trim();
+            }
+        }
+    }
 
-    // Arabic numbers map
-    const arabicNumbersMap = {
-        'واحد': 1, 'واحدة': 1,
-        'اثنين': 2, 'اثنان': 2, 'زوج': 2, 'حبتين': 2,
-        'ثلاثة': 3, 'ثلاث': 3, 'تلاتة': 3, 'تلات': 3,
-        'أربعة': 4, 'أربع': 4,
-        'خمسة': 5, 'خمس': 5,
-        'ستة': 6, 'ست': 6,
-        'سبعة': 7, 'سبع': 7,
-        'ثمانية': 8, 'ثمان': 8, 'تمانية': 8, 'تمان': 8,
-        'تسعة': 9, 'تسع': 9,
-        'عشرة': 10, 'عشر': 10
-    };
-
-    // 1. Explicit Quantity extraction with keywords
-    // Keywords: عدد, العدد, كمية, الكمية
-    const qtyKeywordsRegex = /(العدد|عدد|الكمية|كمية)\s*[:=-]?\s*(\d+|واحد|واحدة|اثنين|اثنان|زوج|حبتين|ثلاثة|ثلاث|تلاتة|تلات|أربعة|أربع|خمسة|خمس|ستة|ست|سبعة|سبع|ثمانية|ثمان|تمانية|تمان|تسعة|تسع|عشرة|عشر)/i;
-    let qtyMatch = name.match(qtyKeywordsRegex);
-    if (qtyMatch) {
+    // 3. Extract Quantity
+    let quantity = 1;
+    let hasQuantity = false;
+    const explicitQtyRegex = /(?:العدد|عدد|الكمية|كمية)\s*[:=-]?\s*(\d+|واحد|واحدة|اثنين|اثنان|ثلاثة|ثلاث|تلاتة|أربعة|أربع|اربعة|اربع|خمسة|خمس|ستة|ست|سبعة|سبع|ثمانية|ثمان|تمانية|ثمانة|تسعة|تسع|عشرة|عشر)\s*(?:مكيفات|مكيف|مكفيات)?/i;
+    let qMatch = text.match(explicitQtyRegex);
+    if (qMatch) {
         hasQuantity = true;
-        const val = qtyMatch[2].trim();
-        if (arabicNumbersMap[val]) {
-            quantity = arabicNumbersMap[val];
-        } else {
-            quantity = parseInt(val, 10);
-        }
-        // Remove from string
-        name = name.replace(qtyKeywordsRegex, '').replace(/\s+/g, ' ').trim();
-    }
-
-    // 2. Explicit Price extraction with keywords
-    // Keywords: السعر, سعر, بسعر, بقيمة, قيمة, القيمة, مبلغ, بمبلغ, بي, بـ, ب
-    const priceKeywordsRegex = /(?:^|\s)(السعر|سعر|بسعر|بقيمة|قيمة|القيمة|مبلغ|بمبلغ|بي|بـ|ب)\s*[:=-]?\s*(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)?/i;
-    let priceMatch = name.match(priceKeywordsRegex);
-    if (priceMatch) {
-        hasPrice = true;
-        price = parseFloat(priceMatch[2]);
-        // Remove from string
-        name = name.replace(priceKeywordsRegex, '').replace(/\s+/g, ' ').trim();
-    }
-
-    // 2b. Price extraction by currency suffix (e.g. 500 ريال)
-    const priceCurrencyRegex = /(?:^|\s)(\d+(?:\.\d+)?)\s*(?:ريال|ريالاً|ر\.س|دولار|درهم|جنيه|قرش|SAR)/i;
-    let currencyMatch = name.match(priceCurrencyRegex);
-    if (!hasPrice && currencyMatch) {
-        hasPrice = true;
-        price = parseFloat(currencyMatch[1]);
-        name = name.replace(priceCurrencyRegex, '').replace(/\s+/g, ' ').trim();
-    }
-
-    // 3. Fallback/Legacy Quantity extraction on the remaining text (only if not already found via keywords)
-    if (!hasQuantity) {
-        // A. Check for number at the start: "[رقم] [اسم]"
-        const numAtStartRegex = /^(\d+)\s+(.+)$/;
-        let match = name.match(numAtStartRegex);
-        if (match) {
-            let qty = parseInt(match[1], 10);
-            let rest = match[2].trim();
-            const unitStartRegex = /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)\s+(.+)$/;
-            let unitMatch = rest.match(unitStartRegex);
-            if (unitMatch) {
-                rest = unitMatch[2].trim();
-            }
-            name = rest;
-            quantity = qty;
+        const qStr = qMatch[1].trim();
+        quantity = wordNumMap[qStr] || parseInt(qStr, 10) || 1;
+        text = text.replace(qMatch[0], '').trim();
+    } else {
+        const startQtyRegex = /^(\d+|واحد|واحدة|اثنين|اثنان|ثلاثة|ثلاث|أربعة|أربع|اربعة|اربع|خمسة|خمس|ستة|ست|سبعة|سبع|ثمانية|ثمان|تمانية|ثمانة|تسعة|تسع|عشرة|عشر)\s+(?=(?:مكيف|مكيفات|شاشة|ثلاجة|غسالة|فريزر|فرن|حبة|حبات|كرتون|علبة|جري|اجري|بيسك|بيتك|فيشر|في شر|فوجي))/i;
+        let sqMatch = text.match(startQtyRegex);
+        if (sqMatch) {
             hasQuantity = true;
-        }
-        // B. Check for number + unit at the end: "[اسم] [رقم] [وحدة]"
-        else {
-            const numUnitAtEndRegex = /^(.*?)\s+(\d+)\s*(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/;
-            match = name.match(numUnitAtEndRegex);
-            if (match) {
-                name = match[1].trim();
-                quantity = parseInt(match[2], 10);
-                hasQuantity = true;
-            }
-            // C. Check for Arabic number word at start
-            else {
-                const words = name.split(/\s+/);
-                if (words.length > 1) {
-                    const firstWord = words[0];
-                    if (arabicNumbersMap[firstWord]) {
-                        let qty = arabicNumbersMap[firstWord];
-                        let restIndex = 1;
-                        if (words.length > 2 && /^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(words[1])) {
-                            restIndex = 2;
-                        }
-                        const restName = words.slice(restIndex).join(' ').trim();
-                        if (restName) {
-                            name = restName;
-                            quantity = qty;
-                            hasQuantity = true;
-                        }
-                    }
-                }
-                
-                // D. Check for Arabic number word or unit at end
-                if (!hasQuantity && words.length > 1) {
-                    const lastWord = words[words.length - 1];
-                    if (lastWord === 'حبتين' || lastWord === 'زوج') {
-                        name = words.slice(0, words.length - 1).join(' ').trim();
-                        quantity = 2;
-                        hasQuantity = true;
-                    } else if (words.length > 2) {
-                        const secondToLast = words[words.length - 2];
-                        const last = words[words.length - 1];
-                        if (/^(حبة|حبات|كرتون|علبة|كيس|كيلو|مل)$/.test(last)) {
-                            if (arabicNumbersMap[secondToLast]) {
-                                name = words.slice(0, words.length - 2).join(' ').trim();
-                                quantity = arabicNumbersMap[secondToLast];
-                                hasQuantity = true;
-                            }
-                        }
-                    }
-                }
-
-                // E. Check for simple number at the end: "[اسم] [رقم]"
-                if (!hasQuantity) {
-                    const numAtEndRegex = /^(.*?)\s+(\d+)$/;
-                    match = name.match(numAtEndRegex);
-                    if (match) {
-                        name = match[1].trim();
-                        quantity = parseInt(match[2], 10);
-                        hasQuantity = true;
-                    }
-                }
-            }
+            const qStr = sqMatch[1].trim();
+            quantity = wordNumMap[qStr] || parseInt(qStr, 10) || 1;
+            text = text.replace(startQtyRegex, '').trim();
         }
     }
 
-    // Clean up any double spaces or trailing punctuation
-    name = name.replace(/\s+/g, ' ').replace(/^[,،;\-\s]+|[,،;\-\s]+$/g, '').trim();
+    // If total price was given for a batch (> 15000 SAR for multiple units) -> calculate unit price
+    if (price > 15000 && quantity > 1) {
+        price = Math.round(price / quantity);
+    }
+
+    // Extract capacity / tonnage (e.g. 4 طن, 2 طن, 1.5 طن, 3 طن)
+    let capacity = '';
+    const capMatch = text.match(/(1\.5|2\.5|3\.5|\d+|واحد|اثنين|اثنان|طنيين|طنين|ثلاثة|ثلاث|أربعة|أربع|اربعة|اربع|خمسة|خمس|ستة|ست)\s*طن/i);
+    if (capMatch) {
+        const capNum = wordNumMap[capMatch[1]] || capMatch[1];
+        capacity = `${capNum} طن`;
+        text = text.replace(capMatch[0], '').trim();
+    }
+
+    // Build product name
+    let name = brand ? `مكيف ${brand}` : 'مكيف';
+    if (capacity) name += ` ${capacity}`;
 
     return { name, quantity, price, hasQuantity, hasPrice };
+}
+
+function parseQuantityAndName(token) {
+    return parseItemChunk(token);
 }
 
 // Parse text list of items
 function parseTextItems(text, splitSpaces = true) {
     if (!text) return [];
-    const trimmed = text.trim();
-    // Split by newlines, commas, semicolons, dashes, bullet points, or " و " / " أو " / " ثم "
-    const rawTokens = trimmed.split(/[\n\r،,؛;\-•*]|\s+و\s+|\s+أو\s+|\s+ثم\s+/);
-    let items = [];
-    
-    rawTokens.forEach(token => {
-        let cleaned = token.trim();
+    let s = toEnglishDigits(text.trim());
+
+    // Normalize speech typos
+    s = s.replace(/مكييفات|مكيفات|مكيفه|مكفيات/gi, 'مكيف');
+    s = s.replace(/اجري|قري/gi, 'جري');
+    s = s.replace(/في شر/gi, 'فيشر');
+    s = s.replace(/فوجى/gi, 'فوجي');
+    s = s.replace(/بيتك/gi, 'بيسك');
+    s = s.replace(/لا\s*ف?\s*ريال|لاف\s*ريال|لافيال|لاف/gi, 'آلاف ريال');
+
+    // Split on explicit delimiters first
+    let lines = s.split(/[\n\r،,؛;\-•*]|\s+و\s+|\s+أو\s+|\s+ثم\s+/);
+    let chunks = [];
+
+    // Further split lines when multiple AC brands occur in a single continuous line
+    lines.forEach(line => {
+        const brandMatches = [...line.matchAll(/(?:خمس|خمسة|ست|ستة|سبع|سبعة|ثمان|ثمانية|تسع|تسعة|عشر|عشرة|عدد|كمية|\d+)?\s*(?:مكيف\s+)?(?:جري|بيسك|فيشر|فوجي)/gi)];
+        if (brandMatches.length > 1) {
+            for (let i = 0; i < brandMatches.length; i++) {
+                const start = brandMatches[i].index;
+                const end = (i < brandMatches.length - 1) ? brandMatches[i + 1].index : line.length;
+                chunks.push(line.substring(start, end));
+            }
+        } else {
+            chunks.push(line);
+        }
+    });
+
+    const items = [];
+    chunks.forEach(c => {
+        let cleaned = c.trim();
         if (!cleaned) return;
         cleaned = cleanArabicWawPrefix(cleaned);
         if (cleaned) {
-            const parsed = parseQuantityAndName(cleaned);
+            const parsed = parseItemChunk(cleaned);
             if (parsed.name) {
                 items.push(parsed);
             }
         }
     });
-    
-    // Fallback for space-separated single lines (like: "بصل طماط خيار")
-    if (items.length === 1 && !items[0].hasQuantity && splitSpaces && trimmed.split(/\s+/).length > 1 && !trimmed.includes('،') && !trimmed.includes(',') && !trimmed.includes('\n') && !trimmed.includes('\r')) {
-        const words = trimmed.split(/\s+/);
-        items = [];
-        words.forEach(word => {
-            let cleaned = word.trim();
-            if (!cleaned) return;
-            cleaned = cleanArabicWawPrefix(cleaned);
-            if (cleaned) {
-                const parsed = parseQuantityAndName(cleaned);
-                if (parsed.name) {
-                    items.push(parsed);
-                }
-            }
-        });
-    }
-    
+
     return items;
 }
 
@@ -4781,8 +5180,26 @@ function openSmartImportModal(gIndex) {
     // Reset tabs
     document.getElementById('tabTextImport').classList.add('active');
     document.getElementById('tabVoiceImport').classList.remove('active');
+    const tabAudioFileImport = document.getElementById('tabAudioFileImport');
+    if (tabAudioFileImport) tabAudioFileImport.classList.remove('active');
+    
     document.getElementById('contentTextImport').style.display = 'block';
     document.getElementById('contentVoiceImport').style.display = 'none';
+    const contentAudioFileImport = document.getElementById('contentAudioFileImport');
+    if (contentAudioFileImport) contentAudioFileImport.style.display = 'none';
+
+    // Reset Audio file state
+    const importAudioFile = document.getElementById('importAudioFile');
+    if (importAudioFile) importAudioFile.value = '';
+    const audioElement = document.getElementById('audioElement');
+    if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
+    }
+    const audioPlayerCard = document.getElementById('audioPlayerCard');
+    if (audioPlayerCard) audioPlayerCard.style.display = 'none';
+    const audioTranscribeTextArea = document.getElementById('audioTranscribeTextArea');
+    if (audioTranscribeTextArea) audioTranscribeTextArea.value = '';
     
     // Stop recording if active
     if (isSpeechRecording && speechRecognition) {

@@ -195,6 +195,32 @@
                     <span class="result-label" id="grandFinalPriceLabel" data-i18n="grandFinalPriceVat">السعر النهائي الكلي (شامل الضريبة):</span>
                     <span class="result-value" id="grandFinalPrice">0.00</span>
                 </div>
+
+                <!-- Interactive Target Final Price & Reverse Discount Calculator Box -->
+                <div id="targetPriceCalculatorBox" style="margin-top: 1rem; padding: 1rem; border-radius: var(--radius-sm); background: rgba(212, 175, 55, 0.08); border: 1px solid var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.85rem; text-align: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
+                        <label for="targetFinalPriceInput" style="font-size: 1rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin: 0; text-align: center;">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span data-i18n="targetFinalPriceLabel">تعديل مبلغ النتيجة النهائية مباشرة (حاسبة الخصم العكسي ⚡):</span>
+                        </label>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; margin-top: 0.25rem;">
+                            <input type="text" inputmode="decimal" pattern="[0-9.]*" id="targetFinalPriceInput" style="width: 200px; padding: 0.5rem 0.85rem; border-radius: 8px; border: 2px solid var(--primary); background: rgba(0,0,0,0.5); color: var(--success); font-weight: 900; font-size: 1.25rem; text-align: center; box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);" placeholder="0.00">
+                            <span id="targetPriceCurrencyLabel" style="font-size: 0.95rem; font-weight: 800; color: var(--text-muted);">ر.س</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Reverse Effective Discount Result Banner -->
+                    <div id="reverseDiscountBadge" style="display: none; flex-direction: column; align-items: center; justify-content: center; gap: 0.65rem; width: 100%; padding: 0.75rem 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.12); border: 1px dashed var(--success); text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 1rem; font-weight: 800; color: var(--text-primary); flex-wrap: wrap; text-align: center;">
+                            <i class="fa-solid fa-calculator" style="color: var(--success);"></i>
+                            <span>النسبة الحقيقية للخصم المطلوب: <span id="reverseDiscountPctVal" style="color: var(--success); font-size: 1.2rem; font-weight: 900;">0.00%</span></span>
+                            <span style="font-size: 0.9rem; color: var(--text-muted);">(مبلغ الوفر: <span id="reverseDiscountAmtVal" style="color: var(--danger); font-weight: 700;">0</span>)</span>
+                        </div>
+                        <button type="button" id="btnApplyReverseDiscount" class="btn btn-primary" style="width: auto; min-width: 220px; padding: 0.5rem 1.25rem; font-size: 0.95rem; font-weight: 800; background: var(--success); border-color: var(--success); display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <i class="fa-solid fa-check"></i> <span data-i18n="btnApplyReverseDiscount">تطبيق الخصم على الحسابات ⚡</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Toggle Button for Detailed Report & Analysis -->
@@ -905,6 +931,9 @@
                     <button type="button" class="import-tab-btn" id="tabVoiceImport" style="flex: 1; padding: 0.6rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
                         <i class="fa-solid fa-microphone"></i> <span data-i18n="tabVoiceTitle">الإملاء الصوتي الذكي 🎙️</span>
                     </button>
+                    <button type="button" class="import-tab-btn" id="tabAudioFileImport" style="flex: 1; padding: 0.6rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                        <i class="fa-solid fa-file-audio"></i> <span data-i18n="tabAudioFileTitle">رفع مقطع صوتي 🎵</span>
+                    </button>
                 </div>
 
                 <!-- Tab content 1: Text Import -->
@@ -932,6 +961,80 @@
                             <span class="wave-bar"></span>
                         </div>
                         <p id="voiceStatusText" style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);" data-i18n="voiceStatusReady">مستعد للتسجيل...</p>
+                    </div>
+                </div>
+
+                <!-- Tab content 3: Audio File Import & Transcription -->
+                <div id="contentAudioFileImport" class="tab-content-pane" style="display: none;">
+                    <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.75rem;" data-i18n="audioFileDesc">
+                        قم برفع وتسجيل مقطع صوتي من الواتساب أو الجهاز لتفريغه آلياً والتأكد من سلامة الطلبات:
+                    </p>
+                    
+                    <input type="file" id="importAudioFile" accept="audio/*,.ogg,.opus,.m4a,.mp3,.wav,.webm,.aac,.flac" style="display: none;">
+                    
+                    <!-- Audio File Drop Zone / Upload Area -->
+                    <div id="audioDropZone" class="audio-drop-zone" style="border: 2px dashed var(--primary); border-radius: var(--radius-sm); padding: 1rem; text-align: center; background: rgba(212, 175, 55, 0.03); cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; color: var(--primary);"></i>
+                        <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);" data-i18n="btnSelectAudioFile">اضغط هنا أو اسحب مقطع صوتي من الواتساب / الجهاز</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="audioSupportedFormats">الصيغ المدعومة: MP3, OGG, M4A, OPUS, WAV, WEBM</span>
+                    </div>
+
+                    <!-- Audio URL Link Input Section -->
+                    <div class="audio-link-container" style="margin-top: 0.75rem; padding: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-sm); background: rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="audioUrlInput" style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0;">
+                            <i class="fa-solid fa-link" style="color: var(--primary);"></i>
+                            <span data-i18n="audioLinkInputLabel">أو أدخل رابط مقطع صوتي مباشر / أي رابط (تفريغ صوتي من الرابط 🔗):</span>
+                        </label>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <input type="url" id="audioUrlInput" style="flex: 1; min-width: 200px; padding: 0.45rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-primary); font-size: 0.9rem;" placeholder="https://example.com/audio.mp3 أو رابط Google Drive..." data-i18n-placeholder="audioUrlInputPlaceholder">
+                            <button type="button" id="btnAudioTranscribeUrl" class="btn btn-primary" style="width: auto; padding: 0.45rem 1rem; font-size: 0.85rem; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: 0.35rem; background: var(--accent); border-color: var(--accent);">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span data-i18n="btnTranscribeUrl">تفريغ من الرابط ⚡</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audio File Information & Player Card (Hidden until file selected) -->
+                    <div id="audioPlayerCard" style="display: none; flex-direction: column; gap: 0.75rem; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); padding: 0.75rem; border-radius: var(--radius-sm); margin-top: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
+                                <i class="fa-solid fa-file-audio" style="color: var(--primary); font-size: 1.2rem;"></i>
+                                <span id="audioFileName" style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis;">audio_clip.ogg</span>
+                                <span id="audioFileSize" style="font-size: 0.8rem; color: var(--text-muted);">(0 KB)</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                                <button type="button" id="btnAudioChangeFile" class="btn btn-secondary" style="padding: 0.25rem 0.65rem; font-size: 0.8rem; min-height: unset; height: auto;">
+                                    <i class="fa-solid fa-rotate"></i> <span data-i18n="btnChangeAudio">تغيير المقطع</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Native HTML5 Audio player -->
+                        <audio id="audioElement" controls style="width: 100%; height: 38px; border-radius: 4px; outline: none;"></audio>
+
+                        <!-- Speed Controls & Auto Transcribe Button -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.25rem;" data-i18n="lblAudioSpeed">سرعة التسمع:</span>
+                                <button type="button" class="audio-speed-btn active" data-speed="1">1x</button>
+                                <button type="button" class="audio-speed-btn" data-speed="1.25">1.25x</button>
+                                <button type="button" class="audio-speed-btn" data-speed="1.5">1.5x</button>
+                                <button type="button" class="audio-speed-btn" data-speed="2">2x</button>
+                            </div>
+
+                            <button type="button" id="btnAudioTranscribeAuto" class="btn btn-primary" style="width: auto; padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; background: var(--accent); border-color: var(--accent); display: flex; align-items: center; gap: 0.35rem;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="btnAudioTranscribeAuto">تفريغ الصوت آلياً ⚡</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Editable Transcription Textarea -->
+                    <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.35rem;">
+                        <label for="audioTranscribeTextArea" style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem;">
+                            <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
+                            <span data-i18n="audioTranscribeDesc">مربع تفريغ النص الصوتي (تأكد من سلامة التفريغ والتعديل عليه بكل سهولة):</span>
+                        </label>
+                        <textarea id="audioTranscribeTextArea" rows="3" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: var(--text-primary); font-family: inherit; font-size: 1rem; resize: vertical;" data-i18n-placeholder="audioTranscribePlaceholder" placeholder="النص المفرغ من المقطع الصوتي سيظهر هنا تلقائياً، أو يمكنك كتابته وتعديله مباشرةً..."></textarea>
                     </div>
                 </div>
 
