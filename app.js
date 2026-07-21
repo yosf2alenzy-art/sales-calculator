@@ -2717,6 +2717,12 @@ function setupEventListeners() {
 
     if (geminiApiKeyInput) {
         geminiApiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+        geminiApiKeyInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (val) {
+                localStorage.setItem('gemini_api_key', val);
+            }
+        });
     }
 
     if (btnSaveGeminiKey) {
@@ -2740,13 +2746,18 @@ function setupEventListeners() {
     const transcribeWithGeminiCloud = async (fileOrBlob, mimeType) => {
         const apiKey = (localStorage.getItem('gemini_api_key') || (geminiApiKeyInput ? geminiApiKeyInput.value : '')).trim();
         if (!apiKey) {
+            const geminiContainer = document.getElementById('geminiApiKeyContainer');
+            if (geminiContainer) {
+                geminiContainer.style.border = '2px solid var(--primary)';
+                geminiContainer.style.boxShadow = '0 0 15px rgba(212, 175, 55, 0.4)';
+            }
+            if (geminiApiKeyInput) geminiApiKeyInput.focus();
             throw new Error(state.language === 'ar' 
-                ? '🔑 يرجى إدخال مفتاح Gemini API المجاني في المربع المخصص للتفريغ السحابي على Netlify/GitHub' 
-                : '🔑 Please enter a Gemini API Key for Cloud Transcription on Netlify/GitHub');
+                ? '🔑 يرجى وضع مفتاح Gemini API المجاني في المربع المظلل بالأصفر أعلاه ثم إعادة ضغط تفريغ الصوت ⚡' 
+                : '🔑 Please enter a Gemini API Key in the highlighted field above and try again');
         }
 
         const base64Data = await fileToBase64(fileOrBlob);
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         let detectedMime = mimeType || fileOrBlob.type || 'audio/mp3';
         if (detectedMime.includes('ogg') || detectedMime.includes('opus')) detectedMime = 'audio/ogg';
@@ -2760,8 +2771,8 @@ function setupEventListeners() {
                         text: "أنت مساعد استخراج طلبات المنتجات باللغة العربية. قم بتفريغ المقطع الصوتي واذكر الأجهزة والمنتجات والأعداد والأسعار بدقة بدون أي مقدمات أو خاتمة."
                     },
                     {
-                        inline_data: {
-                            mime_type: detectedMime,
+                        inlineData: {
+                            mimeType: detectedMime,
                             data: base64Data
                         }
                     }
@@ -2769,19 +2780,52 @@ function setupEventListeners() {
             }]
         };
 
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+        const endpointsToTry = [
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`
+        ];
 
-        const data = await res.json();
-        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
-            return data.candidates[0].content.parts[0].text.trim();
-        } else if (data.error) {
-            throw new Error(data.error.message || 'Gemini API Error');
+        try {
+            const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const listData = await listRes.json();
+            if (listData && listData.models && Array.isArray(listData.models)) {
+                listData.models.forEach(m => {
+                    if (m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')) {
+                        const mName = m.name.replace('models/', '');
+                        endpointsToTry.unshift(`https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${apiKey}`);
+                        endpointsToTry.unshift(`https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${apiKey}`);
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Failed to query ListModels:', e);
         }
-        throw new Error(state.language === 'ar' ? 'تعذر استخراج النص من الذكاء الاصطناعي السحابي' : 'Failed to extract text from Cloud AI');
+
+        let lastError = null;
+        const uniqueEndpoints = [...new Set(endpointsToTry)];
+
+        for (const endpoint of uniqueEndpoints) {
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else if (data.error) {
+                    lastError = data.error.message || JSON.stringify(data.error);
+                }
+            } catch (err) {
+                lastError = err.message;
+            }
+        }
+
+        throw new Error(lastError || (state.language === 'ar' ? 'تعذر استخراج النص من الذكاء الاصطناعي السحابي' : 'Failed to extract text from Cloud AI'));
     };
 
     const triggerServerTranscription = async (file) => {
