@@ -8,7 +8,7 @@ const fileBuffer = fs.readFileSync(audioPath);
 
 const req = http.request({
     hostname: 'localhost',
-    port: 3005,
+    port: 3000,
     path: '/api/transcribe',
     method: 'POST',
     headers: {

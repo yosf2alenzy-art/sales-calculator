@@ -2712,9 +2712,77 @@ function setupEventListeners() {
     const audioElement = document.getElementById('audioElement');
     const btnAudioChangeFile = document.getElementById('btnAudioChangeFile');
     const btnAudioTranscribeAuto = document.getElementById('btnAudioTranscribeAuto');
-    const audioTranscribeTextArea = document.getElementById('audioTranscribeTextArea');
+    const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
+    const btnSaveGeminiKey = document.getElementById('btnSaveGeminiKey');
 
-    let currentSelectedAudioFile = null;
+    if (geminiApiKeyInput) {
+        geminiApiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
+    }
+
+    if (btnSaveGeminiKey) {
+        btnSaveGeminiKey.addEventListener('click', () => {
+            const val = geminiApiKeyInput ? geminiApiKeyInput.value.trim() : '';
+            localStorage.setItem('gemini_api_key', val);
+            alert(state.language === 'ar' ? 'تم حفظ مفتاح Gemini API بنجاح! 🔑' : 'Gemini API Key saved successfully! 🔑');
+        });
+    }
+
+    const fileToBase64 = (fileOrBlob) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(fileOrBlob);
+        reader.onload = () => {
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = error => reject(error);
+    });
+
+    const transcribeWithGeminiCloud = async (fileOrBlob, mimeType) => {
+        const apiKey = (localStorage.getItem('gemini_api_key') || (geminiApiKeyInput ? geminiApiKeyInput.value : '')).trim();
+        if (!apiKey) {
+            throw new Error(state.language === 'ar' 
+                ? '🔑 يرجى إدخال مفتاح Gemini API المجاني في المربع المخصص للتفريغ السحابي على Netlify/GitHub' 
+                : '🔑 Please enter a Gemini API Key for Cloud Transcription on Netlify/GitHub');
+        }
+
+        const base64Data = await fileToBase64(fileOrBlob);
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        let detectedMime = mimeType || fileOrBlob.type || 'audio/mp3';
+        if (detectedMime.includes('ogg') || detectedMime.includes('opus')) detectedMime = 'audio/ogg';
+        else if (detectedMime.includes('wav')) detectedMime = 'audio/wav';
+        else if (detectedMime.includes('m4a') || detectedMime.includes('mp4')) detectedMime = 'audio/mp4';
+
+        const payload = {
+            contents: [{
+                parts: [
+                    {
+                        text: "أنت مساعد استخراج طلبات المنتجات باللغة العربية. قم بتفريغ المقطع الصوتي واذكر الأجهزة والمنتجات والأعداد والأسعار بدقة بدون أي مقدمات أو خاتمة."
+                    },
+                    {
+                        inline_data: {
+                            mime_type: detectedMime,
+                            data: base64Data
+                        }
+                    }
+                ]
+            }]
+        };
+
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+            return data.candidates[0].content.parts[0].text.trim();
+        } else if (data.error) {
+            throw new Error(data.error.message || 'Gemini API Error');
+        }
+        throw new Error(state.language === 'ar' ? 'تعذر استخراج النص من الذكاء الاصطناعي السحابي' : 'Failed to extract text from Cloud AI');
+    };
 
     const triggerServerTranscription = async (file) => {
         if (!file) return;
@@ -2728,12 +2796,7 @@ function setupEventListeners() {
 
         const startSpeechRecognitionFallback = () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                if (audioTranscribeTextArea && audioTranscribeTextArea.value.includes('جاري')) {
-                    audioTranscribeTextArea.value = '';
-                }
-                return;
-            }
+            if (!SpeechRecognition) return;
             if (audioElement && audioElement.src) {
                 audioElement.play();
             }
@@ -2755,12 +2818,11 @@ function setupEventListeners() {
             rec.onerror = (e) => console.log('Audio transcribe rec error:', e);
             rec.start();
             if (audioElement) {
-                audioElement.onended = () => {
-                    rec.stop();
-                };
+                audioElement.onended = () => rec.stop();
             }
         };
 
+        // 1. Try local server endpoint first (/api/transcribe)
         try {
             const response = await fetch('/api/transcribe', {
                 method: 'POST',
@@ -2772,11 +2834,26 @@ function setupEventListeners() {
                 if (audioTranscribeTextArea) audioTranscribeTextArea.value = data.text;
                 parsedImportItems = parseTextItems(data.text, true);
                 updateImportBadges();
-            } else {
-                startSpeechRecognitionFallback();
+                return;
             }
         } catch (err) {
-            console.error('API Transcribe error:', err);
+            console.log('Local API transcribe unavailable, switching to Gemini Cloud AI...');
+        }
+
+        // 2. Fallback to Gemini Cloud AI (Works on Netlify & GitHub Pages!)
+        try {
+            const cloudText = await transcribeWithGeminiCloud(file, file.type);
+            if (cloudText) {
+                if (audioTranscribeTextArea) audioTranscribeTextArea.value = cloudText;
+                parsedImportItems = parseTextItems(cloudText, true);
+                updateImportBadges();
+                return;
+            }
+        } catch (cloudErr) {
+            console.error('Gemini Cloud Transcribe Error:', cloudErr);
+            if (audioTranscribeTextArea) {
+                audioTranscribeTextArea.value = `⚠️ ${cloudErr.message || 'فشل التفريغ السحابي'}`;
+            }
             startSpeechRecognitionFallback();
         } finally {
             if (btnAudioTranscribeAuto) {
@@ -2902,14 +2979,28 @@ function setupEventListeners() {
                 if (audioTranscribeTextArea) audioTranscribeTextArea.value = data.text;
                 parsedImportItems = parseTextItems(data.text, true);
                 updateImportBadges();
-            } else {
-                const errorMsg = data && data.error ? data.error : (state.language === 'ar' ? 'تعذر تفريغ الصوت من الرابط' : 'Failed to transcribe audio from URL');
-                if (audioTranscribeTextArea) audioTranscribeTextArea.value = `❌ ${errorMsg}`;
-                alert(errorMsg);
+                return;
             }
         } catch (err) {
-            console.error('API Transcribe URL error:', err);
-            if (audioTranscribeTextArea) audioTranscribeTextArea.value = state.language === 'ar' ? '❌ حدث خطأ أثناء الاتصال بسيرفر التفريغ' : '❌ Error connecting to transcription server';
+            console.log('Local API URL transcribe unavailable, fetching audio via client...');
+        }
+
+        // Cloud URL Audio Fallback via Gemini
+        try {
+            const fetchRes = await fetch(url);
+            const audioBlob = await fetchRes.blob();
+            const cloudText = await transcribeWithGeminiCloud(audioBlob, audioBlob.type || 'audio/mp3');
+            if (cloudText) {
+                if (audioTranscribeTextArea) audioTranscribeTextArea.value = cloudText;
+                parsedImportItems = parseTextItems(cloudText, true);
+                updateImportBadges();
+                return;
+            }
+        } catch (cloudErr) {
+            console.error('Cloud URL Transcribe error:', cloudErr);
+            if (audioTranscribeTextArea) {
+                audioTranscribeTextArea.value = `⚠️ ${cloudErr.message || 'فشل التفريغ السحابي من الرابط'}`;
+            }
         } finally {
             if (btnAudioTranscribeUrl) {
                 btnAudioTranscribeUrl.disabled = false;
