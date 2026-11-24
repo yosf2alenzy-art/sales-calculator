@@ -4917,116 +4917,64 @@ function animateCounter(element, start, end, duration = 1200) {
     window.requestAnimationFrame(step);
 }
 
-// Helper to call CounterAPI with local caching for robust fallbacks
-async function handleStats() {
-    const namespace = "yousef_aldahmashy_calculators";
-    const visitorKey = "visitor_count";
-    const usageKey = "usage_count";
+// Visitor & usage counters — served by our own API (/api/stats on Vercel + Neon).
+// No invented fallback numbers: until the server answers we show the last real value, or a dash.
+const STATS_VISIT_KEY = 'calc_visit_counted_at';
+const STATS_CACHE_KEY = 'calc_stats_cache';
 
+function readStatsCache() {
+    try { return JSON.parse(safeGetLocalStorage(STATS_CACHE_KEY) || 'null'); } catch (e) { return null; }
+}
+function writeStatsCache(t) {
+    if (t && typeof t.visitors === 'number' && typeof t.usage === 'number') {
+        safeSetLocalStorage(STATS_CACHE_KEY, JSON.stringify({ visitors: t.visitors, usage: t.usage }));
+    }
+}
+function showStats(t, animate) {
     const visitorValEl = document.getElementById('visitorCountVal');
     const usageValEl = document.getElementById('usageCountVal');
-
-    // 0. Load last known values from localStorage immediately to prevent layout shifts
-    const cachedVisitorsStr = safeGetLocalStorage('last_known_visitors') || "1,248";
-    const cachedUsageStr = safeGetLocalStorage('last_known_usage') || "954";
-
-    let localVisitors = parseFormattedNumber(cachedVisitorsStr);
-    let localUsage = parseFormattedNumber(cachedUsageStr);
-
-    // 0b. Increment visitor count locally on new session to give instant visual feedback
-    const isNewVisitorSession = !safeGetSessionStorage('visited');
-    if (isNewVisitorSession) {
-        localVisitors += 1;
-        safeSetLocalStorage('last_known_visitors', formatStatNumber(localVisitors));
+    if (!t) {
+        if (visitorValEl) visitorValEl.textContent = '—';
+        if (usageValEl) usageValEl.textContent = '—';
+        return;
     }
-
-    // 0c. Trigger initial premium odometer/count-up animation
-    animateCounter(visitorValEl, 0, localVisitors, 1200);
-    animateCounter(usageValEl, 0, localUsage, 1200);
-
-    // 1. Handle Visitor Count from Server
-    try {
-        let visitorCount = null;
-        if (isNewVisitorSession) {
-            // First time in this session, increment on server
-            const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}/up`);
-            if (res.ok) {
-                const data = await res.json();
-                visitorCount = data.count || data.value;
-                safeSetSessionStorage('visited', 'true');
-            }
-        }
-        
-        if (!visitorCount) {
-            // Get current count from server
-            const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${visitorKey}`);
-            if (res.ok) {
-                const data = await res.json();
-                visitorCount = data.count || data.value;
-            }
-        }
-
-        if (visitorCount && visitorCount > localVisitors) {
-            // Animate from current local count to fresh server count smoothly
-            animateCounter(visitorValEl, localVisitors, visitorCount, 800);
-            safeSetLocalStorage('last_known_visitors', formatStatNumber(visitorCount));
-        }
-    } catch (e) {
-        console.error("Error loading visitor count:", e);
-        // Fallback: We already incremented and animated locally, so the user sees a valid count!
-    }
-
-    // 2. Handle Usage Count from Server
-    try {
-        const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${usageKey}`);
-        let usageCount = null;
-        if (res.ok) {
-            const data = await res.json();
-            usageCount = data.count || data.value;
-        }
-        if (usageCount && usageCount > localUsage) {
-            animateCounter(usageValEl, localUsage, usageCount, 800);
-            safeSetLocalStorage('last_known_usage', formatStatNumber(usageCount));
-        }
-    } catch (e) {
-        console.error("Error loading usage count:", e);
-        // Fallback: Retains animated local count
+    const prev = readStatsCache();
+    if (animate) {
+        animateCounter(visitorValEl, prev ? Math.min(prev.visitors, t.visitors) : 0, t.visitors, 900);
+        animateCounter(usageValEl, prev ? Math.min(prev.usage, t.usage) : 0, t.usage, 900);
+    } else {
+        if (visitorValEl) visitorValEl.textContent = formatStatNumber(t.visitors);
+        if (usageValEl) usageValEl.textContent = formatStatNumber(t.usage);
     }
 }
 
-// Function to increment usage count (called on copy/share)
+async function handleStats() {
+    showStats(readStatsCache(), false);
+    try {
+        const last = parseInt(safeGetLocalStorage(STATS_VISIT_KEY) || '0', 10);
+        const isNewVisit = !last || (Date.now() - last) > 24 * 60 * 60 * 1000;
+        const t = isNewVisit
+            ? await apiRequest('/api/stats', { method: 'POST', body: { kind: 'visit' } })
+            : await apiRequest('/api/stats');
+        if (isNewVisit) safeSetLocalStorage(STATS_VISIT_KEY, String(Date.now()));
+        showStats(t, true);
+        writeStatsCache(t);
+    } catch (e) {
+        // server unreachable: keep the last real values (or the dash) on screen
+    }
+}
+
+// Counts one "program user" per browser session (called on copy / PDF / CSV / share)
 async function triggerUsageStats() {
-    const namespace = "yousef_aldahmashy_calculators";
-    const usageKey = "usage_count";
-    const usageValEl = document.getElementById('usageCountVal');
-
-    const cachedUsageStr = safeGetLocalStorage('last_known_usage') || "954";
-    let localUsage = parseFormattedNumber(cachedUsageStr);
-
-    if (!safeGetSessionStorage('used')) {
-        // Increment locally first for instant premium feedback
-        localUsage += 1;
-        safeSetLocalStorage('last_known_usage', formatStatNumber(localUsage));
-        if (usageValEl) {
-            usageValEl.textContent = formatStatNumber(localUsage);
-        }
-        safeSetSessionStorage('used', 'true');
-
-        // Increment on server
-        try {
-            const res = await fetch(`https://api.counterapi.dev/v1/${namespace}/${usageKey}/up`);
-            if (res.ok) {
-                const data = await res.json();
-                const serverCount = data.count || data.value;
-                if (serverCount && serverCount > localUsage) {
-                    animateCounter(usageValEl, localUsage, serverCount, 600);
-                    safeSetLocalStorage('last_known_usage', formatStatNumber(serverCount));
-                }
-            }
-        } catch (e) {
-            console.error("Error incrementing usage count:", e);
-            // Fallback: Local increment stands, so UI remains updated!
-        }
+    if (safeGetSessionStorage('calc_usage_counted')) return;
+    safeSetSessionStorage('calc_usage_counted', 'true');
+    try {
+        const t = await apiRequest('/api/stats', { method: 'POST', body: { kind: 'usage' } });
+        showStats(t, true);
+        writeStatsCache(t);
+    } catch (e) {
+        // allow a retry later in this session
+        try { sessionStorage.removeItem('calc_usage_counted'); } catch (err) {}
     }
 }
 
