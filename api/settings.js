@@ -27,6 +27,7 @@ function sanitize(input) {
     const out = {};
     const set = (k, v) => { if (v !== undefined) out[k] = v; };
     set('programTitle', str(s.programTitle, 200));
+    set('programSubtitle', str(s.programSubtitle, 300));
     set('customProducts', strList(s.customProducts, 5000, 300));
     set('tutorialLinks', objList(s.tutorialLinks, 50));
     set('customTutorials', objList(s.customTutorials, 100));

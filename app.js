@@ -124,6 +124,9 @@ const translations = {
         collapseAllExceptFirst: "طي الكل",
         deleteExtraGroups: "إلغاء المجموعات المفتوحة",
         settingsProgramTitle: "اسم البرنامج:",
+        settingsProgramSubtitle: "الجملة التي أسفل العنوان:",
+        settingsProgramSubtitlePlaceholder: "مثال: أداة حسابات المبيعات الذكية ومشاركتها مع العملاء",
+        settingsTitleHint: "اتركهما فارغين لاستخدام النص الافتراضي. تظهر التعديلات للجميع بعد «حفظ واعتماد التعديلات».",
         settingsProgramTitlePlaceholder: "مثال: حاسبة الدهمشي الذكية",
         tutorialCardLabel: "شرح البرنامج",
         tutorialSelectPlaceholder: "القائمة",
@@ -325,6 +328,9 @@ const translations = {
         collapseAllExceptFirst: "Collapse All",
         deleteExtraGroups: "Close Extra Groups",
         settingsProgramTitle: "Program Name:",
+        settingsProgramSubtitle: "Line under the title:",
+        settingsProgramSubtitlePlaceholder: "e.g. Smart Sales Calculations & Client Sharing Tool",
+        settingsTitleHint: "Leave both empty to use the default text. Changes reach everyone after \"Save & Apply Changes\".",
         settingsProgramTitlePlaceholder: "e.g. Al-Dahmashy Smart Calculator",
         tutorialCardLabel: "App Tutorials",
         tutorialSelectPlaceholder: "Menu",
@@ -517,6 +523,7 @@ const defaultProducts = [
 let state = {
     language: 'ar',
     programTitle: '',
+    programSubtitle: '',
     currency: 'SAR',
     customCurrency: 'يورو',
     theme: 'luxury-gold',
@@ -879,7 +886,7 @@ const API_BASE = (typeof window !== 'undefined' && window.location.hostname.ends
 let authToken = null; // kept in memory only: closing the tab ends the session
 
 // Settings controlled by the admin for everyone
-const CENTRAL_ADMIN_KEYS = ['programTitle', 'customProducts', 'tutorialLinks', 'customTutorials', 'visibleButtons',
+const CENTRAL_ADMIN_KEYS = ['programTitle', 'programSubtitle', 'customProducts', 'tutorialLinks', 'customTutorials', 'visibleButtons',
     'lockTheme', 'lockedTheme', 'showProductList', 'disableOffline', 'terms'];
 // Settings published as defaults: applied on a visitor's first visit only, the visitor can still change them
 const CENTRAL_DEFAULT_KEYS = ['currency', 'customCurrency', 'applyVat', 'vatRate'];
@@ -998,6 +1005,7 @@ function openSettingsModal() {
     document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
     document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
     document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
+    document.getElementById('settingsProgramSubtitleInput').value = state.programSubtitle || '';
     renderSettingsUsersList();
     populateVisibilityCheckboxes();
     renderAdminSuggestionsList();
@@ -2180,6 +2188,12 @@ function setupEventListeners() {
         saveState();
         applyProgramTitle();
     });
+
+    document.getElementById('settingsProgramSubtitleInput').addEventListener('input', () => {
+        state.programSubtitle = document.getElementById('settingsProgramSubtitleInput').value;
+        saveState();
+        applyProgramTitle();
+    });
     
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -2499,6 +2513,9 @@ function setupEventListeners() {
             
             const programTitleInput = document.getElementById('settingsProgramTitleInput');
             if (programTitleInput) state.programTitle = programTitleInput.value.trim();
+
+            const programSubtitleInput = document.getElementById('settingsProgramSubtitleInput');
+            if (programSubtitleInput) state.programSubtitle = programSubtitleInput.value.trim();
             
             // Button visibility checkboxes
             const btnVisibilityToggles = [
@@ -2557,6 +2574,7 @@ function setupEventListeners() {
         btnExportSettings.addEventListener('click', () => {
             const settingsData = {
                 programTitle: state.programTitle || '',
+                programSubtitle: state.programSubtitle || '',
                 customProducts: state.customProducts || [],
                 tutorialLinks: state.tutorialLinks || [],
                 customTutorials: state.customTutorials || [],
@@ -2614,6 +2632,7 @@ function setupEventListeners() {
                         state.visibleButtons = { ...state.visibleButtons, ...data.visibleButtons };
                     }
                     if (data.programTitle !== undefined) state.programTitle = data.programTitle;
+                    if (data.programSubtitle !== undefined) state.programSubtitle = data.programSubtitle;
                     if (data.lockTheme !== undefined) state.lockTheme = data.lockTheme;
                     if (data.lockedTheme !== undefined) state.lockedTheme = data.lockedTheme;
                     if (data.showProductList !== undefined) state.showProductList = data.showProductList;
@@ -3576,6 +3595,8 @@ function checkOfflineStatus() {
 }
 
 // Apply dynamic program title updates
+const DEFAULT_SUBTITLES = { ar: translations.ar.subtitle, en: translations.en.subtitle };
+
 function applyProgramTitle() {
     const defaultAr = "حاسبة الدهمشي الذكية";
     const defaultEn = "Al-Dahmashy Smart Calculator";
@@ -3599,6 +3620,13 @@ function applyProgramTitle() {
     } else {
         document.title = lang === 'ar' ? 'حاسبة الدهمشي الذكية الاحترافية للمبيعات' : 'Al-Dahmashy Smart Calculator - Professional Sales';
     }
+
+    // Subtitle line under the title (custom or default per language)
+    const customSubtitle = state.programSubtitle ? state.programSubtitle.trim() : "";
+    translations.ar.subtitle = customSubtitle || DEFAULT_SUBTITLES.ar;
+    translations.en.subtitle = customSubtitle || DEFAULT_SUBTITLES.en;
+    const mainSubtitleEl = document.getElementById('mainProgramSubtitle');
+    if (mainSubtitleEl) mainSubtitleEl.textContent = translations[lang].subtitle;
 
     // Update main header h1
     const mainTitleEl = document.getElementById('mainProgramTitle');
