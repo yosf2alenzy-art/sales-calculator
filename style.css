@@ -2394,3 +2394,30 @@ body.theme-warehouse-light #btnPdfWhatsAppSend:hover {
 .login-submit.loading { opacity: 0.75; pointer-events: none; }
 .login-submit.loading .login-arrow { animation: loginPulse 0.8s ease-in-out infinite alternate; }
 @keyframes loginPulse { from { opacity: 0.3; } to { opacity: 1; } }
+
+/* Program number badge (first program in the Al-Dahmashy series) */
+.program-number-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 1rem 0.3rem 0.35rem;
+    border-radius: 50px;
+    border: 1px dashed var(--primary);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+[dir="ltr"] .program-number-badge { padding: 0.3rem 0.35rem 0.3rem 1rem; }
+.program-number-digit {
+    display: grid;
+    place-items: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.95rem;
+    font-family: 'Tajawal', sans-serif;
+}
+body.theme-luxury-gold .program-number-digit, body:not([class*="theme-"]) .program-number-digit { color: #1c1917; }
