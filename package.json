@@ -1,0 +1,9 @@
+{
+  "name": "sales-calculator",
+  "private": true,
+  "description": "Al-Dahmashy smart sales calculator + central admin API (Vercel functions)",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

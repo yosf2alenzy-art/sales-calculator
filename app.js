@@ -17,6 +17,22 @@ const translations = {
         addDiscount: "إضافة خصم",
         percentDiscount: "خصم نسبة (%)",
         fixedDiscount: "خصم مبلغ ثابت",
+        fixedDiscountHint: "يُخصم {v} {c} من كل وحدة × {q} وحدة = {t} {c}",
+        fixedDiscountHintNoQty: "يُخصم هذا المبلغ من كل وحدة، ويُضرب في إجمالي كمية المجموعة",
+        loginSubtitle: "سجّل دخولك لإدارة الحاسبة وإعداداتها",
+        loginFoot: "للموظفين المصرّح لهم فقط",
+        loginCapsOn: "زر الأحرف الكبيرة (Caps Lock) مفعّل",
+        loginShowPassword: "إظهار كلمة المرور",
+        setupHeader: "إعداد حساب المدير",
+        setupSubtitle: "أول مرة: أدخل رمز الإعداد ثم اختر اسم مستخدم وكلمة مرور قوية",
+        setupSubmit: "إنشاء حساب المدير",
+        lblSetupCode: "رمز الإعداد",
+        lblPasswordConfirm: "تأكيد كلمة المرور",
+        cpHeader: "تغيير كلمة المرور",
+        cpCurrent: "كلمة المرور الحالية",
+        cpNew: "كلمة المرور الجديدة (8 أحرف على الأقل)",
+        cpConfirm: "تأكيد كلمة المرور الجديدة",
+        cpSubmit: "تغيير كلمة المرور",
         resUnitPrice: "سعر الوحدة:",
         resQuantity: "الكمية:",
         resOriginalTotal: "إجمالي السعر الأصلي:",
@@ -63,6 +79,7 @@ const translations = {
         themeEmeraldGreen: "أخضر زمردي",
         themeClassicBlue: "أزرق كلاسيكي",
         themeElegantLight: "مضيء أنيق",
+        themeWarehouseLight: "فاتح المستودع",
         headerCreator: "عمل : يوسف عيد",
         visitorCountLabel: "عدد زوار الحاسبة",
         usageCountLabel: "عدد مستخدمي البرنامج",
@@ -202,6 +219,22 @@ const translations = {
         addFixedDiscount: "+ Amount",
         percentDiscount: "Percent Discount (%)",
         fixedDiscount: "Fixed Amount Discount",
+        fixedDiscountHint: "{v} {c} off each unit × {q} units = {t} {c}",
+        fixedDiscountHintNoQty: "This amount is deducted from each unit and multiplied by the group's total quantity",
+        loginSubtitle: "Sign in to manage the calculator and its settings",
+        loginFoot: "Authorized staff only",
+        loginCapsOn: "Caps Lock is on",
+        loginShowPassword: "Show password",
+        setupHeader: "Set up the admin account",
+        setupSubtitle: "First time: enter the setup code, then choose a username and a strong password",
+        setupSubmit: "Create admin account",
+        lblSetupCode: "Setup code",
+        lblPasswordConfirm: "Confirm password",
+        cpHeader: "Change password",
+        cpCurrent: "Current password",
+        cpNew: "New password (at least 8 characters)",
+        cpConfirm: "Confirm new password",
+        cpSubmit: "Change password",
         resUnitPrice: "Unit Price:",
         resQuantity: "Quantity:",
         resOriginalTotal: "Original Total Price:",
@@ -246,6 +279,7 @@ const translations = {
         themeEmeraldGreen: "Emerald Green",
         themeClassicBlue: "Classic Blue",
         themeElegantLight: "Elegant Light",
+        themeWarehouseLight: "Warehouse Light",
         headerCreator: "Made by: Yousef Eid",
         visitorCountLabel: "Calculator Visitors",
         usageCountLabel: "Calculator Users",
@@ -499,9 +533,7 @@ let state = {
         saveProject: true,
         loadProject: true
     },
-    users: [
-        { username: 'yousef', password: '851978', permissions: { createQuotation: true } }
-    ],
+    users: [], // staff accounts live on the server (see api/), never in the browser
     currentUser: null,
     groups: [
         {
@@ -675,6 +707,8 @@ function isMobileDevice() {
 function applyTheme(theme) {
     document.body.className = '';
     if (theme && theme !== 'luxury-gold') {
+        // The warehouse light theme builds on the light theme base rules
+        if (theme === 'warehouse-light') document.body.classList.add('theme-elegant-light');
         document.body.classList.add('theme-' + theme);
     }
 }
@@ -833,6 +867,197 @@ function executeWhatsAppSendPDF(phoneInputId) {
     }, 350);
 }
 
+// =====================================================================
+// Central admin API (Vercel + Neon). Admin settings are published on the
+// server and applied for every visitor; logins are verified server-side.
+// =====================================================================
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app'))
+    ? ''
+    : 'https://dahmashy-calculator.vercel.app';
+let authToken = null; // kept in memory only: closing the tab ends the session
+
+// Settings controlled by the admin for everyone
+const CENTRAL_ADMIN_KEYS = ['programTitle', 'customProducts', 'tutorialLinks', 'customTutorials', 'visibleButtons',
+    'lockTheme', 'lockedTheme', 'showProductList', 'disableOffline', 'terms'];
+// Settings published as defaults: applied on a visitor's first visit only, the visitor can still change them
+const CENTRAL_DEFAULT_KEYS = ['currency', 'customCurrency', 'applyVat', 'vatRate'];
+
+class ApiError extends Error {
+    constructor(status, code) { super(code || ('http_' + status)); this.status = status; this.code = code; }
+}
+
+async function apiRequest(path, { method = 'GET', body, auth = false } = {}) {
+    const headers = {};
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (auth && authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    let res;
+    try {
+        res = await fetch(API_BASE + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, cache: 'no-store' });
+    } catch (e) {
+        throw new ApiError(0, 'network');
+    }
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
+    if (!res.ok) {
+        if (res.status === 401 && auth && state.currentUser) {
+            // session expired or revoked
+            authToken = null;
+            state.currentUser = null;
+            updateUIForSession();
+        }
+        throw new ApiError(res.status, data && data.error);
+    }
+    return data;
+}
+
+function apiErrorMessage(err) {
+    const ar = state.language !== 'en';
+    const code = err && err.code;
+    const map = {
+        network: ar ? 'تعذّر الاتصال بالخادم. تحقق من الإنترنت وحاول مجدداً.' : 'Could not reach the server. Check your connection and try again.',
+        invalid_credentials: ar ? 'خطأ في اسم المستخدم أو كلمة المرور' : 'Incorrect username or password',
+        too_many_attempts: ar ? 'محاولات كثيرة خاطئة. حاول مجدداً بعد 15 دقيقة.' : 'Too many failed attempts. Try again in 15 minutes.',
+        bad_setup_code: ar ? 'رمز الإعداد غير صحيح' : 'Incorrect setup code',
+        weak_password: ar ? 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' : 'Password must be at least 8 characters',
+        bad_username: ar ? 'اسم المستخدم من 3 إلى 32 حرفاً أو رقماً، بدون مسافات' : 'Username must be 3-32 letters or digits, no spaces',
+        user_exists: ar ? 'عذراً، هذا الموظف مسجل مسبقاً.' : 'Employee username already exists.',
+        already_set_up: ar ? 'تم إعداد حساب المدير مسبقاً. سجّل الدخول.' : 'The admin account is already set up. Please sign in.',
+        unauthorized: ar ? 'انتهت الجلسة. سجّل الدخول مجدداً.' : 'Session expired. Please sign in again.',
+        forbidden: ar ? 'هذه العملية للمدير فقط.' : 'Admins only.',
+        cannot_delete_self: ar ? 'لا يمكنك حذف حسابك الحالي.' : 'You cannot delete your own account.',
+        last_admin: ar ? 'لا يمكن حذف آخر مدير.' : 'Cannot delete the last admin.',
+        password_mismatch: ar ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'
+    };
+    return map[code] || (ar ? 'حدث خطأ غير متوقع في الخادم. حاول لاحقاً.' : 'Unexpected server error. Please try later.');
+}
+
+// Re-apply every admin-driven part of the UI after settings change
+function refreshAdminDrivenUI() {
+    try {
+        renderDatalist();
+        if (typeof currencySelect !== 'undefined' && currencySelect) currencySelect.value = state.currency;
+        if (typeof customCurrencyInput !== 'undefined' && customCurrencyInput) customCurrencyInput.value = state.customCurrency;
+        if (typeof toggleCustomCurrencyVisibility === 'function') toggleCustomCurrencyVisibility();
+        if (typeof applyVatCheckbox !== 'undefined' && applyVatCheckbox) applyVatCheckbox.checked = state.applyVat;
+        if (typeof vatRateInput !== 'undefined' && vatRateInput) vatRateInput.value = state.vatRate;
+        applyProgramTitle();
+        applyVisibleButtons();
+        checkOfflineStatus();
+        if (state.lockTheme) {
+            themeSelect.value = state.lockedTheme;
+            themeSelect.disabled = true;
+            applyTheme(state.lockedTheme);
+        } else {
+            themeSelect.disabled = false;
+            themeSelect.value = state.theme;
+            applyTheme(state.theme);
+        }
+        if (typeof populateTutorialSelect === 'function') populateTutorialSelect();
+        renderGroups();
+        calculate();
+    } catch (e) {
+        console.warn('UI refresh after settings sync failed', e);
+    }
+}
+
+// Load the admin's published settings for this visitor
+async function syncCentralSettings() {
+    try {
+        const data = await apiRequest('/api/settings');
+        const s = data && data.settings;
+        if (!s || Object.keys(s).length === 0) return; // nothing published yet: keep defaults
+        CENTRAL_ADMIN_KEYS.forEach(k => {
+            if (s[k] === undefined) return;
+            state[k] = k === 'visibleButtons' ? { ...state.visibleButtons, ...s[k] } : s[k];
+        });
+        if (window.__calcFirstVisit) {
+            CENTRAL_DEFAULT_KEYS.forEach(k => { if (s[k] !== undefined) state[k] = s[k]; });
+        }
+        saveState();
+        refreshAdminDrivenUI();
+    } catch (e) {
+        // offline or server unavailable: the last synced copy in localStorage keeps working
+    }
+}
+
+// Publish the admin's current settings for every visitor
+async function publishCentralSettings() {
+    const settings = {};
+    CENTRAL_ADMIN_KEYS.concat(CENTRAL_DEFAULT_KEYS).forEach(k => { if (state[k] !== undefined) settings[k] = state[k]; });
+    return apiRequest('/api/settings', { method: 'PUT', body: { settings }, auth: true });
+}
+
+function openSettingsModal() {
+    const settingsModal = document.getElementById('settingsModal');
+    if (!settingsModal) return;
+    settingsModal.style.display = 'flex';
+    document.getElementById('settingsToggleProductList').checked = state.showProductList;
+    document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
+    document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
+    document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
+    document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
+    renderSettingsUsersList();
+    populateVisibilityCheckboxes();
+    renderAdminSuggestionsList();
+    renderAdminTutorialLinksList();
+    renderAdminCustomVideosList();
+}
+
+// Login modal: normal sign-in, or first-time admin setup when no admin exists yet
+let loginMode = 'login';
+async function openLoginModal() {
+    const loginModal = document.getElementById('loginModal');
+    loginModal.style.display = 'flex';
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').type = 'password';
+    const codeEl = document.getElementById('loginSetupCode');
+    const confirmEl = document.getElementById('loginPasswordConfirm');
+    if (codeEl) codeEl.value = '';
+    if (confirmEl) confirmEl.value = '';
+    document.getElementById('loginErrorMsg').style.display = 'none';
+    setLoginMode('login');
+    document.getElementById('loginUsername').focus();
+    try {
+        const st = await apiRequest('/api/status');
+        setLoginMode(st && st.needsSetup ? 'setup' : 'login');
+    } catch (e) { /* keep login mode */ }
+}
+
+function setLoginMode(mode) {
+    loginMode = mode;
+    const t = translations[state.language] || translations.ar;
+    const card = document.querySelector('#loginModal .login-card');
+    if (card) card.classList.toggle('setup-mode', mode === 'setup');
+    const title = document.querySelector('#loginTitle span');
+    const sub = document.querySelector('#loginModal .login-hero p span');
+    const submit = document.querySelector('#loginModal .login-submit span');
+    if (title) title.textContent = mode === 'setup' ? t.setupHeader : t.loginHeader;
+    if (sub) sub.textContent = mode === 'setup' ? t.setupSubtitle : t.loginSubtitle;
+    if (submit) submit.textContent = mode === 'setup' ? t.setupSubmit : t.btnLoginSubmit;
+    const codeEl = document.getElementById('loginSetupCode');
+    const confirmEl = document.getElementById('loginPasswordConfirm');
+    if (codeEl) codeEl.required = mode === 'setup';
+    if (confirmEl) confirmEl.required = mode === 'setup';
+}
+
+function showLoginError(message) {
+    const box = document.getElementById('loginErrorMsg');
+    const span = box.querySelector('span');
+    if (span) span.textContent = message;
+    box.style.display = 'flex';
+    const loginCard = document.querySelector('#loginModal .login-card');
+    if (loginCard) {
+        loginCard.classList.remove('shake');
+        void loginCard.offsetWidth;
+        loginCard.classList.add('shake');
+    }
+}
+
+function escapeHtml(v) {
+    return String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // Load state from localStorage on init
 function init() {
     let savedState = safeGetLocalStorage('sales_calculator_state_v14');
@@ -967,24 +1192,8 @@ function init() {
                 if (state.visibleButtons.loadProject === undefined) state.visibleButtons.loadProject = true;
             }
 
-            if (!Array.isArray(state.users)) {
-                state.users = [
-                    { username: 'yousef', password: '851978', permissions: { createQuotation: true } }
-                ];
-            } else {
-                // Remove old meyousef if it exists
-                state.users = state.users.filter(u => u.username !== 'meyousef');
-                
-                // Ensure default user is updated or present
-                const hasMeYousef = state.users.some(u => u.username === 'yousef');
-                if (!hasMeYousef) {
-                    state.users.push({ username: 'yousef', password: '851978', permissions: { createQuotation: true } });
-                } else {
-                    // Force the password from requests to ensure sync
-                    const mainAdmin = state.users.find(u => u.username === 'yousef');
-                    if (mainAdmin) mainAdmin.password = '851978';
-                }
-            }
+            // Accounts are verified on the server now: drop any locally stored credentials
+            state.users = [];
             state.currentUser = null; // reset session at startup
             if (!state.language) state.language = 'ar';
             if (!Array.isArray(state.terms) || state.terms.length === 0) {
@@ -1031,6 +1240,7 @@ function init() {
             console.error('Failed to parse saved state, using defaults', e);
         }
     } else {
+        window.__calcFirstVisit = true;
         saveState();
     }
 
@@ -1078,6 +1288,7 @@ function init() {
     updateUIForSession();
     handleStats();
     checkAdminHash();
+    syncCentralSettings();
 }
 
 function checkAdminHash() {
@@ -1108,25 +1319,9 @@ function checkAdminHash() {
         const loginModal = document.getElementById('loginModal');
         const settingsModal = document.getElementById('settingsModal');
         if (state.currentUser) {
-            if (wantsSettings) {
-                settingsModal.style.display = 'flex';
-                document.getElementById('settingsToggleProductList').checked = state.showProductList;
-                document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
-                document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
-                document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
-                document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
-                renderSettingsUsersList();
-                populateVisibilityCheckboxes();
-                renderAdminSuggestionsList();
-                renderAdminTutorialLinksList();
-                renderAdminCustomVideosList();
-            }
+            if (wantsSettings && state.currentUser.isAdmin) openSettingsModal();
         } else {
-            loginModal.style.display = 'flex';
-            document.getElementById('loginUsername').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginErrorMsg').style.display = 'none';
-            document.getElementById('loginUsername').focus();
+            openLoginModal();
         }
     }
 }
@@ -1141,7 +1336,7 @@ function updateUIForSession() {
     if (state.currentUser) {
         loginBtnText.textContent = translations[lang].navLogout + " (" + state.currentUser.username + ")";
         btnUserLogin.classList.add('active');
-        btnAdminSettings.style.display = 'flex';
+        btnAdminSettings.style.display = state.currentUser.isAdmin ? 'flex' : 'none';
     } else {
         loginBtnText.textContent = translations[lang].navLogin;
         btnUserLogin.classList.remove('active');
@@ -1150,19 +1345,26 @@ function updateUIForSession() {
 }
 
 // Login / Logout operations
-function handleLogin(username, password) {
-    username = username.trim();
-    const user = state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-    if (user) {
-        state.currentUser = { username: user.username, permissions: { ...user.permissions } };
-        saveState();
-        updateUIForSession();
-        return true;
-    }
-    return false;
+async function handleLogin(username, password) {
+    const data = await apiRequest('/api/login', { method: 'POST', body: { username: username.trim(), password } });
+    authToken = data.token;
+    state.currentUser = { username: data.user.username, isAdmin: !!data.user.isAdmin, permissions: { ...(data.user.permissions || {}) } };
+    saveState();
+    updateUIForSession();
+    return state.currentUser;
+}
+
+async function handleSetupAdmin(setupCode, username, password) {
+    const data = await apiRequest('/api/setup', { method: 'POST', body: { setupCode: setupCode.trim(), username: username.trim(), password } });
+    authToken = data.token;
+    state.currentUser = { username: data.user.username, isAdmin: true, permissions: { ...(data.user.permissions || {}) } };
+    saveState();
+    updateUIForSession();
+    return state.currentUser;
 }
 
 function handleLogout() {
+    authToken = null;
     state.currentUser = null;
     saveState();
     updateUIForSession();
@@ -1170,64 +1372,61 @@ function handleLogout() {
 }
 
 // User Management
-function addUser(username, password, permQuotation) {
-    username = username.trim();
-    if (!username || !password) return false;
-    const exists = state.users.some(u => u.username.toLowerCase() === username.toLowerCase());
-    if (exists) return false;
-    
-    state.users.push({
-        username: username,
-        password: password,
-        permissions: { createQuotation: permQuotation }
-    });
-    saveState();
-    renderSettingsUsersList();
+async function addUser(username, password, permQuotation) {
+    await apiRequest('/api/users', { method: 'POST', auth: true, body: { username: username.trim(), password, permissions: { createQuotation: !!permQuotation } } });
+    await renderSettingsUsersList();
     return true;
 }
 
-function deleteUser(username) {
-    if (username.toLowerCase() === 'yousef') return false;
-    state.users = state.users.filter(u => u.username.toLowerCase() !== username.toLowerCase());
-    if (state.currentUser && state.currentUser.username.toLowerCase() === username.toLowerCase()) {
-        handleLogout();
+async function deleteUser(username) {
+    const ar = state.language !== 'en';
+    if (!confirm(ar ? `حذف الموظف "${username}"؟` : `Delete employee "${username}"?`)) return false;
+    try {
+        await apiRequest('/api/users?username=' + encodeURIComponent(username), { method: 'DELETE', auth: true });
+        await renderSettingsUsersList();
+        return true;
+    } catch (e) {
+        alert(apiErrorMessage(e));
+        return false;
     }
-    saveState();
-    renderSettingsUsersList();
-    return true;
 }
 
-function renderSettingsUsersList() {
+async function renderSettingsUsersList() {
     const container = document.getElementById('adminUsersListContainer');
     if (!container) return;
-    container.innerHTML = '';
     const lang = state.language;
-    
-    state.users.forEach(user => {
+    container.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 0.5rem;"><i class="fa-solid fa-spinner fa-spin"></i></div>`;
+    let users = [];
+    try {
+        const data = await apiRequest('/api/users', { auth: true });
+        users = (data && data.users) || [];
+    } catch (e) {
+        container.innerHTML = `<div style="color: var(--danger); font-weight: 700; padding: 0.5rem;">${escapeHtml(apiErrorMessage(e))}</div>`;
+        return;
+    }
+    state.users = users.map(u => ({ username: u.username, isAdmin: u.isAdmin, permissions: u.permissions }));
+    container.innerHTML = '';
+    const me = state.currentUser ? state.currentUser.username.toLowerCase() : '';
+
+    users.forEach(user => {
         const row = document.createElement('div');
         row.className = 'settings-user-row';
-        
         const canQuote = user.permissions && user.permissions.createQuotation;
         const permText = canQuote ? translations[lang].permQuotation : (lang === 'ar' ? 'بدون صلاحيات' : 'No permissions');
-        
+        const isMe = user.username.toLowerCase() === me;
         row.innerHTML = `
             <div class="settings-user-info">
-                <span class="settings-user-name">${user.username}</span>
-                <span class="settings-user-perm">${permText}</span>
+                <span class="settings-user-name">${escapeHtml(user.username)}${isMe ? (lang === 'ar' ? ' (أنت)' : ' (you)') : ''}</span>
+                <span class="settings-user-perm">${user.isAdmin ? (lang === 'ar' ? 'مدير النظام' : 'Administrator') : escapeHtml(permText)}</span>
             </div>
-            ${user.username !== 'yousef' ? `
-                <button type="button" class="btn-delete delete-user-btn" data-username="${user.username}" title="${lang === 'ar' ? 'حذف المستخدم' : 'Delete User'}" style="width: 2rem; height: 2rem;">
+            ${!isMe ? `
+                <button type="button" class="btn-delete delete-user-btn" title="${lang === 'ar' ? 'حذف المستخدم' : 'Delete User'}" style="width: 2rem; height: 2rem;">
                     <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
                 </button>
-            ` : `<span style="font-size: 0.85rem; color: var(--primary); font-weight: bold;">مدير النظام</span>`}
+            ` : `<span style="font-size: 0.85rem; color: var(--primary); font-weight: bold;">${lang === 'ar' ? 'مدير النظام' : 'Admin'}</span>`}
         `;
-        
         const deleteBtn = row.querySelector('.delete-user-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
-                deleteUser(user.username);
-            });
-        }
+        if (deleteBtn) deleteBtn.addEventListener('click', () => deleteUser(user.username));
         container.appendChild(row);
     });
 }
@@ -1822,11 +2021,7 @@ function setupEventListeners() {
         if (state.currentUser) {
             handleLogout();
         } else {
-            loginModal.style.display = 'flex';
-            document.getElementById('loginUsername').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginErrorMsg').style.display = 'none';
-            document.getElementById('loginUsername').focus();
+            openLoginModal();
         }
     });
     
@@ -1834,27 +2029,59 @@ function setupEventListeners() {
         loginModal.style.display = 'none';
     });
     
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const usernameInput = document.getElementById('loginUsername').value;
         const passwordInput = document.getElementById('loginPassword').value;
-        const success = handleLogin(usernameInput, passwordInput);
-        if (success) {
-            loginModal.style.display = 'none';
-            document.getElementById('settingsModal').style.display = 'flex';
-            document.getElementById('settingsToggleProductList').checked = state.showProductList;
-            document.getElementById('settingsToggleDisableOffline').checked = !!state.disableOffline;
-            document.getElementById('settingsToggleThemeLock').checked = state.lockTheme;
-            document.getElementById('settingsLockedThemeSelect').value = state.lockedTheme;
-            document.getElementById('settingsProgramTitleInput').value = state.programTitle || '';
-            renderSettingsUsersList();
-            populateVisibilityCheckboxes();
-            renderAdminSuggestionsList();
-            renderAdminTutorialLinksList();
-            renderAdminCustomVideosList();
-        } else {
-            document.getElementById('loginErrorMsg').style.display = 'block';
+        const submitBtn = loginModal.querySelector('.login-submit');
+        document.getElementById('loginErrorMsg').style.display = 'none';
+        if (loginMode === 'setup') {
+            const confirmVal = (document.getElementById('loginPasswordConfirm') || {}).value;
+            if (passwordInput !== confirmVal) return showLoginError(apiErrorMessage({ code: 'password_mismatch' }));
         }
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        try {
+            const user = loginMode === 'setup'
+                ? await handleSetupAdmin(document.getElementById('loginSetupCode').value, usernameInput, passwordInput)
+                : await handleLogin(usernameInput, passwordInput);
+            loginModal.style.display = 'none';
+            document.getElementById('loginPassword').value = '';
+            if (user.isAdmin) {
+                openSettingsModal();
+            } else {
+                showToast(state.language === 'ar' ? `أهلاً ${user.username} 👋` : `Welcome ${user.username} 👋`);
+            }
+        } catch (err) {
+            if (err.code === 'already_set_up') setLoginMode('login');
+            showLoginError(apiErrorMessage(err));
+            document.getElementById('loginPassword').select();
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+        }
+    });
+
+    // Login: show/hide password + Caps Lock warning
+    const btnToggleLoginPassword = document.getElementById('btnToggleLoginPassword');
+    const loginPasswordEl = document.getElementById('loginPassword');
+    if (btnToggleLoginPassword && loginPasswordEl) {
+        btnToggleLoginPassword.addEventListener('click', () => {
+            const show = loginPasswordEl.type === 'password';
+            loginPasswordEl.type = show ? 'text' : 'password';
+            btnToggleLoginPassword.innerHTML = show ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            loginPasswordEl.focus();
+        });
+        const capsWarn = document.getElementById('loginCapsWarn');
+        const checkCaps = (e) => {
+            if (capsWarn && e.getModifierState) capsWarn.classList.toggle('show', e.getModifierState('CapsLock'));
+        };
+        loginPasswordEl.addEventListener('keydown', checkCaps);
+        loginPasswordEl.addEventListener('keyup', checkCaps);
+    }
+    ['loginUsername', 'loginPassword'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => { document.getElementById('loginErrorMsg').style.display = 'none'; });
     });
 
     // Hash change and popstate event listeners for settings and routing
@@ -1952,21 +2179,51 @@ function setupEventListeners() {
         applyProgramTitle();
     });
     
-    document.getElementById('addUserForm').addEventListener('submit', (e) => {
+    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const newUsernameInput = document.getElementById('newUsername');
         const newUserPasswordInput = document.getElementById('newUserPassword');
         const newUserPermQuotationInput = document.getElementById('newUserPermQuotation');
-        
-        const success = addUser(newUsernameInput.value, newUserPasswordInput.value, newUserPermQuotationInput.checked);
-        if (success) {
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+            await addUser(newUsernameInput.value, newUserPasswordInput.value, newUserPermQuotationInput.checked);
             newUsernameInput.value = '';
             newUserPasswordInput.value = '';
             newUserPermQuotationInput.checked = true;
-        } else {
-            alert(state.language === 'ar' ? 'عذراً، هذا الموظف مسجل مسبقاً.' : 'Employee username already exists.');
+        } catch (err) {
+            alert(apiErrorMessage(err));
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
         }
     });
+
+    // Change own password (server-side)
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cur = document.getElementById('cpCurrent');
+            const nw = document.getElementById('cpNew');
+            const cf = document.getElementById('cpConfirm');
+            const msg = document.getElementById('cpMsg');
+            const ar = state.language !== 'en';
+            const show = (text, ok) => { msg.textContent = text; msg.style.display = 'block'; msg.style.color = ok ? 'var(--success)' : 'var(--danger)'; };
+            if (nw.value !== cf.value) return show(apiErrorMessage({ code: 'password_mismatch' }), false);
+            const btn = changePasswordForm.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            try {
+                const data = await apiRequest('/api/password', { method: 'POST', auth: true, body: { currentPassword: cur.value, newPassword: nw.value } });
+                authToken = data.token;
+                cur.value = nw.value = cf.value = '';
+                show(ar ? 'تم تغيير كلمة المرور، وأُغلقت جلساتك الأخرى.' : 'Password changed. Your other sessions were signed out.', true);
+            } catch (err) {
+                show(apiErrorMessage(err), false);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
 
     // Expand all groups globally (Uncollapse all)
     document.getElementById('btnExpandAll').addEventListener('click', () => {
@@ -2280,9 +2537,15 @@ function setupEventListeners() {
                 applyTheme(state.theme);
             }
             
-            alert(state.language === 'ar' ? 'تم حفظ واعتماد التعديلات بنجاح في المتصفح! 🎉' : 'Settings saved and applied successfully in browser! 🎉');
-            const settingsModal = document.getElementById('settingsModal');
-            if (settingsModal) settingsModal.style.display = 'none';
+            const saveBtn = btnSaveAdminSettings;
+            saveBtn.disabled = true;
+            publishCentralSettings().then(() => {
+                alert(state.language === 'ar' ? 'تم حفظ التعديلات ونشرها لجميع زوار الحاسبة! 🎉' : 'Settings saved and published for every visitor! 🎉');
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) settingsModal.style.display = 'none';
+            }).catch(err => {
+                alert((state.language === 'ar' ? 'حُفظت التعديلات في هذا المتصفح فقط، ولم تُنشر: ' : 'Saved in this browser only, not published: ') + apiErrorMessage(err));
+            }).finally(() => { saveBtn.disabled = false; });
         });
     }
 
@@ -2296,7 +2559,6 @@ function setupEventListeners() {
                 tutorialLinks: state.tutorialLinks || [],
                 customTutorials: state.customTutorials || [],
                 visibleButtons: state.visibleButtons || {},
-                users: state.users || [],
                 lockTheme: state.lockTheme || false,
                 lockedTheme: state.lockedTheme || 'luxury-gold',
                 showProductList: state.showProductList !== false,
@@ -2337,9 +2599,6 @@ function setupEventListeners() {
                 try {
                     const data = JSON.parse(evt.target.result);
                     
-                    if (data.users && Array.isArray(data.users)) {
-                        state.users = data.users;
-                    }
                     if (data.customProducts && Array.isArray(data.customProducts)) {
                         state.customProducts = data.customProducts;
                     }
@@ -2366,8 +2625,13 @@ function setupEventListeners() {
                     }
                     
                     saveState();
-                    alert(state.language === 'ar' ? 'تم استيراد إعدادات البرنامج وتطبيقها بنجاح! 💾🎉 وسيتم تحديث الصفحة الآن.' : 'Settings imported and applied successfully! 💾🎉 Reloading page now.');
-                    window.location.reload();
+                    const finish = (published) => {
+                        alert(state.language === 'ar'
+                            ? (published ? 'تم استيراد الإعدادات ونشرها لجميع الزوار! 💾🎉 سيتم تحديث الصفحة الآن.' : 'تم استيراد الإعدادات في هذا المتصفح فقط (لم تُنشر). سيتم تحديث الصفحة الآن.')
+                            : (published ? 'Settings imported and published for everyone! 💾🎉 Reloading now.' : 'Settings imported in this browser only (not published). Reloading now.'));
+                        window.location.reload();
+                    };
+                    publishCentralSettings().then(() => finish(true)).catch(() => finish(false));
                 } catch (err) {
                     alert(state.language === 'ar' ? 'فشل استيراد ملف الإعدادات. يرجى التأكد من صحة ملف الـ JSON.' : 'Failed to import settings. Please check the JSON file.');
                 }
@@ -3736,6 +4000,7 @@ function renderGroups() {
                 <button type="button" class="btn-delete delete-discount-btn" title="${lang === 'ar' ? 'حذف الخصم' : 'Delete Discount'}" aria-label="${lang === 'ar' ? 'حذف الخصم' : 'Delete Discount'}">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
+                ${discount.type === 'fixed' ? `<div class="fixed-discount-hint" data-group-id="${group.id}" data-discount-id="${discount.id}"><i class="fa-solid fa-circle-info"></i> <span>${getFixedDiscountHintText(group, discount)}</span></div>` : ''}
             `;
 
             const typeSelect = item.querySelector('.discount-type-select');
@@ -3834,7 +4099,32 @@ function renderGroups() {
 
 
 // Perform sequential discount calculation
+// Explains that a fixed discount is applied per unit (value × group total quantity)
+function getFixedDiscountHintText(group, discount) {
+    const lang = state.language;
+    const t = translations[lang] || translations.ar;
+    const currency = getActiveCurrency();
+    const qty = group.products.reduce((sum, p) => sum + (parseFloat(p.quantity) || 0), 0);
+    const val = parseFloat(discount.value) || 0;
+    if (qty <= 0) return t.fixedDiscountHintNoQty;
+    return t.fixedDiscountHint
+        .split('{v}').join(formatNumber(val))
+        .split('{q}').join(Number.isInteger(qty) ? String(qty) : formatNumber(qty))
+        .split('{t}').join(formatNumber(val * qty))
+        .split('{c}').join(currency);
+}
+
+function refreshFixedDiscountHints() {
+    document.querySelectorAll('.fixed-discount-hint').forEach(el => {
+        const group = state.groups.find(g => g.id === el.dataset.groupId);
+        const discount = group && group.discounts.find(d => d.id === el.dataset.discountId);
+        const span = el.querySelector('span');
+        if (group && discount && span) span.textContent = getFixedDiscountHintText(group, discount);
+    });
+}
+
 function calculate() {
+    refreshFixedDiscountHints();
     const lang = state.language;
     const currency = getActiveCurrency();
 
@@ -4588,8 +4878,8 @@ function fallbackCopyText(text, lang) {
 }
 
 // Show Toast feedback in the correct language
-function showToast(lang) {
-    toastMessage.textContent = translations[lang].toastSuccess;
+function showToast(langOrMessage) {
+    toastMessage.textContent = translations[langOrMessage] ? translations[langOrMessage].toastSuccess : String(langOrMessage);
     toastMessage.classList.add('show');
     setTimeout(() => {
         toastMessage.classList.remove('show');

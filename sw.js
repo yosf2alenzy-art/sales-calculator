@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sales-calc-cache-v37';
+const CACHE_NAME = 'sales-calc-cache-v39';
 const ASSETS = [
     './',
     './index.html',
@@ -37,6 +37,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
     // Avoid caching non-HTTP requests (e.g. chrome-extension or file schemes)
     if (!e.request.url.startsWith(self.location.origin) && !e.request.url.startsWith('https://cdnjs.cloudflare.com')) {
+        return;
+    }
+    // Never cache the live admin API
+    if (new URL(e.request.url).pathname.startsWith('/api/') || e.request.method !== 'GET') {
         return;
     }
     

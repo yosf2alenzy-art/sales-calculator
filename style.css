@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
 
 :root {
     --bg-gradient: linear-gradient(135deg, #1c1917 0%, #0c0a09 100%);
@@ -1919,3 +1919,478 @@ body.theme-elegant-light .audio-drop-zone {
 
 
 
+
+/* =========================================================
+   Fixed-amount discount hint (per-unit explanation)
+   ========================================================= */
+.fixed-discount-hint {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin-top: -0.1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--primary-glow);
+    border: 1px dashed var(--primary);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.6;
+}
+.fixed-discount-hint i {
+    color: var(--primary);
+    margin-top: 0.25rem;
+    flex: none;
+}
+
+/* =========================================================
+   Employee Login Modal (professional redesign)
+   ========================================================= */
+.login-overlay {
+    background: radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.82));
+}
+.login-card {
+    position: relative;
+    max-width: 420px;
+    padding: 2.25rem 2rem 1.25rem;
+    border-radius: 24px;
+    overflow: visible;
+}
+.login-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    border-radius: 24px 24px 0 0;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+.login-close {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    background: var(--item-bg);
+}
+[dir="ltr"] .login-close { left: auto; right: 0.9rem; }
+.login-hero {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+.login-avatar {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 1rem;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    font-size: 1.9rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    box-shadow: 0 12px 28px var(--primary-glow);
+}
+.login-hero h3 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 0.35rem;
+}
+.login-hero p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+.login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+.login-field label {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+.login-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.login-card .login-input-wrap input[type="text"],
+.login-card .login-input-wrap input[type="password"] {
+    width: 100%;
+    height: 3.25rem;
+    padding: 0 2.9rem 0 2.9rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-align: right;
+    color: var(--text-primary);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border, rgba(255, 255, 255, 0.1));
+    border-radius: 14px;
+    outline: none;
+    transition: var(--transition);
+}
+.login-card .login-input-wrap input[type="password"] {
+    letter-spacing: 0.25em;
+}
+.login-card .login-input-wrap input::placeholder {
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: normal;
+}
+.login-card .login-input-wrap input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+[dir="ltr"] .login-card .login-input-wrap input { text-align: left; }
+.login-input-icon {
+    position: absolute;
+    right: 1.05rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: var(--transition);
+}
+[dir="ltr"] .login-input-icon { right: auto; left: 1.05rem; }
+.login-input-wrap:focus-within .login-input-icon { color: var(--primary); }
+.login-eye {
+    position: absolute;
+    left: 0.55rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+[dir="ltr"] .login-eye { left: auto; right: 0.55rem; }
+.login-eye:hover { color: var(--primary); background: var(--primary-glow); }
+.login-caps {
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.login-caps.show { display: flex; }
+.login-error {
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 12px;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--danger);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+.login-submit {
+    height: 3.25rem;
+    margin-top: 0.35rem;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    color: #fff !important;
+    gap: 0.6rem;
+}
+.login-arrow { transition: transform 0.25s ease; }
+.login-submit:hover .login-arrow { transform: translateX(-4px); }
+[dir="ltr"] .login-arrow { transform: scaleX(-1); }
+[dir="ltr"] .login-submit:hover .login-arrow { transform: scaleX(-1) translateX(-4px); }
+.login-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-border);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.login-card.shake { animation: loginShake 0.45s ease; }
+@keyframes loginShake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-7px); }
+    40%, 60% { transform: translateX(7px); }
+}
+@media (max-width: 480px) {
+    .login-card { padding: 2rem 1.25rem 1rem; border-radius: 20px; }
+}
+
+/* =========================================================
+   Warehouse Light Theme — matches the warehouse app's light theme
+   (tokens: page #fafaf8, card #fff, input #f4f4f2, accent #ea580c,
+    text #18181b / #6b7280 / #a1a1aa, borders #00000014,
+    font IBM Plex Sans Arabic)
+   ========================================================= */
+body.theme-warehouse-light {
+    --bg-gradient: #fafaf8;
+    --card-bg: #ffffff;
+    --card-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #18181b;
+    --text-secondary: #6b7280;
+    --text-muted: #a1a1aa;
+    --primary: #ea580c;
+    --primary-hover: #c2410c;
+    --primary-glow: rgba(234, 88, 12, 0.1);
+    --accent: #ea580c;
+    --success: #16a34a;
+    --success-hover: #15803d;
+    --success-glow: rgba(22, 163, 74, 0.12);
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --input-bg: #f4f4f2;
+    --input-border: rgba(0, 0, 0, 0.08);
+    --option-bg: #ffffff;
+    --item-bg: #fafaf8;
+    --header-gradient: linear-gradient(135deg, #18181b 0%, #18181b 100%);
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --font-family: 'IBM Plex Sans Arabic', 'Tajawal', sans-serif;
+    --wh-card-hover: #f5f5f3;
+    --wh-border-hover: rgba(0, 0, 0, 0.16);
+    --wh-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --wh-shadow-lift: 0 12px 28px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(234, 88, 12, 0.1);
+    background: #fafaf8;
+    color: #18181b;
+}
+
+/* Surfaces: flat white cards, hairline border, soft shadow (no glass) */
+body.theme-warehouse-light .card,
+body.theme-warehouse-light .stats-card,
+body.theme-warehouse-light .modal-card,
+body.theme-warehouse-light .settings-bar {
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--wh-shadow-card);
+}
+body.theme-warehouse-light .card:hover,
+body.theme-warehouse-light .settings-bar:hover {
+    border-color: var(--wh-border-hover);
+    box-shadow: var(--wh-shadow-card);
+    background: #ffffff;
+}
+body.theme-warehouse-light .stats-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(234, 88, 12, 0.35);
+    box-shadow: var(--wh-shadow-lift);
+}
+body.theme-warehouse-light .stats-icon {
+    background: rgba(234, 88, 12, 0.1);
+    color: #ea580c;
+}
+body.theme-warehouse-light .stats-value { color: #ea580c; }
+
+/* Header: dark title like the warehouse page headings */
+body.theme-warehouse-light header h1 {
+    background: none;
+    -webkit-text-fill-color: #18181b;
+    color: #18181b;
+    font-weight: 800;
+}
+body.theme-warehouse-light header p { color: #6b7280; }
+
+/* Rows inside cards */
+body.theme-warehouse-light .discount-item,
+body.theme-warehouse-light .product-item,
+body.theme-warehouse-light .breakdown-step,
+body.theme-warehouse-light .preset-item {
+    background: #fafaf8;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.theme-warehouse-light .discount-number {
+    background: rgba(234, 88, 12, 0.1);
+    color: #ea580c;
+}
+
+/* Inputs */
+body.theme-warehouse-light input[type="number"],
+body.theme-warehouse-light input[type="text"],
+body.theme-warehouse-light input[type="password"],
+body.theme-warehouse-light select,
+body.theme-warehouse-light textarea {
+    background-color: #f4f4f2;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #18181b;
+}
+body.theme-warehouse-light input:focus,
+body.theme-warehouse-light select:focus,
+body.theme-warehouse-light textarea:focus {
+    background-color: #ffffff;
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12);
+    opacity: 1;
+}
+body.theme-warehouse-light .group-name-input { color: #18181b; }
+
+/* Buttons */
+body.theme-warehouse-light .btn-primary,
+body.theme-warehouse-light #btnCreateResultsPdf,
+body.theme-warehouse-light #btnPdfPrintPDF,
+body.theme-warehouse-light #galleryFallbackLink {
+    background: #ea580c !important;
+    border-color: #ea580c !important;
+    color: #ffffff !important;
+    box-shadow: none;
+}
+body.theme-warehouse-light .btn-primary:hover {
+    background: #c2410c !important;
+    border-color: #c2410c !important;
+    box-shadow: var(--wh-shadow-lift);
+}
+body.theme-warehouse-light .btn-secondary,
+body.theme-warehouse-light .lang-btn,
+body.theme-warehouse-light .group-action-btn,
+body.theme-warehouse-light #btnCollapseAllExceptFirst,
+body.theme-warehouse-light #btnExpandAll {
+    background: #f4f4f2;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #6b7280;
+    box-shadow: none;
+}
+body.theme-warehouse-light .btn-secondary:hover,
+body.theme-warehouse-light .lang-btn:hover,
+body.theme-warehouse-light .group-action-btn:hover,
+body.theme-warehouse-light #btnCollapseAllExceptFirst:hover,
+body.theme-warehouse-light #btnExpandAll:hover {
+    background: #ffffff !important;
+    border-color: rgba(0, 0, 0, 0.16) !important;
+    color: #18181b !important;
+    box-shadow: var(--wh-shadow-card) !important;
+}
+body.theme-warehouse-light .lang-btn.active {
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #ffffff;
+    box-shadow: none;
+}
+body.theme-warehouse-light #btnAddGroup {
+    background: #ea580c;
+    border-color: #ea580c;
+    color: #ffffff;
+}
+body.theme-warehouse-light #btnAddGroup:hover {
+    background: #c2410c;
+    color: #ffffff;
+    box-shadow: var(--wh-shadow-lift);
+}
+body.theme-warehouse-light #btnDeleteExtraGroups {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+body.theme-warehouse-light #btnDeleteExtraGroups:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+body.theme-warehouse-light .btn-delete {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+body.theme-warehouse-light .btn-delete:hover {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+/* Export / action buttons: white "tool" buttons like the warehouse toolbars */
+body.theme-warehouse-light .action-grid .btn:not(.btn-primary),
+body.theme-warehouse-light .btn-copy,
+body.theme-warehouse-light .btn-whatsapp {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #18181b;
+    box-shadow: var(--wh-shadow-card);
+}
+body.theme-warehouse-light .action-grid .btn:not(.btn-primary):hover,
+body.theme-warehouse-light .btn-copy:hover,
+body.theme-warehouse-light .btn-whatsapp:hover {
+    background: #f5f5f3;
+    border-color: rgba(0, 0, 0, 0.16);
+    color: #18181b;
+    box-shadow: var(--wh-shadow-lift);
+}
+body.theme-warehouse-light .btn-whatsapp i { color: #16a34a; }
+body.theme-warehouse-light .btn-excel {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #18181b !important;
+    box-shadow: var(--wh-shadow-card);
+}
+body.theme-warehouse-light .btn-excel i { color: #16a34a; }
+
+/* Results card: orange accent strip like the warehouse active states */
+body.theme-warehouse-light .results-card { border-color: rgba(0, 0, 0, 0.08); }
+body.theme-warehouse-light .results-card::before {
+    background: linear-gradient(90deg, #ea580c, #fb923c);
+}
+body.theme-warehouse-light .result-row { border-color: rgba(0, 0, 0, 0.06); }
+
+/* Modals */
+body.theme-warehouse-light .modal-overlay {
+    background: rgba(24, 24, 27, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+body.theme-warehouse-light .modal-header { border-bottom-color: rgba(0, 0, 0, 0.08); }
+body.theme-warehouse-light .modal-header h3 { color: #18181b; }
+body.theme-warehouse-light .modal-header h3 i { color: #ea580c; }
+body.theme-warehouse-light .close-modal-btn { color: #6b7280; }
+body.theme-warehouse-light .login-overlay { background: rgba(24, 24, 27, 0.45); }
+body.theme-warehouse-light .login-avatar { box-shadow: 0 12px 28px rgba(234, 88, 12, 0.25); }
+body.theme-warehouse-light .login-close { background: #f4f4f2; }
+
+/* Scrollbar */
+body.theme-warehouse-light ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 8px; }
+body.theme-warehouse-light #targetFinalPriceInput {
+    background: #ffffff !important;
+    border: 1px solid rgba(234, 88, 12, 0.45) !important;
+    color: #16a34a !important;
+    box-shadow: var(--wh-shadow-card) !important;
+}
+body.theme-warehouse-light #targetFinalPriceInput:focus {
+    border-color: #ea580c !important;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12) !important;
+}
+body.theme-warehouse-light .action-grid .btn-whatsapp,
+body.theme-warehouse-light #btnQuoteWhatsAppSend,
+body.theme-warehouse-light #btnPdfWhatsAppSend {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #18181b !important;
+    box-shadow: var(--wh-shadow-card) !important;
+}
+body.theme-warehouse-light .action-grid .btn-whatsapp:hover,
+body.theme-warehouse-light #btnQuoteWhatsAppSend:hover,
+body.theme-warehouse-light #btnPdfWhatsAppSend:hover {
+    background: #f5f5f3 !important;
+    border-color: rgba(0, 0, 0, 0.16) !important;
+}
+
+/* Login modal: first-time admin setup mode + loading state */
+.login-card .setup-only { display: none; }
+.login-card.setup-mode .setup-only { display: flex; }
+.login-card.setup-mode .login-avatar { background: linear-gradient(135deg, var(--success), var(--success-hover, #059669)); }
+.login-submit.loading { opacity: 0.75; pointer-events: none; }
+.login-submit.loading .login-arrow { animation: loginPulse 0.8s ease-in-out infinite alternate; }
+@keyframes loginPulse { from { opacity: 0.3; } to { opacity: 1; } }

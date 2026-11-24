@@ -39,6 +39,7 @@
                     <option value="emerald-green" data-i18n="themeEmeraldGreen">أخضر زمردي</option>
                     <option value="classic-blue" data-i18n="themeClassicBlue">أزرق كلاسيكي</option>
                     <option value="elegant-light" data-i18n="themeElegantLight">مضيء أنيق</option>
+                    <option value="warehouse-light" data-i18n="themeWarehouseLight">فاتح المستودع</option>
                 </select>
             </div>
             
@@ -348,26 +349,49 @@
     <div class="toast" id="toastMessage">تم نسخ التقرير بنجاح! 🎉</div>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="modal-overlay" style="display: none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-lock"></i> <span data-i18n="loginHeader">تسجيل دخول الموظف</span></h3>
-                <button type="button" class="close-modal-btn" id="btnCloseLogin">&times;</button>
+    <div id="loginModal" class="modal-overlay login-overlay" style="display: none;">
+        <div class="modal-card login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+            <button type="button" class="close-modal-btn login-close" id="btnCloseLogin" aria-label="إغلاق">&times;</button>
+            <div class="login-hero">
+                <div class="login-avatar"><i class="fa-solid fa-user-shield"></i></div>
+                <h3 id="loginTitle"><span data-i18n="loginHeader">تسجيل دخول الموظف</span></h3>
+                <p><span data-i18n="loginSubtitle">سجّل دخولك لإدارة الحاسبة وإعداداتها</span></p>
             </div>
-            <div class="modal-body">
-                <form id="loginForm" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="loginUsername" data-i18n="lblUsername">اسم المستخدم</label>
-                        <input type="text" id="loginUsername" placeholder="مثال: yousef" required style="text-align: right;">
+            <form id="loginForm" class="login-form" autocomplete="on">
+                <div class="login-field setup-only">
+                    <label for="loginSetupCode" data-i18n="lblSetupCode">رمز الإعداد</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-key login-input-icon"></i>
+                        <input type="text" id="loginSetupCode" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX">
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="loginPassword" data-i18n="lblPassword">كلمة المرور</label>
-                        <input type="password" id="loginPassword" required style="text-align: right;">
+                </div>
+                <div class="login-field">
+                    <label for="loginUsername" data-i18n="lblUsername">اسم المستخدم</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-user login-input-icon"></i>
+                        <input type="text" id="loginUsername" placeholder="مثال: yousef" autocomplete="username" autocapitalize="off" spellcheck="false" required>
                     </div>
-                    <div id="loginErrorMsg" style="color: var(--danger); font-weight: 700; text-align: center; display: none;" data-i18n="errLogin">خطأ في اسم المستخدم أو كلمة المرور</div>
-                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;" data-i18n="btnLoginSubmit">دخول</button>
-                </form>
-            </div>
+                </div>
+                <div class="login-field">
+                    <label for="loginPassword" data-i18n="lblPassword">كلمة المرور</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-lock login-input-icon"></i>
+                        <input type="password" id="loginPassword" placeholder="••••••" autocomplete="current-password" required>
+                        <button type="button" class="login-eye" id="btnToggleLoginPassword" aria-label="إظهار كلمة المرور"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                    <div class="login-caps" id="loginCapsWarn"><i class="fa-solid fa-triangle-exclamation"></i> <span data-i18n="loginCapsOn">زر الأحرف الكبيرة (Caps Lock) مفعّل</span></div>
+                </div>
+                <div class="login-field setup-only">
+                    <label for="loginPasswordConfirm" data-i18n="lblPasswordConfirm">تأكيد كلمة المرور</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-lock login-input-icon"></i>
+                        <input type="password" id="loginPasswordConfirm" placeholder="••••••" autocomplete="new-password">
+                    </div>
+                </div>
+                <div id="loginErrorMsg" class="login-error" style="display: none;"><i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="errLogin">خطأ في اسم المستخدم أو كلمة المرور</span></div>
+                <button type="submit" class="btn btn-primary login-submit"><span data-i18n="btnLoginSubmit">دخول</span> <i class="fa-solid fa-arrow-left login-arrow"></i></button>
+            </form>
+            <div class="login-foot"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="loginFoot">للموظفين المصرّح لهم فقط</span></div>
         </div>
     </div>
 
@@ -425,6 +449,8 @@
                             <option value="emerald-green" data-i18n="themeEmeraldGreen">أخضر زمردي</option>
                             <option value="classic-blue" data-i18n="themeClassicBlue">أزرق كلاسيكي</option>
                             <option value="elegant-light" data-i18n="themeElegantLight">مضيء أنيق</option>
+                            <option value="warehouse-light" data-i18n="themeWarehouseLight">فاتح المستودع</option>
+                    <option value="warehouse-light" data-i18n="themeWarehouseLight">فاتح المستودع</option>
                         </select>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem;">
@@ -469,6 +495,21 @@
                     </div>
                 </div>
 
+                <!-- Change Password Section (server-side) -->
+                <div style="background: var(--item-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--card-border); display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h4 style="color: var(--primary); border-bottom: 1px dashed var(--card-border); padding-bottom: 0.25rem;" data-i18n="cpHeader">تغيير كلمة المرور</h4>
+                    <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <input type="text" autocomplete="username" style="display:none" aria-hidden="true" tabindex="-1">
+                        <input type="password" id="cpCurrent" placeholder="كلمة المرور الحالية" data-i18n-placeholder="cpCurrent" autocomplete="current-password" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="password" id="cpNew" placeholder="كلمة المرور الجديدة (8 أحرف على الأقل)" data-i18n-placeholder="cpNew" autocomplete="new-password" minlength="8" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
+                            <input type="password" id="cpConfirm" placeholder="تأكيد كلمة المرور الجديدة" data-i18n-placeholder="cpConfirm" autocomplete="new-password" minlength="8" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
+                        </div>
+                        <div id="cpMsg" style="display: none; font-weight: 700; font-size: 0.9rem;"></div>
+                        <button type="submit" class="btn btn-primary" style="width: auto; align-self: flex-start; padding: 0.4rem 1rem; font-size: 0.9rem;" data-i18n="cpSubmit">تغيير كلمة المرور</button>
+                    </form>
+                </div>
+
                 <!-- User Management Section -->
                 <div style="background: var(--item-bg); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 1rem;">
                     <h4 style="color: var(--primary); border-bottom: 1px dashed rgba(255, 255, 255, 0.1); padding-bottom: 0.25rem;" data-i18n="settingsUserMgmt">إدارة الموظفين والصلاحيات</h4>
@@ -477,7 +518,7 @@
                     <form id="addUserForm" style="display: flex; flex-direction: column; gap: 0.75rem; background: rgba(0, 0, 0, 0.2); padding: 0.75rem; border-radius: var(--radius-sm);">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                             <input type="text" id="newUsername" placeholder="اسم المستخدم الجديد" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
-                            <input type="password" id="newUserPassword" placeholder="كلمة المرور" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
+                            <input type="password" id="newUserPassword" placeholder="كلمة المرور (8 أحرف على الأقل)" minlength="8" autocomplete="new-password" required style="font-size: 0.95rem; padding: 0.5rem; text-align: right;">
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                             <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; user-select: none; margin-bottom: 0; font-size: 0.9rem;">
